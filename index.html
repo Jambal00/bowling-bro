@@ -1898,8 +1898,11 @@ function renderSeason(items){
 // ---------- trend chart ----------
 // One measure per view so every view has a single y-axis: Scores, Series, Consistency.
 var SVGNS = "http://www.w3.org/2000/svg";
-var CHART_VIEWS = [["scores", "Scores"], ["series", "Series"], ["spread", "Consistency"]];
-var CHART_C = { game: "#7c5cc4", night: "#2f6fed", run: "#d9480f", grid: "#e8e6dc", ink: "#6b6b6b" };
+var CHART_VIEWS = [["scores", "Scores"], ["series", "Series"], ["running", "Average"], ["spread", "Consistency"]];
+var CHART_C = { game: "#7c5cc4", night: "#2f6fed", run: "#d9480f", grid: "#e8e6dc", ink: "#6b6b6b", avg: "#555", extra: "#9a978a" };
+// one colour per game number, in fixed order; games past the fourth share the neutral "extra" colour
+var GAME_COLORS = ["#2f6fed", "#d9480f", "#0f9d7a", "#c2409a"];
+function gameColor(gi){ return GAME_COLORS[gi] || CHART_C.extra; }
 var chartView = "scores";
 function svgEl(tag, attrs, text){
   var e = document.createElementNS(SVGNS, tag);
@@ -1911,12 +1914,13 @@ function renderChart(items){
   var card = document.getElementById("chart-card");
   var pinsRun = 0, gamesRun = 0;
   var data = sortChrono(items).map(function(it){
-    var sc = seriesScores(it.h).filter(isNum);
+    var raw = seriesScores(it.h) || [];
+    var sc = raw.filter(isNum);
     if (!sc.length) return null;
     var t = 0; sc.forEach(function(x){ t += x; });
     pinsRun += t; gamesRun += sc.length;
     return {
-      label: String(it.h.date || "").replace(/\/\d{4}$/, ""), sc: sc, total: t, avg: t / sc.length, run: pinsRun / gamesRun,
+      label: String(it.h.date || "").replace(/\/\d{4}$/, ""), sc: sc, total: t, avg: t / sc.length, run: pinsRun / gamesRun, played: gamesRun, games: raw,
       hi: Math.max.apply(null, sc), lo: Math.min.apply(null, sc)
     };
   }).filter(Boolean);
@@ -1941,9 +1945,12 @@ function renderChart(items){
   var vals = [], refs = [], zero = false, title, legend = [];
   if (chartView === "scores"){
     title = "Game scores by " + (practiceTab ? "session" : "week");
-    data.forEach(function(d){ vals = vals.concat(d.sc, [d.avg, d.run]); });
+    data.forEach(function(d){ vals = vals.concat(d.sc); });
     if (!practiceTab) refs.push({ v: goalAverage(), text: "goal " + fmtNum(goalAverage()) });
-    legend = [["dot", CHART_C.game, "Each game"], ["line", CHART_C.night, (practiceTab ? "Session" : "Night") + " average"], ["dash", CHART_C.run, "Running average"]];
+    var maxGames = 0;
+    data.forEach(function(d){ maxGames = Math.max(maxGames, d.games.length); });
+    for (var lg0 = 0; lg0 < Math.min(maxGames, GAME_COLORS.length); lg0++) legend.push(["line", gameColor(lg0), "Game " + (lg0 + 1)]);
+    if (maxGames > GAME_COLORS.length) legend.push(["line", CHART_C.extra, "Game " + (GAME_COLORS.length + 1) + (maxGames > GAME_COLORS.length + 1 ? "+" : "")]);
   } else if (chartView === "series"){
     title = "Series total by " + (practiceTab ? "session" : "week");
     data.forEach(function(d){ vals.push(d.total); });
@@ -1954,6 +1961,11 @@ function renderChart(items){
         if (v !== null && !seen[v] && refs.length < 3){ seen[v] = true; refs.push({ v: v, text: fmtNum(v) }); }
       });
     }
+  } else if (chartView === "running"){
+    title = "Averages by " + (practiceTab ? "session" : "week");
+    data.forEach(function(d){ vals.push(d.run, d.avg); });
+    legend = [["line", CHART_C.night, "Running average"], ["line", CHART_C.run, (practiceTab ? "Session" : "Weekly") + " average"]];
+    if (!practiceTab) refs.push({ v: goalAverage(), text: "goal " + fmtNum(goalAverage()) });
   } else {
     title = "High-low spread by " + (practiceTab ? "session" : "week") + " (lower is steadier)";
     zero = true;
@@ -1992,20 +2004,34 @@ function renderChart(items){
   function path(key){ return data.map(function(d, i){ return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(d[key]).toFixed(1); }).join(" "); }
   var labelPoints = n <= 10;
   if (chartView === "scores"){
-    data.forEach(function(d, i){
-      d.sc.forEach(function(s, gi){
-        var off = d.sc.length > 1 ? (gi / (d.sc.length - 1) - 0.5) * Math.min(14, band * 0.4) : 0;
-        svg.appendChild(svgEl("circle", { cx: x(i) + off, cy: y(s), r: 3.5, fill: CHART_C.game, stroke: "#fff", "stroke-width": 1.5 }));
+    // one line per game number: Game 1 across every week, Game 2 across every week, and so on
+    var gameCount = 0;
+    data.forEach(function(d){ gameCount = Math.max(gameCount, d.games.length); });
+    for (var gi = gameCount - 1; gi >= 0; gi--){
+      var dPath = "", pen = false, pts = [];
+      data.forEach(function(d, i){
+        var s = d.games[gi];
+        if (!isNum(s)){ pen = false; return; }   // a missed game breaks the line instead of bridging it
+        dPath += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(s).toFixed(1) + " ";
+        pen = true; pts.push([x(i), y(s)]);
       });
-    });
-    svg.appendChild(svgEl("path", { d: path("run"), fill: "none", stroke: CHART_C.run, "stroke-width": 2, "stroke-dasharray": "5 3", "stroke-linejoin": "round" }));
-    svg.appendChild(svgEl("path", { d: path("avg"), fill: "none", stroke: CHART_C.night, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-    data.forEach(function(d, i){ svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.avg), r: 4, fill: CHART_C.night, stroke: "#fff", "stroke-width": 2 })); });
+      if (!pts.length) continue;
+      svg.appendChild(svgEl("path", { d: dPath, fill: "none", stroke: gameColor(gi), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      pts.forEach(function(p){ svg.appendChild(svgEl("circle", { cx: p[0], cy: p[1], r: 3.5, fill: gameColor(gi), stroke: "#fff", "stroke-width": 1.5 })); });
+    }
   } else if (chartView === "series"){
     svg.appendChild(svgEl("path", { d: path("total"), fill: "none", stroke: CHART_C.night, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
     data.forEach(function(d, i){
       svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.total), r: 4, fill: CHART_C.night, stroke: "#fff", "stroke-width": 2 }));
       if (labelPoints) svg.appendChild(svgEl("text", { x: x(i), y: y(d.total) - 8, "text-anchor": "middle", "font-size": 9, "font-weight": 600, fill: "#1a1a1a" }, d.total));
+    });
+  } else if (chartView === "running"){
+    svg.appendChild(svgEl("path", { d: path("avg"), fill: "none", stroke: CHART_C.run, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    data.forEach(function(d, i){ svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.avg), r: 3.5, fill: CHART_C.run, stroke: "#fff", "stroke-width": 1.5 })); });
+    svg.appendChild(svgEl("path", { d: path("run"), fill: "none", stroke: CHART_C.night, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    data.forEach(function(d, i){
+      svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.run), r: 4, fill: CHART_C.night, stroke: "#fff", "stroke-width": 2 }));
+      if (labelPoints) svg.appendChild(svgEl("text", { x: x(i), y: y(d.run) - 8, "text-anchor": "middle", "font-size": 9, "font-weight": 600, fill: "#1a1a1a", stroke: "#fff", "stroke-width": 3, "stroke-linejoin": "round", "paint-order": "stroke" }, d.run.toFixed(1)));
     });
   } else {
     var bw = Math.max(4, Math.min(24, band - 2));
@@ -2019,12 +2045,20 @@ function renderChart(items){
   }
   var readout = document.getElementById("chart-readout");
   var unit = practiceTab ? "session" : "week";
+  readout.style.whiteSpace = ""; readout.style.fontSize = "12px";
   readout.textContent = "Tap or hover a " + unit + " to see its numbers.";
   function show(i){
     var d = data[i];
     cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", 0.25);
+    if (chartView === "running"){
+      // one line, e.g. "10/1 - 230.0 avg, Running Avg - 200.1 after 12 games"; shrink the type until it fits
+      readout.style.whiteSpace = "nowrap";
+      readout.textContent = d.label + " - " + d.avg.toFixed(1) + " avg, Running Avg - " + d.run.toFixed(1) + " after " + d.played + " game" + (d.played === 1 ? "" : "s");
+      for (var fs = 12; fs > 8 && readout.scrollWidth > readout.clientWidth; ){ fs -= 0.5; readout.style.fontSize = fs + "px"; }
+      return;
+    }
     readout.textContent = d.label + " · " + (chartView === "scores"
-      ? "games " + d.sc.join(", ") + " · average " + d.avg.toFixed(1) + " · running average " + d.run.toFixed(1)
+      ? "games " + d.sc.join(", ") + " · average " + d.avg.toFixed(1)
       : chartView === "series" ? "series " + d.total + " (" + d.sc.join(", ") + ")"
       : (d.sc.length > 1 ? "high " + d.hi + ", low " + d.lo + " · spread " + (d.hi - d.lo) : "only one game, no spread"));
   }
@@ -2045,7 +2079,7 @@ function renderChart(items){
     var wrap = document.createElement("span");
     var sw = svgEl("svg", { width: 22, height: 10, viewBox: "0 0 22 10", "aria-hidden": "true" });
     if (item[0] === "dot") sw.appendChild(svgEl("circle", { cx: 11, cy: 5, r: 3.5, fill: item[1] }));
-    else sw.appendChild(svgEl("line", { x1: 1, x2: 21, y1: 5, y2: 5, stroke: item[1], "stroke-width": 2, "stroke-dasharray": item[0] === "dash" ? "5 3" : "" }));
+    else sw.appendChild(svgEl("line", { x1: 1, x2: 21, y1: 5, y2: 5, stroke: item[1], "stroke-width": item[0] === "line" ? 2 : (item[0] === "thin" ? 1 : 1.5), "stroke-dasharray": item[0] === "dash" ? "5 3" : "" }));
     wrap.appendChild(sw);
     wrap.appendChild(document.createTextNode(item[2]));
     lg.appendChild(wrap);
