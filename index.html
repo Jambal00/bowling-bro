@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Bowling Bro'">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f2f1ea">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Bowling Bro' — Live Tracker</title>
 <style>
 :root { color-scheme: light; }
@@ -184,6 +189,14 @@ button.preset-chip { color: #1a1a1a; }
     <div style="text-align:center;margin-top:6px;"><button class="small-link" id="auth-skip-btn">Try it without signing in (saves on this device only)</button></div>
   </div>
 </div>
+<div id="install-sheet" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:60;display:flex;align-items:flex-end;justify-content:center;">
+  <div role="dialog" aria-modal="true" aria-labelledby="install-title" style="background:#fff;width:100%;max-width:420px;border-radius:16px 16px 0 0;padding:18px 18px 22px;">
+    <h2 id="install-title" style="font-size:17px;margin:0 0 8px;">Add Bowling Bro' to your Home Screen</h2>
+    <ol id="install-steps" style="font-size:14px;line-height:1.5;color:#333;margin:0 0 14px;padding-left:20px;"></ol>
+    <p id="install-note" style="font-size:12px;color:#6b6b6b;margin:0 0 14px;line-height:1.4;"></p>
+    <button class="primary full" id="install-close-btn">Got it</button>
+  </div>
+</div>
 <div class="app">
 
   <div class="header">
@@ -197,6 +210,7 @@ button.preset-chip { color: #1a1a1a; }
         <button id="menu-league-btn">League report</button>
         <button id="menu-practice-btn">Practice report</button>
         <button id="header-profile-btn">Profile</button>
+        <button id="menu-install-btn">Add to Home Screen</button>
         <button id="menu-auth-btn">Sign in</button>
       </div>
     </div>
@@ -2265,6 +2279,44 @@ menuBtn.addEventListener("click", function(e){
   menuBtn.setAttribute("aria-expanded", "true");
 });
 document.addEventListener("click", closeMenu);
+
+// Add to Home Screen
+var installBtn = document.getElementById("menu-install-btn"), installSheet = document.getElementById("install-sheet");
+var installPrompt = null;
+function isInstalled(){
+  return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+}
+function refreshInstallBtn(){ installBtn.classList.toggle("hidden", isInstalled()); }
+function showInstallSteps(){
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var steps, note = "";
+  if (isIOS){
+    steps = ["Tap the Share button (the square with an arrow pointing up).", "Scroll down and tap \u201cAdd to Home Screen\u201d.", "Tap \u201cAdd\u201d."];
+    if (/CriOS|FxiOS|EdgiOS/.test(ua)) note = "If you don\u2019t see that option, open this page in Safari and try again.";
+  } else if (/Android/.test(ua)){
+    steps = ["Tap the browser menu (\u22ee) at the top right.", "Tap \u201cAdd to Home screen\u201d or \u201cInstall app\u201d.", "Confirm by tapping \u201cAdd\u201d or \u201cInstall\u201d."];
+  } else {
+    steps = ["Open this page on your phone.", "Open Menu and tap \u201cAdd to Home Screen\u201d.", "Follow the steps shown there."];
+    note = "On a computer, look for an install icon in your browser\u2019s address bar.";
+  }
+  var ol = document.getElementById("install-steps");
+  ol.innerHTML = "";
+  steps.forEach(function(t){ var li = document.createElement("li"); li.textContent = t; ol.appendChild(li); });
+  document.getElementById("install-note").textContent = note;
+  installSheet.classList.remove("hidden");
+}
+window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); installPrompt = e; });
+window.addEventListener("appinstalled", function(){ installPrompt = null; installBtn.classList.add("hidden"); });
+installBtn.addEventListener("click", function(){
+  if (!installPrompt){ showInstallSteps(); return; }
+  var p = installPrompt; installPrompt = null;
+  p.prompt();
+  if (p.userChoice) p.userChoice.then(refreshInstallBtn, refreshInstallBtn);
+});
+document.getElementById("install-close-btn").addEventListener("click", function(){ installSheet.classList.add("hidden"); });
+installSheet.addEventListener("click", function(e){ if (e.target === installSheet) installSheet.classList.add("hidden"); });
+refreshInstallBtn();
 document.getElementById("menu-game-btn").addEventListener("click", function(){ returnView = null; goToView("game"); });
 document.getElementById("menu-league-btn").addEventListener("click", function(){ historyTab = "league"; editKey = null; goToView("history"); });
 document.getElementById("menu-practice-btn").addEventListener("click", function(){ historyTab = "practice"; editKey = null; goToView("history"); });
