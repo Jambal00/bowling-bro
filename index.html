@@ -1,0 +1,2319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Bowling Bro'">
+<title>Bowling Bro' — Live Tracker</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body {
+  margin: 0; padding: 0;
+  background: #f2f1ea;
+  color: #1a1a1a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+.app { max-width: 420px; margin: 0 auto; padding: 14px 14px 40px; }
+.header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 12px;
+}
+.header .place { font-size: 13px; color: #6b6b6b; }
+.header .game-label { font-size: 13px; font-weight: 600; color: #2f6fed; }
+.card {
+  background: #fff; border: 1px solid #e2e0d5; border-radius: 14px;
+  padding: 14px; margin-bottom: 12px;
+}
+.card h2 { font-size: 14px; margin: 0 0 10px; color: #1a1a1a; }
+label { font-size: 12px; color: #6b6b6b; display: block; margin-bottom: 4px; }
+input[type=text], input[type=number], select, textarea {
+  width: 100%; font-size: 15px; padding: 9px 10px; border-radius: 8px;
+  border: 1px solid #d8d5c8; background: #fbfbf7; color: #1a1a1a; margin-bottom: 10px;
+}
+textarea { resize: vertical; }
+.row { display: flex; gap: 10px; }
+.row > div { flex: 1; }
+button {
+  font-size: 14px; padding: 10px 14px; border-radius: 10px;
+  border: 1px solid #d8d5c8; background: #fff; color: #1a1a1a; cursor: pointer;
+}
+button.primary { background: #2f6fed; border-color: #2f6fed; color: #fff; font-weight: 600; }
+button.strike-btn { background: #f2a900; border-color: #f2a900; color: #1a1a1a; font-weight: 700; font-size: 16px; }
+button.full { width: 100%; }
+button:disabled { opacity: 0.4; cursor: default; }
+.arsenal-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.arsenal-chip {
+  font-size: 12px; padding: 5px 10px; border-radius: 999px; background: #f2f1ea; border: 1px solid #d8d5c8;
+  display: flex; align-items: center; gap: 6px;
+}
+.arsenal-chip button { padding: 0 4px; border: none; background: none; font-size: 12px; color: #a33; }
+.scoresheet { display: flex; gap: 2px; margin-bottom: 10px; }
+.frame-cell { flex: 1 1 0; min-width: 0; border: 1px solid #e2e0d5; border-radius: 5px; padding: 3px 1px; text-align: center; overflow: hidden; }
+.frame-cell.current { border-color: #2f6fed; background: #eaf1ff; }
+.frame-marks { font-size: 10px; color: #6b6b6b; min-height: 13px; white-space: nowrap; }
+.frame-num { font-size: 8px; color: #999; }
+.frame-score { font-size: 11px; font-weight: 600; }
+.score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.score-current { font-size: 28px; font-weight: 700; }
+.score-potential { font-size: 12px; color: #6b6b6b; text-align: right; }
+.status-line { font-size: 13px; color: #6b6b6b; margin-bottom: 8px; }
+.nudge-group { display: flex; align-items: center; gap: 6px; }
+.nudge-group button { padding: 6px 10px; font-size: 14px; }
+.nudge-group input { text-align: center; margin-bottom: 0; }
+.pin { cursor: pointer; pointer-events: all; }
+.pin-standing { fill: #1a1a1a; }
+.pin-down { fill: none; stroke: #b7b2a0; stroke-width: 1.5; }
+.pin-locked { fill: none; stroke: #d8d5c8; stroke-width: 1; stroke-dasharray: 2 2; }
+.preset-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.preset-chip { font-size: 12px; padding: 6px 10px; border-radius: 999px; background: #f2f1ea; border: 1px solid #d8d5c8; cursor: pointer; }
+.preset-chip.selected { background: #2f6fed; border-color: #2f6fed; color: #fff; }
+.nav-row { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; }
+.hidden { display: none !important; }
+.summary-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.summary-table td, .summary-table th { padding: 6px 4px; border-bottom: 1px solid #eee; text-align: left; }
+.game-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 2px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; }
+.game-row .chev { color: #999; font-size: 12px; }
+.game-details { display: none; padding: 6px 4px 14px; border-bottom: 1px solid #eee; }
+.game-details.open { display: block; }
+.game-details .stat-line { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; color: #444; }
+.history-item { padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+.small-link { font-size: 12px; color: #2f6fed; background: none; border: none; padding: 0; cursor: pointer; }
+/* compact scoring screen: everything from the scoresheet to the frame buttons fits one phone screen */
+body.in-game .app { padding: 8px 12px 10px; }
+body.in-game .header { margin-bottom: 6px; }
+#view-game .card { padding: 8px 10px; margin-bottom: 6px; }
+#view-game .scoresheet { margin-bottom: 6px; }
+#view-game .score-row { margin-bottom: 0; gap: 10px; }
+#view-game .score-current { font-size: 24px; line-height: 1; }
+#view-game .status-line { margin: 0; flex: 1; font-weight: 600; color: #1a1a1a; }
+#view-game label { font-size: 11px; margin-bottom: 2px; white-space: nowrap; }
+#view-game select, #view-game textarea { margin-bottom: 0; padding: 6px 8px; }
+#view-game #line-row { gap: 8px; align-items: flex-end; }
+#view-game #line-row > div { min-width: 0; }
+#view-game #ball-shot-row { flex: 1.15; }
+#view-game .nudge-group { gap: 3px; }
+#view-game .nudge-group button { padding: 6px 0; flex: 0 0 28px; }
+#view-game .nudge-group input { padding: 6px 2px; min-width: 0; -moz-appearance: textfield; }
+#view-game .nudge-group input::-webkit-outer-spin-button, #view-game .nudge-group input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+#view-game .preset-row { margin-bottom: 6px; gap: 5px; }
+#view-game .preset-chip { padding: 5px 9px; }
+#view-game textarea { resize: none; height: 34px; font-family: inherit; }
+#view-game #tap-hint, #view-game #notes-only-hint { font-size: 11px !important; margin: 0 0 4px !important; }
+#view-game #rack { height: 184px; width: auto; max-width: 100%; }
+#view-game #scoring-buttons-row { margin-top: 6px !important; gap: 8px; }
+#view-game #scoring-buttons-row button { padding: 10px 6px; }
+#view-game .nav-row { margin-top: 6px; }
+#view-game .nav-row button { padding: 8px 12px; flex: 1; }
+.stat-lg { font-size: 24px; font-weight: 700; line-height: 1.15; }
+.stat-sm { font-size: 15px; font-weight: 600; }
+button.preset-chip { color: #1a1a1a; }
+.chart-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: #444; margin-bottom: 4px; }
+.chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.goal-edit { border-bottom: 1px solid #eee; padding: 0 0 2px; margin-bottom: 12px; }
+.menu-panel { position: absolute; right: 0; top: 32px; z-index: 20; background: #fff; border: 1px solid #d8d5c8; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); padding: 6px; display: flex; flex-direction: column; min-width: 210px; }
+.menu-panel button { border: none; background: none; text-align: left; padding: 11px 12px; font-size: 14px; border-radius: 8px; }
+.menu-panel button:active { background: #f2f1ea; }
+.detail-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -4px; }
+.detail-table { border-collapse: collapse; font-size: 13px; white-space: nowrap; min-width: 100%; }
+.detail-table th, .detail-table td { padding: 7px 8px; text-align: center; border-bottom: 1px solid #eee; font-variant-numeric: tabular-nums; }
+.detail-table thead th { background: #fde9b4; font-weight: 700; font-size: 12px; }
+.detail-table tr.col-avgs td { color: #999; font-size: 12px; border-bottom: none; background: #f6f5ef; }
+.detail-table tr.col-avgs td.strong { color: #1a1a1a; font-weight: 700; }
+.detail-table th:first-child, .detail-table td:first-child { position: sticky; left: 0; background: #fff; text-align: left; }
+.detail-table thead th:first-child { background: #fde9b4; }
+.detail-table tr.col-avgs td:first-child { background: #f6f5ef; }
+.detail-table tbody tr { cursor: pointer; }
+.detail-table tbody tr.editing td { background: #eaf1ff; }
+.detail-table td.note { text-align: left; white-space: normal; min-width: 170px; max-width: 240px; }
+.detail-table .good { color: #1d7a46; font-weight: 600; }
+.detail-table .bad { color: #c0392b; font-weight: 600; }
+.detail-edit { border: 1px solid #2f6fed; border-radius: 10px; padding: 10px; margin-top: 10px; }
+.goal { padding: 10px 0; border-bottom: 1px solid #eee; }
+.goal:last-child { border-bottom: none; padding-bottom: 2px; }
+.goal-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.goal-name { font-size: 13px; font-weight: 600; }
+.goal-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.goal-badge.met { background: #dff3e6; color: #1d6b3f; }
+.goal-badge.short { background: #fdecc8; color: #7a4700; }
+.goal-bar { position: relative; height: 10px; border-radius: 999px; background: #eeece2; margin: 8px 0 6px; overflow: hidden; }
+.goal-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 999px; }
+.goal-fill.met { background: #2e8b57; }
+.goal-fill.short { background: #f2a900; }
+.goal-detail { font-size: 12px; color: #6b6b6b; }
+.celebrate { animation: pop 0.4s ease; }
+#print-report { display: none; }
+@media print {
+  @page { size: landscape; margin: 10mm; }
+  body * { visibility: hidden; }
+  #print-report, #print-report * { visibility: visible; }
+  #print-report { position: absolute; left: 0; top: 0; width: 100%; padding: 10px; display: block; font-size: 15px; }
+  #print-report p { font-size: 14px; margin: 4px 0; }
+  #print-report table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+  #print-report th, #print-report td { border: 1px solid #999; padding: 6px 8px; font-size: 13px; text-align: left; }
+  #print-report h1 { font-size: 24px; margin-bottom: 6px; }
+  #print-report h2 { font-size: 18px; margin: 18px 0 8px; }
+  #print-report .pdf-scoreboard { display: flex; margin: 8px 0 14px; page-break-inside: avoid; }
+  #print-report .pdf-frame { flex: 1; border: 1px solid #999; text-align: center; padding: 5px 2px; }
+  #print-report .pdf-frame .fnum { font-size: 11px; color: #666; }
+  #print-report .pdf-frame .fmarks { font-size: 16px; font-weight: bold; min-height: 19px; }
+  #print-report .pdf-frame .fscore { font-size: 15px; }
+  #print-report .pdf-game-stats { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 14px; font-size: 14px; }
+  #print-report .pdf-game-stats div { white-space: nowrap; }
+}
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+</style>
+</head>
+<body>
+<div id="auth-gate" class="hidden" style="position:fixed;inset:0;background:#f2f1ea;z-index:50;overflow:auto;">
+  <div style="max-width:420px;margin:0 auto;padding:48px 18px 30px;">
+    <h1 style="font-size:26px;margin:0 0 6px;">Bowling Bro'</h1>
+    <p style="font-size:14px;color:#6b6b6b;margin:0 0 18px;line-height:1.45;">Sign in to keep your scores, goals and season history, and to see them on any device.</p>
+    <div class="card">
+      <label for="auth-email">Email</label>
+      <input type="text" id="auth-email" inputmode="email" autocomplete="email" autocapitalize="off" />
+      <button class="primary full" id="auth-send-btn">Email me a sign-in link</button>
+      <div id="auth-code-row" class="hidden" style="margin-top:14px;">
+        <label for="auth-code">Code from the email (optional)</label>
+        <input type="text" id="auth-code" inputmode="numeric" autocomplete="one-time-code" />
+        <button class="full" id="auth-verify-btn">Sign in with code</button>
+      </div>
+      <p id="auth-status" style="font-size:12px;color:#444;margin:10px 0 0;min-height:16px;line-height:1.4;"></p>
+    </div>
+    <div style="text-align:center;margin-top:6px;"><button class="small-link" id="auth-skip-btn">Try it without signing in (saves on this device only)</button></div>
+  </div>
+</div>
+<div class="app">
+
+  <div class="header">
+    <span class="place" id="place-label">Big Al's</span>
+    <div style="display:flex;align-items:center;gap:10px;position:relative;">
+      <span class="game-label" id="game-label"></span>
+      <button id="menu-btn" aria-haspopup="true" aria-expanded="false" style="padding:5px 10px;font-size:13px;font-weight:600;">Menu ▾</button>
+      <div id="menu-panel" class="menu-panel hidden">
+        <button id="menu-game-btn">Back to scoring</button>
+        <button id="header-setup-btn">Series setup</button>
+        <button id="menu-league-btn">League report</button>
+        <button id="menu-practice-btn">Practice report</button>
+        <button id="header-profile-btn">Profile</button>
+        <button id="menu-auth-btn">Sign in</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="practice-banner" class="hidden" style="background:#fdecc8;border:1px solid #f2a900;color:#7a4700;border-radius:10px;padding:8px 12px;font-size:12px;font-weight:600;margin-bottom:12px;text-align:center;">Test mode — nothing you do will be saved</div>
+
+  <!-- SETUP VIEW -->
+  <div id="view-setup">
+    <div class="card">
+      <h2>Tonight's setup</h2>
+      <label for="setup-session-type">What are you bowling?</label>
+      <select id="setup-session-type">
+        <option value="league">League night</option>
+        <option value="practice">Practice session</option>
+      </select>
+      <label>Bowling center</label>
+      <input type="text" id="setup-center" value="Big Al's" />
+      <label>Lanes (enter once you're assigned)</label>
+      <input type="text" id="setup-lanes" placeholder="e.g. 7 &amp; 8" />
+    </div>
+
+    <div class="card">
+      <h2>Arsenal for tonight</h2>
+      <div class="arsenal-list" id="arsenal-list"></div>
+      <div class="row">
+        <div><input type="text" id="arsenal-add-input" placeholder="Add a ball" /></div>
+        <div style="flex:0 0 auto;"><button id="arsenal-add-btn">Add</button></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Default balls</h2>
+      <label>Strike ball</label>
+      <select id="setup-strike-ball"></select>
+      <label>Spare ball</label>
+      <select id="setup-spare-ball"></select>
+    </div>
+
+    <div class="card">
+      <h2>Starting line</h2>
+      <div class="row">
+        <div>
+          <label>Feet</label>
+          <div class="nudge-group">
+            <button id="setup-feet-down">-</button>
+            <input type="number" id="setup-feet" value="20" min="1" max="39" />
+            <button id="setup-feet-up">+</button>
+          </div>
+        </div>
+        <div>
+          <label>At the arrows</label>
+          <div class="nudge-group">
+            <button id="setup-arrow-down">-</button>
+            <input type="number" id="setup-arrow" value="12" min="1" max="39" />
+            <button id="setup-arrow-up">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Test mode</h2>
+      <div style="display:flex;align-items:flex-start;gap:10px;">
+        <input type="checkbox" id="practice-toggle" style="width:20px;height:20px;margin:1px 0 0;flex:0 0 auto;" />
+        <label for="practice-toggle" style="font-size:13px;color:#1a1a1a;margin:0;">Just trying out the app — don't save anything to my league or practice history</label>
+      </div>
+    </div>
+
+    <button class="primary full" id="start-series-btn">Start Game 1</button>
+    <div style="text-align:center;margin-top:10px;display:flex;justify-content:center;gap:16px;">
+      <button class="small-link" id="view-history-link">See season history</button>
+      <button class="small-link" id="reset-series-btn" style="color:#a33;">Clear games &amp; start fresh</button>
+    </div>
+  </div>
+
+  <!-- GAME VIEW -->
+  <div id="view-game" class="hidden">
+    <div class="card">
+      <div class="scoresheet" id="scoresheet"></div>
+      <div class="score-row">
+        <div class="score-current" id="score-current">0</div>
+        <div class="status-line" id="status-line"></div>
+        <div class="score-potential" id="score-potential"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="row" id="line-row">
+        <div id="ball-shot-row">
+          <label>Ball this shot</label>
+          <select id="ball-used-select"></select>
+        </div>
+        <div>
+          <label>Feet</label>
+          <div class="nudge-group">
+            <button id="feet-down">-</button>
+            <input type="number" id="feet-input" />
+            <button id="feet-up">+</button>
+          </div>
+        </div>
+        <div>
+          <label>Arrows</label>
+          <div class="nudge-group">
+            <button id="arrow-down">-</button>
+            <input type="number" id="arrow-input" />
+            <button id="arrow-up">+</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="preset-row" id="preset-row" aria-label="Notes for this frame, tap all that apply"></div>
+      <textarea id="frame-note" rows="1" placeholder="Other note for this frame"></textarea>
+    </div>
+
+    <div class="card">
+      <p style="font-size:12px;color:#6b6b6b;text-align:center;margin:0 0 8px;" class="scoring-only" id="tap-hint">Tap any pins still standing, then tap Submit.</p>
+      <p style="font-size:12px;color:#6b6b6b;text-align:center;margin:0 0 8px;" class="hidden" id="notes-only-hint">This frame is already scored. You can still add or edit its note above.</p>
+      <button class="small-link hidden" id="edit-frame-btn" style="display:block;margin:0 auto 10px;">Edit this frame's scoring</button>
+      <svg class="scoring-only" id="rack" viewBox="0 20 200 144" style="display:block;margin:0 auto;">
+        <circle class="pin" data-pin="0" cx="100" cy="140" r="17"></circle>
+        <circle class="pin" data-pin="1" cx="78" cy="108" r="17"></circle>
+        <circle class="pin" data-pin="2" cx="122" cy="108" r="17"></circle>
+        <circle class="pin" data-pin="3" cx="56" cy="76" r="17"></circle>
+        <circle class="pin" data-pin="4" cx="100" cy="76" r="17"></circle>
+        <circle class="pin" data-pin="5" cx="144" cy="76" r="17"></circle>
+        <circle class="pin" data-pin="6" cx="34" cy="44" r="17"></circle>
+        <circle class="pin" data-pin="7" cx="78" cy="44" r="17"></circle>
+        <circle class="pin" data-pin="8" cx="122" cy="44" r="17"></circle>
+        <circle class="pin" data-pin="9" cx="166" cy="44" r="17"></circle>
+      </svg>
+      <div class="row scoring-only" id="scoring-buttons-row" style="margin-top:12px;">
+        <div><button class="full" id="undo-btn">Undo</button></div>
+        <div><button class="full strike-btn" id="strike-spare-btn">Strike</button></div>
+        <div><button class="full primary" id="confirm-btn">Submit</button></div>
+      </div>
+      <div class="nav-row">
+        <button id="prev-frame-btn">Previous frame</button>
+        <button id="next-frame-btn">Next frame</button>
+      </div>
+    </div>
+
+    <div id="game-over-panel" class="card hidden" style="text-align:center;">
+      <p style="font-size:15px;font-weight:600;margin:0 0 10px;" id="game-over-score"></p>
+      <button class="primary full" id="next-game-btn">Start next game</button>
+      <div style="margin-top:8px;"><button class="full" id="end-series-btn">End series &amp; see summary</button></div>
+    </div>
+  </div>
+
+  <!-- SUMMARY VIEW -->
+  <div id="view-summary" class="hidden">
+    <div class="card">
+      <h2>Series summary</h2>
+      <p style="font-size:11px;color:#999;margin:-4px 0 8px;">Tap a game to see its stats</p>
+      <div id="summary-games"></div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <div><label>Series total</label><div id="summary-total" style="font-size:20px;font-weight:700;"></div></div>
+        <div><label>Average</label><div id="summary-avg" style="font-size:20px;font-weight:700;"></div></div>
+      </div>
+      <div class="row">
+        <div><label>Strike %</label><div id="summary-strike-pct" style="font-size:18px;font-weight:600;"></div></div>
+        <div><label>Spare %</label><div id="summary-spare-pct" style="font-size:18px;font-weight:600;"></div></div>
+      </div>
+      <div class="row">
+        <div><label>Single-pin %</label><div id="summary-singlepin-pct" style="font-size:18px;font-weight:600;"></div></div>
+        <div><label>Split %</label><div id="summary-split-pct" style="font-size:18px;font-weight:600;"></div></div>
+      </div>
+      <div class="row">
+        <div><label>Open frames</label><div id="summary-opens" style="font-size:18px;font-weight:600;"></div></div>
+        <div></div>
+      </div>
+    </div>
+    <button class="primary full" id="save-history-btn">Save to season history</button>
+    <p id="save-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0 0;min-height:15px;"></p>
+    <button class="full" id="export-pdf-btn" style="margin-top:8px;">Export series as PDF</button>
+    <div style="text-align:center;margin-top:10px;">
+      <button class="small-link" id="new-series-btn">Start a new series</button>
+    </div>
+  </div>
+
+  <!-- HISTORY VIEW -->
+  <div id="view-history" class="hidden">
+    <div class="row" style="margin-bottom:12px;gap:8px;">
+      <div><button class="full" id="history-tab-league">League</button></div>
+      <div><button class="full" id="history-tab-practice">Practice</button></div>
+    </div>
+    <div class="card hidden" id="season-card">
+      <h2 id="season-title">Season to date</h2>
+      <div class="row">
+        <div><label>Average</label><div id="season-avg" class="stat-lg"></div></div>
+        <div><label>High game</label><div id="season-high-game" class="stat-lg"></div></div>
+        <div><label>High series</label><div id="season-high-series" class="stat-lg"></div></div>
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <div><label>Total pins</label><div id="season-pins" class="stat-sm"></div></div>
+        <div><label>Games</label><div id="season-games" class="stat-sm"></div></div>
+        <div><label id="season-nights-label">Weeks</label><div id="season-nights" class="stat-sm"></div></div>
+      </div>
+      <div style="margin-top:10px;">
+        <label>Consistency (average high-low spread per series)</label><div id="season-spread" class="stat-sm"></div>
+      </div>
+    </div>
+    <div class="card hidden" id="goals-card">
+      <h2>Season goals</h2>
+      <div id="goals-list"></div>
+    </div>
+    <div class="card hidden" id="chart-card">
+      <h2 id="chart-title">Trend</h2>
+      <div class="preset-row" id="chart-tabs"></div>
+      <div class="chart-legend" id="chart-legend"></div>
+      <div id="chart-holder"></div>
+      <p id="chart-readout" style="font-size:12px;color:#444;margin:6px 0 0;min-height:30px;"></p>
+    </div>
+    <div class="card">
+      <h2 id="history-list-title">Season history</h2>
+      <p id="history-status" style="font-size:11px;color:#999;margin:-4px 0 8px;"></p>
+      <div id="history-list"></div>
+    </div>
+    <button class="primary full hidden" id="export-csv-btn" style="margin-bottom:8px;">Export all series as CSV</button>
+    <p id="csv-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:0 0 8px;"></p>
+    <button class="full" id="history-back-btn">Back</button>
+  </div>
+
+  <!-- PROFILE VIEW -->
+  <div id="view-profile" class="hidden">
+    <div class="card">
+      <h2>About you</h2>
+      <label for="profile-name">Name</label>
+      <input type="text" id="profile-name" autocomplete="name" maxlength="80" />
+      <label for="profile-email">Email</label>
+      <input type="text" id="profile-email" inputmode="email" autocomplete="email" maxlength="120" />
+      <label for="profile-hand">Bowling hand</label>
+      <select id="profile-hand">
+        <option value="">Prefer not to say</option>
+        <option value="right">Right-handed</option>
+        <option value="left">Left-handed</option>
+        <option value="two">Two-handed</option>
+      </select>
+    </div>
+    <div class="card">
+      <h2>Where you bowl</h2>
+      <label for="profile-homeCenter">Home center</label>
+      <input type="text" id="profile-homeCenter" maxlength="80" />
+      <label for="profile-league">League</label>
+      <input type="text" id="profile-league" maxlength="80" />
+      <label for="profile-team">Team</label>
+      <input type="text" id="profile-team" maxlength="80" />
+    </div>
+    <button class="primary full" id="profile-save-btn">Save profile</button>
+    <p id="profile-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0;min-height:15px;"></p>
+    <div class="card">
+      <h2>Season goals</h2>
+      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;">Choose what each goal measures and the number you're aiming for. Changes save as you make them and show on your League report.</p>
+      <div id="goal-editor"></div>
+      <button class="full" id="goal-add-btn">Add a goal</button>
+      <p id="goals-status" style="font-size:11px;color:#999;margin:8px 0 0;min-height:14px;"></p>
+    </div>
+    <button class="full" id="profile-back-btn">Back</button>
+  </div>
+
+  <div id="print-report"></div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function(){
+var STORAGE_KEY = "bb_tracker_state_v1";
+var PRESET_NOTES = ["Light", "High", "Flush", "Missed right", "Missed left", "Too fast", "Too slow"];
+
+function defaultState(){
+  return {
+    center: "Big Al's",
+    lanes: "",
+    arsenal: ["Storm Bionic", "Storm Phase II Pearl", "Storm Hy-Road 40", "Storm Ion Max Pearl"],
+    strikeBall: "Storm Bionic",
+    spareBall: "Storm Hy-Road 40",
+    startFeet: 20,
+    startArrow: 12,
+    setupDone: false,
+    games: [],
+    seriesHistory: []
+  };
+}
+function loadState(){
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e){}
+  return defaultState();
+}
+function saveState(){
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+}
+var state = loadState();
+
+function newGame(){
+  return { frames: (function(){ var a=[]; for (var i=0;i<10;i++) a.push({balls:[], feet:null, arrow:null, note:"", presetNotes:[]}); return a; })(), complete:false, finalScore:null };
+}
+
+var curGameIdx = state.games.length ? state.games.length-1 : 0;
+var curFrame = 0, curBall = 0;
+var history = [];
+var returnView = null;
+
+// ---------- view switching ----------
+var views = ["setup","game","summary","history","profile"];
+function showView(name){
+  views.forEach(function(v){ document.getElementById("view-"+v).classList.toggle("hidden", v!==name); });
+  document.body.classList.toggle("in-game", name==="game");
+  document.getElementById("header-setup-btn").classList.toggle("hidden", name==="setup");
+  document.getElementById("header-profile-btn").classList.toggle("hidden", name==="profile");
+  if (name!=="game"){
+    var labels = {setup:"Setup", summary:"Series Summary", history:"Season History", profile:"Profile"};
+    document.getElementById("game-label").textContent = labels[name] || "";
+  }
+}
+
+// ---------- setup view wiring ----------
+var arsenalListEl = document.getElementById("arsenal-list");
+var strikeSelect = document.getElementById("setup-strike-ball");
+var spareSelect = document.getElementById("setup-spare-ball");
+
+function renderArsenalUI(){
+  arsenalListEl.innerHTML = "";
+  state.arsenal.forEach(function(name, idx){
+    var chip = document.createElement("span");
+    chip.className = "arsenal-chip";
+    var txt = document.createElement("span"); txt.textContent = name;
+    var rm = document.createElement("button"); rm.textContent = "x";
+    rm.addEventListener("click", function(){
+      state.arsenal.splice(idx,1); saveState(); renderArsenalUI(); renderBallSelects();
+    });
+    chip.appendChild(txt); chip.appendChild(rm);
+    arsenalListEl.appendChild(chip);
+  });
+  renderBallSelects();
+}
+function renderBallSelects(){
+  [strikeSelect, spareSelect].forEach(function(sel){
+    var current = sel.value;
+    sel.innerHTML = "";
+    state.arsenal.forEach(function(name){
+      var opt = document.createElement("option"); opt.value = name; opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  });
+  strikeSelect.value = state.arsenal.indexOf(state.strikeBall)>=0 ? state.strikeBall : state.arsenal[0];
+  spareSelect.value = state.arsenal.indexOf(state.spareBall)>=0 ? state.spareBall : state.arsenal[0];
+}
+document.getElementById("arsenal-add-btn").addEventListener("click", function(){
+  var inp = document.getElementById("arsenal-add-input");
+  var v = inp.value.trim();
+  if (!v) return;
+  state.arsenal.push(v); inp.value = "";
+  saveState(); renderArsenalUI();
+});
+document.getElementById("setup-center").addEventListener("input", function(e){ state.center = e.target.value; saveState(); });
+document.getElementById("setup-lanes").addEventListener("input", function(e){ state.lanes = e.target.value; saveState(); });
+strikeSelect.addEventListener("change", function(e){ state.strikeBall = e.target.value; saveState(); });
+spareSelect.addEventListener("change", function(e){ state.spareBall = e.target.value; saveState(); });
+document.getElementById("setup-feet").addEventListener("input", function(e){ state.startFeet = parseInt(e.target.value,10)||0; saveState(); });
+document.getElementById("setup-arrow").addEventListener("input", function(e){ state.startArrow = parseInt(e.target.value,10)||0; saveState(); });
+function nudgeSetup(inputId, delta, stateKey){
+  var input = document.getElementById(inputId);
+  var v = (parseInt(input.value,10)||0) + delta;
+  v = Math.max(1, Math.min(39, v));
+  input.value = v;
+  state[stateKey] = v;
+  saveState();
+}
+document.getElementById("setup-feet-up").addEventListener("click", function(){ nudgeSetup("setup-feet",1,"startFeet"); });
+document.getElementById("setup-feet-down").addEventListener("click", function(){ nudgeSetup("setup-feet",-1,"startFeet"); });
+document.getElementById("setup-arrow-up").addEventListener("click", function(){ nudgeSetup("setup-arrow",1,"startArrow"); });
+document.getElementById("setup-arrow-down").addEventListener("click", function(){ nudgeSetup("setup-arrow",-1,"startArrow"); });
+
+document.getElementById("start-series-btn").addEventListener("click", function(){
+  document.getElementById("setup-center").dispatchEvent(new Event("input"));
+  if (returnView){
+    saveState();
+    var target = returnView; returnView = null;
+    if (target === "game"){ showView("game"); renderBallUsedOptions(); refreshGameScreen(); }
+    else if (target === "summary"){ showSummary(); }
+    else { showView(target); }
+    return;
+  }
+  state.setupDone = true;
+  state.savedSeriesId = null;
+  document.getElementById("save-status").textContent = "";
+  state.games = [newGame()];
+  curGameIdx = 0; curFrame = 0; curBall = 0; history = [];
+  saveState();
+  enterGameView();
+});
+
+// ---------- ball-used select (in-game) ----------
+var ballUsedSelect = document.getElementById("ball-used-select");
+function renderBallUsedOptions(){
+  ballUsedSelect.innerHTML = "";
+  state.arsenal.forEach(function(name){
+    var opt = document.createElement("option"); opt.value=name; opt.textContent=name;
+    ballUsedSelect.appendChild(opt);
+  });
+}
+function defaultBallForBall(ballIdx){
+  return ballIdx===0 ? state.strikeBall : state.spareBall;
+}
+
+// ---------- scoring ----------
+function frameNumeric(f){ return f.balls.map(function(b){ return b.knocked; }); }
+function computeScoresFromFrames(frames){
+  var numericFrames = frames.map(frameNumeric);
+  return computeScoresNumeric(numericFrames);
+}
+function computeScoresNumeric(nf){
+  var flat = [], frameStart = [];
+  nf.forEach(function(f){ frameStart.push(flat.length); f.forEach(function(b){ flat.push(b); }); });
+  var scores = [], cum = 0;
+  for (var i=0;i<10;i++){
+    var f = nf[i];
+    if (i<9){
+      if (f.length>=1 && f[0]===10){
+        var b1 = flat[frameStart[i]+1], b2 = flat[frameStart[i]+2];
+        if (b1===undefined || b2===undefined){ scores.push(null); continue; }
+        cum += 10+b1+b2;
+      } else if (f.length===2 && f[0]+f[1]===10){
+        var n1 = flat[frameStart[i]+2];
+        if (n1===undefined){ scores.push(null); continue; }
+        cum += 10+n1;
+      } else if (f.length===2){
+        cum += f[0]+f[1];
+      } else { scores.push(null); continue; }
+    } else {
+      if (!f.length){ scores.push(null); continue; }
+      var s10=0; f.forEach(function(b){ s10+=b; });
+      cum += s10;
+    }
+    scores.push(cum);
+  }
+  return scores;
+}
+function fillFrame(f){
+  if (f.length===0){ f.push(10); return; }
+  if (f.length===1){
+    if (f[0]===10) return;
+    f.push(10-f[0]);
+  }
+}
+function fillFrame10(f){
+  if (f.length===0){ f.push(10); }
+  var b1=f[0];
+  if (f.length===1){ f.push(b1===10 ? 10 : (10-b1)); }
+  var b2=f[1];
+  var earnsBonus = (b1===10) || (b1+b2===10);
+  if (earnsBonus && f.length<3){
+    if (b1===10 && b2===10){ f.push(10); }
+    else if (b1===10 && b2<10){ f.push(10-b2); }
+    else { f.push(10); }
+  }
+}
+function computePotential(frames){
+  var nf = frames.map(frameNumeric).map(function(f){ return f.slice(); });
+  for (var i=0;i<10;i++){
+    if (i<9) fillFrame(nf[i]); else fillFrame10(nf[i]);
+  }
+  var scores = computeScoresNumeric(nf);
+  return scores[9];
+}
+function lastKnownScore(scores){
+  for (var i=9;i>=0;i--){ if (scores[i]!==null) return scores[i]; }
+  return 0;
+}
+
+// ---------- frame helpers ----------
+function curGame(){ return state.games[curGameIdx]; }
+function activeFrame(){ return curGame().frames[curFrame]; }
+function tappablePins(pinsDownArr){
+  var out=[]; for (var i=0;i<10;i++){ if (!pinsDownArr[i]) out.push(i); } return out;
+}
+function pinsDownForBallStart(){
+  var f = activeFrame();
+  var down = [false,false,false,false,false,false,false,false,false,false];
+  if (curFrame<9){
+    if (curBall===1 && f.balls.length===1){
+      for (var i=0;i<f.balls[0].knocked;i++){} // placeholder, real logic below
+    }
+  }
+  return down;
+}
+
+var stillUp = {};
+var pinsDown = [false,false,false,false,false,false,false,false,false,false];
+
+function resetPinsForNewBall(respot){
+  if (respot){ pinsDown = [false,false,false,false,false,false,false,false,false,false]; }
+  stillUp = {};
+}
+
+function syncPinsFromFrameState(){
+  // rebuild pinsDown based on balls already recorded in the active frame + respot rules
+  pinsDown = [false,false,false,false,false,false,false,false,false,false];
+  var f = activeFrame();
+  if (curFrame<9){
+    if (f.balls.length>=1){
+      // ball1 recorded: mark that many pins down arbitrarily is impossible to know exactly which without record.
+    }
+  }
+}
+
+// Because "which specific pins" matters for display continuity, we store per-ball knocked pin index sets too.
+function ensureBallPinSets(f){
+  f._pinSets = f._pinSets || [];
+}
+
+function lockAllExcept(standingList){
+  var standing = {};
+  (standingList || []).forEach(function(i){ standing[i] = true; });
+  for (var i=0;i<10;i++){ if (!standing[i]) pinsDown[i] = true; }
+}
+function startBallEntry(){
+  var f = activeFrame();
+  ensureBallPinSets(f);
+  pinsDown = [false,false,false,false,false,false,false,false,false,false];
+  if (curFrame<9){
+    if (curBall===1 && f._pinSets[0]){
+      // only the pins still standing after ball 1 are in play for ball 2 - everything else is already down
+      lockAllExcept(f._pinSets[0]);
+    }
+  } else {
+    if (curBall===1 && f._pinSets[0] && f.balls[0] && f.balls[0].knocked!==10){
+      lockAllExcept(f._pinSets[0]);
+    }
+    if (curBall===2){
+      var b1 = f.balls[0], b2 = f.balls[1];
+      if (b1 && b1.knocked===10 && b2 && b2.knocked===10){
+        // two strikes - fresh full rack for the bonus ball
+      } else if (b1 && b1.knocked===10 && b2 && b2.knocked<10){
+        lockAllExcept(f._pinSets[1]);
+      } else if (b1 && b1.knocked+ (b2?b2.knocked:0) ===10){
+        // spare on the first two balls - fresh full rack for the bonus ball
+      }
+    }
+  }
+  stillUp = {};
+  // pre-fill feet/arrow inputs
+  document.getElementById("feet-input").value = lineValue("feet");
+  document.getElementById("arrow-input").value = lineValue("arrow");
+  ballUsedSelect.value = (f.balls[curBall] && f.balls[curBall].ballUsed) || defaultBallForBall(curBall);
+  document.getElementById("frame-note").value = f.note || "";
+  renderPresetRow(f.presetNotes || []);
+}
+// The line (feet / arrow board) is kept per ball in f.lines[ballIdx]; f.feet / f.arrow always
+// mirror the FIRST ball's line. A spare-shot adjustment therefore never leaks into the next
+// frame: every new frame's first ball defaults to the most recent frame's first-ball line.
+function hasVal(v){ return v !== null && v !== undefined && !(typeof v === "number" && isNaN(v)); }
+function firstBallLineValue(key){
+  var frames = curGame().frames;
+  for (var i=curFrame;i>=0;i--){
+    var pf = frames[i];
+    var l0 = pf.lines && pf.lines[0];
+    if (l0 && hasVal(l0[key])) return l0[key];
+    if (hasVal(pf[key])) return pf[key];
+  }
+  return key === "feet" ? state.startFeet : state.startArrow;
+}
+function lineValue(key){
+  var f = activeFrame();
+  var own = f.lines && f.lines[curBall];
+  if (own && hasVal(own[key])) return own[key];
+  return firstBallLineValue(key);
+}
+function setLineValue(key, v){
+  var f = activeFrame();
+  f.lines = f.lines || [];
+  f.lines[curBall] = f.lines[curBall] || {};
+  f.lines[curBall][key] = v;
+  if (curBall === 0) f[key] = v;
+}
+
+// ---------- pins rendering ----------
+var pinsEls = document.querySelectorAll(".pin");
+function renderPins(){
+  pinsEls.forEach(function(p){
+    var idx = parseInt(p.getAttribute("data-pin"),10);
+    p.classList.remove("pin-standing","pin-down","pin-locked");
+    if (pinsDown[idx]){ p.classList.add("pin-locked"); }
+    else if (stillUp[idx]){ p.classList.add("pin-standing"); }
+    else { p.classList.add("pin-down"); }
+  });
+}
+pinsEls.forEach(function(p){
+  p.addEventListener("click", function(){
+    var idx = parseInt(p.getAttribute("data-pin"),10);
+    if (pinsDown[idx]) return;
+    if (stillUp[idx]) delete stillUp[idx]; else stillUp[idx]=true;
+    renderPins();
+  });
+});
+
+// ---------- preset notes ----------
+var presetRowEl = document.getElementById("preset-row");
+function renderPresetRow(selected){
+  selected = selected || [];
+  presetRowEl.innerHTML = "";
+  PRESET_NOTES.forEach(function(label){
+    var chip = document.createElement("span");
+    chip.className = "preset-chip" + (selected.indexOf(label)!==-1 ? " selected" : "");
+    chip.textContent = label;
+    chip.addEventListener("click", function(){
+      var f = activeFrame();
+      f.presetNotes = f.presetNotes || [];
+      var idx = f.presetNotes.indexOf(label);
+      if (idx===-1){ f.presetNotes.push(label); } else { f.presetNotes.splice(idx,1); }
+      saveState();
+      renderPresetRow(f.presetNotes);
+    });
+    presetRowEl.appendChild(chip);
+  });
+}
+document.getElementById("frame-note").addEventListener("input", function(e){
+  activeFrame().note = e.target.value; saveState();
+});
+function frameNoteDisplay(f){
+  var parts = [];
+  if (f.presetNotes && f.presetNotes.length) parts.push(f.presetNotes.join(", "));
+  if (f.note) parts.push(f.note);
+  return parts.join(" — ");
+}
+
+// ---------- feet/arrow nudges ----------
+function nudge(inputId, delta, key){
+  var input = document.getElementById(inputId);
+  var v = (parseInt(input.value,10)||0) + delta;
+  v = Math.max(1, Math.min(39, v));
+  input.value = v;
+  setLineValue(key, v);
+  saveState();
+}
+document.getElementById("feet-up").addEventListener("click", function(){ nudge("feet-input",1,"feet"); });
+document.getElementById("feet-down").addEventListener("click", function(){ nudge("feet-input",-1,"feet"); });
+document.getElementById("arrow-up").addEventListener("click", function(){ nudge("arrow-input",1,"arrow"); });
+document.getElementById("arrow-down").addEventListener("click", function(){ nudge("arrow-input",-1,"arrow"); });
+document.getElementById("feet-input").addEventListener("input", function(e){ setLineValue("feet", parseInt(e.target.value,10)||0); saveState(); });
+document.getElementById("arrow-input").addEventListener("input", function(e){ setLineValue("arrow", parseInt(e.target.value,10)||0); saveState(); });
+ballUsedSelect.addEventListener("change", function(e){
+  var f = activeFrame();
+  f.balls[curBall] = f.balls[curBall] || {knocked:0, ballUsed:""};
+  f.balls[curBall].ballUsed = e.target.value;
+  saveState();
+});
+
+// ---------- game flow ----------
+function snapshot(){
+  history.push(JSON.stringify({games: state.games, curGameIdx: curGameIdx, curFrame: curFrame, curBall: curBall}));
+}
+function restoreSnapshot(){
+  if (!history.length) return;
+  var s = JSON.parse(history.pop());
+  state.games = s.games; curGameIdx = s.curGameIdx; curFrame = s.curFrame; curBall = s.curBall;
+  saveState();
+  refreshGameScreen();
+}
+function advanceFrame(){
+  curFrame++; curBall=0;
+  if (curFrame>9){ finishGame(); return; }
+}
+function handleFrame10(){
+  var f = activeFrame();
+  var nums = frameNumeric(f);
+  if (nums.length===1){ curBall=1; }
+  else if (nums.length===2){
+    var b1=nums[0], b2=nums[1];
+    if (b1===10 || b1+b2===10){ curBall=2; }
+    else { finishGame(); }
+  } else if (nums.length===3){ finishGame(); }
+}
+function finishGame(){
+  var g = curGame();
+  g.complete = true;
+  var scores = computeScoresFromFrames(g.frames);
+  g.finalScore = lastKnownScore(scores);
+  saveState();
+  document.getElementById("game-over-score").textContent = "Game " + (curGameIdx+1) + " complete: " + g.finalScore;
+  document.getElementById("game-over-panel").classList.remove("hidden");
+}
+
+function recordBall(knocked){
+  snapshot();
+  var f = activeFrame();
+  ensureBallPinSets(f);
+  var ballObj = { knocked: knocked, ballUsed: ballUsedSelect.value || defaultBallForBall(curBall) };
+  f.balls[curBall] = ballObj;
+  // record which pins are still standing after this ball (used to set up the next ball's rack)
+  f._pinSets[curBall] = Object.keys(stillUp).map(function(k){ return parseInt(k,10); });
+  // lock in the line shown for this ball (first ball also sets the frame's own line)
+  setLineValue("feet", parseInt(document.getElementById("feet-input").value,10) || lineValue("feet"));
+  setLineValue("arrow", parseInt(document.getElementById("arrow-input").value,10) || lineValue("arrow"));
+
+  // mark pins down for continuity
+  var tappable = tappablePins(pinsDown);
+  tappable.forEach(function(i){ if (!stillUp[i]) pinsDown[i]=true; });
+
+  if (curFrame<9){
+    if (curBall===0 && knocked===10){ advanceFrame(); }
+    else if (curBall===0){ curBall=1; }
+    else { advanceFrame(); }
+  } else {
+    handleFrame10();
+  }
+  saveState();
+  refreshGameScreen();
+}
+
+document.getElementById("confirm-btn").addEventListener("click", function(){
+  var tappable = tappablePins(pinsDown);
+  var knocked = 0;
+  tappable.forEach(function(i){ if (!stillUp[i]) knocked++; });
+  recordBall(knocked);
+});
+document.getElementById("strike-spare-btn").addEventListener("click", function(){
+  var tappable = tappablePins(pinsDown);
+  recordBall(tappable.length); // all remaining tappable pins fall
+});
+document.getElementById("undo-btn").addEventListener("click", restoreSnapshot);
+
+document.getElementById("next-frame-btn").addEventListener("click", function(){
+  if (curFrame<9){ goToFrame(curFrame+1); }
+});
+document.getElementById("prev-frame-btn").addEventListener("click", function(){
+  if (curFrame>0){ goToFrame(curFrame-1); }
+});
+
+document.getElementById("next-game-btn").addEventListener("click", function(){
+  state.games.push(newGame());
+  curGameIdx++; curFrame=0; curBall=0; history=[];
+  saveState();
+  document.getElementById("game-over-panel").classList.add("hidden");
+  refreshGameScreen();
+});
+document.getElementById("end-series-btn").addEventListener("click", function(){
+  showSummary();
+});
+
+// ---------- rendering the game screen ----------
+function frameMarksDisplay(f){
+  var nums = frameNumeric(f);
+  if (curFrame<9 ? true : true){} // no-op placeholder for clarity
+  return nums;
+}
+function markLabel(n){ return n===0 ? "-" : String(n); }
+function frameMarksForIndex(frames, idx){
+  var f = frames[idx];
+  var nums = frameNumeric(f);
+  if (idx<9){
+    if (!nums.length) return ["",""];
+    if (nums[0]===10) return ["X",""];
+    if (nums.length===1) return [markLabel(nums[0]), ""];
+    if (nums[0]+nums[1]===10) return [markLabel(nums[0]), "/"];
+    return [markLabel(nums[0]), markLabel(nums[1])];
+  } else {
+    var out = ["","",""];
+    for (var k=0;k<nums.length;k++){
+      if (nums[k]===10){ out[k]="X"; }
+      else if (k>0 && nums[k-1]!==10 && (nums[k]+nums[k-1]===10)){ out[k]="/"; }
+      else { out[k]=markLabel(nums[k]); }
+    }
+    return out;
+  }
+}
+function goToFrame(idx){
+  curFrame = idx;
+  var f = curGame().frames[idx];
+  var maxBall = (idx===9) ? 2 : 1;
+  curBall = Math.min(f.balls.length, maxBall);
+  refreshGameScreen();
+}
+function renderScoresheet(){
+  var g = curGame();
+  var scores = computeScoresFromFrames(g.frames);
+  var el = document.getElementById("scoresheet");
+  el.innerHTML = "";
+  var _loop = function(i){
+    var marks = frameMarksForIndex(g.frames, i);
+    var cell = document.createElement("div");
+    cell.className = "frame-cell" + (i===curFrame ? " current" : "");
+    cell.style.cursor = "pointer";
+    var num = document.createElement("div"); num.className="frame-num"; num.textContent = i+1;
+    var mk = document.createElement("div"); mk.className="frame-marks"; mk.textContent = marks.join(" ");
+    var sc = document.createElement("div"); sc.className="frame-score"; sc.textContent = scores[i]===null ? "" : scores[i];
+    cell.appendChild(num); cell.appendChild(mk); cell.appendChild(sc);
+    cell.addEventListener("click", function(){ goToFrame(i); });
+    el.appendChild(cell);
+  };
+  for (var i=0;i<10;i++){ _loop(i); }
+  document.getElementById("score-current").textContent = lastKnownScore(scores);
+  var potential = computePotential(g.frames);
+  document.getElementById("score-potential").textContent = "max: " + potential;
+}
+function setScoringVisible(visible){
+  document.querySelectorAll(".scoring-only").forEach(function(el){ el.classList.toggle("hidden", !visible); });
+  document.getElementById("notes-only-hint").classList.toggle("hidden", visible);
+  document.getElementById("edit-frame-btn").classList.toggle("hidden", visible);
+}
+document.getElementById("edit-frame-btn").addEventListener("click", function(){
+  if (!confirm("This clears the pins recorded for this frame so you can re-enter them. Feet, arrow, and notes stay as they are. Continue?")) return;
+  var f = curGame().frames[curFrame];
+  f.balls = [];
+  f._pinSets = [];
+  curBall = 0;
+  var g = curGame();
+  if (g.complete && curFrame === 9){ g.complete = false; g.finalScore = null; }
+  saveState();
+  refreshGameScreen();
+});
+function refreshGameScreen(){
+  document.getElementById("place-label").textContent = state.center + (state.lanes ? (" · Lanes " + state.lanes) : "");
+  document.getElementById("game-label").textContent = (sessionType() === "practice" ? "Practice · " : "") + "Game " + (curGameIdx+1);
+  renderScoresheet();
+  var g = curGame();
+  var f = g.frames[curFrame];
+  var frameAlreadyScored = isFrameDone(f, curFrame);
+  var viewOnly = frameAlreadyScored;
+  setScoringVisible(!viewOnly);
+  if (viewOnly){
+    document.getElementById("status-line").textContent = "Frame " + (curFrame+1) + " - editing notes";
+  } else {
+    var ballLabel = (curFrame===9 && curBall===2) ? "Ball 3 (bonus)" : "Ball " + (curBall+1);
+    document.getElementById("status-line").textContent = "Frame " + (curFrame+1) + " · " + ballLabel;
+  }
+  if (g.complete){
+    document.getElementById("game-over-panel").classList.remove("hidden");
+  } else {
+    document.getElementById("game-over-panel").classList.add("hidden");
+  }
+  startBallEntry();
+  // a full rack in front of you is a strike chance (first ball, or a 10th-frame fill ball after a strike or spare)
+  document.getElementById("strike-spare-btn").textContent = tappablePins(pinsDown).length===10 ? "Strike" : "Spare";
+  renderPins();
+  undoBtnState();
+}
+function undoBtnState(){
+  document.getElementById("undo-btn").disabled = (history.length===0);
+}
+
+function enterGameView(){
+  renderBallUsedOptions();
+  showView("game");
+  refreshGameScreen();
+}
+
+// ---------- summary ----------
+// ---------- pin-fall based stats (spare %, single-pin %, splits) ----------
+var PIN_NEIGHBORS = {
+  0:[1,2], 1:[0,2,3,4], 2:[0,1,4,5], 3:[1,4,6,7], 4:[1,2,3,5,7,8],
+  5:[2,4,8,9], 6:[3,7], 7:[3,4,6,8], 8:[4,5,7,9], 9:[5,8]
+};
+function isSplitLeave(standingIndices){
+  if (!standingIndices || standingIndices.length < 2) return false;
+  if (standingIndices.indexOf(0) !== -1) return false; // headpin still standing - not a split
+  var standingSet = {};
+  standingIndices.forEach(function(i){ standingSet[i] = true; });
+  var visited = {};
+  var stack = [standingIndices[0]];
+  visited[standingIndices[0]] = true;
+  while (stack.length){
+    var cur = stack.pop();
+    (PIN_NEIGHBORS[cur] || []).forEach(function(n){
+      if (standingSet[n] && !visited[n]){ visited[n] = true; stack.push(n); }
+    });
+  }
+  for (var k=0;k<standingIndices.length;k++){
+    if (!visited[standingIndices[k]]) return true; // a standing pin unreachable from the others = a gap
+  }
+  return false;
+}
+function computeGameStats(g){
+  var scores = computeScoresFromFrames(g.frames);
+  var stats = {
+    finalScore: g.complete ? g.finalScore : lastKnownScore(scores),
+    strikes: 0, frameCount: 0,
+    spareOpportunities: 0, spares: 0, opens: 0,
+    singlePinOpportunities: 0, singlePinMade: 0,
+    splitOpportunities: 0, splitsLeft: 0
+  };
+  g.frames.forEach(function(f, fi){
+    var nums = frameNumeric(f);
+    if (!nums.length) return;
+    stats.frameCount++;
+
+    // Split% denominator = every fresh-rack first ball thrown in the game (10-12
+    // per complete game: frames 1-9 contribute one each, frame 10 contributes 1-3
+    // depending on strikes/spares). Frames 1-9 always get exactly one such check.
+    countSplitOpportunity(f, 0, stats);
+
+    if (fi<9){
+      if (nums[0]===10){ stats.strikes++; return; }
+      if (nums.length<2) return;
+      evalSpareFrame(nums, f, stats);
+    } else {
+      nums.forEach(function(n){ if (n===10) stats.strikes++; });
+      if (nums.length>=2){
+        if (nums[0]===10){
+          countSplitOpportunity(f, 1, stats); // ball 2 gets a fresh rack after a strike
+          if (nums.length>=3 && nums[1]===10){
+            countSplitOpportunity(f, 2, stats); // ball 3 fresh again after two strikes
+          }
+        } else if (nums[0]+nums[1]===10){
+          if (nums.length>=3){
+            countSplitOpportunity(f, 2, stats); // bonus ball after a spare is a fresh rack
+          }
+        }
+      }
+      if (nums[0]===10) return;
+      if (nums.length<2) return;
+      evalSpareFrame(nums, f, stats);
+    }
+  });
+  return stats;
+}
+function countSplitOpportunity(f, ballIdx, stats){
+  stats.splitOpportunities++;
+  var standing = (f._pinSets && f._pinSets[ballIdx]) || [];
+  if (isSplitLeave(standing)) stats.splitsLeft++;
+}
+function evalSpareFrame(nums, f, stats){
+  stats.spareOpportunities++;
+  var made = (nums[0]+nums[1]===10);
+  if (made) stats.spares++; else stats.opens++;
+  var standing = (f._pinSets && f._pinSets[0]) || [];
+  if (standing.length===1){
+    stats.singlePinOpportunities++;
+    if (made) stats.singlePinMade++;
+  }
+}
+function pct(n, d){ return d ? Math.round(100*n/d) : 0; }
+function aggregateStats(games){
+  var agg = { strikes:0, frameCount:0, spareOpportunities:0, spares:0, opens:0, singlePinOpportunities:0, singlePinMade:0, splitOpportunities:0, splitsLeft:0, total:0 };
+  games.forEach(function(g){
+    var s = computeGameStats(g);
+    agg.total += s.finalScore;
+    agg.strikes += s.strikes; agg.frameCount += s.frameCount;
+    agg.spareOpportunities += s.spareOpportunities; agg.spares += s.spares; agg.opens += s.opens;
+    agg.singlePinOpportunities += s.singlePinOpportunities; agg.singlePinMade += s.singlePinMade;
+    agg.splitOpportunities += s.splitOpportunities; agg.splitsLeft += s.splitsLeft;
+  });
+  return agg;
+}
+function gameStatLines(s){
+  return [
+    ["Strike %", pct(s.strikes, s.frameCount) + "%"],
+    ["Spare % (of " + s.spareOpportunities + " chances)", pct(s.spares, s.spareOpportunities) + "%"],
+    ["Single-pin % (of " + s.singlePinOpportunities + " leaves)", pct(s.singlePinMade, s.singlePinOpportunities) + "%"],
+    ["Split % (of " + s.splitOpportunities + " first balls)", pct(s.splitsLeft, s.splitOpportunities) + "%"],
+    ["Open frames", String(s.opens)]
+  ];
+}
+function showSummary(){
+  var container = document.getElementById("summary-games");
+  container.innerHTML = "";
+  state.games.forEach(function(g, gi){
+    var s = computeGameStats(g);
+    var row = document.createElement("div");
+    row.className = "game-row";
+    var label = document.createElement("div");
+    label.textContent = "Game " + (gi+1) + " - " + s.finalScore;
+    var chev = document.createElement("div");
+    chev.className = "chev";
+    chev.textContent = "▾";
+    row.appendChild(label); row.appendChild(chev);
+
+    var details = document.createElement("div");
+    details.className = "game-details";
+    gameStatLines(s).forEach(function(line){
+      var sl = document.createElement("div");
+      sl.className = "stat-line";
+      var a = document.createElement("span"); a.textContent = line[0];
+      var b = document.createElement("span"); b.textContent = line[1];
+      sl.appendChild(a); sl.appendChild(b);
+      details.appendChild(sl);
+    });
+
+    row.addEventListener("click", function(){
+      var isOpen = details.classList.toggle("open");
+      chev.textContent = isOpen ? "▴" : "▾";
+    });
+
+    container.appendChild(row);
+    container.appendChild(details);
+  });
+
+  var agg = aggregateStats(state.games);
+  document.getElementById("summary-total").textContent = agg.total;
+  document.getElementById("summary-avg").textContent = state.games.length ? (agg.total/state.games.length).toFixed(1) : "0.0";
+  document.getElementById("summary-strike-pct").textContent = pct(agg.strikes, agg.frameCount) + "%";
+  document.getElementById("summary-spare-pct").textContent = pct(agg.spares, agg.spareOpportunities) + "%";
+  document.getElementById("summary-singlepin-pct").textContent = pct(agg.singlePinMade, agg.singlePinOpportunities) + "%";
+  document.getElementById("summary-split-pct").textContent = pct(agg.splitsLeft, agg.splitOpportunities) + "%";
+  document.getElementById("summary-opens").textContent = agg.opens;
+  showView("summary");
+}
+// ---------- season store (account database, with this-device fallback) ----------
+// Each saved series is one document holding every game, frame and ball, kept in the
+// viewer's private area of the artifact database so it follows them across devices.
+var cloud = { col: null, ready: false, docs: [], dl: null };
+// ---------- Supabase connection (sign-in + per-bowler storage) ----------
+// The publishable key is meant to live in the page. Row-level security in the database
+// is what keeps each bowler's rows private to them.
+var SUPABASE_URL = "https://brgtnbkazftmetedbyup.supabase.co";
+var SUPABASE_KEY = "sb_publishable_jrLTgVCk7bOdRWKftgI87Q_sBJAcYjJ";
+var sb = null, sbUser = null;
+function sbCheck(r){ if (r && r.error) throw r.error; return r; }
+function sbErrCode(e){ return { code: (e && (e.code || e.message)) || "error" }; }
+// One row per bowler (profile, goals): exposes the same set()/onSnapshot() shape the app uses.
+function sbSingleDoc(table, uid){
+  return {
+    set: function(body){
+      return sb.from(table).upsert({ user_id: uid, data: body, updated_at: new Date().toISOString() }, { onConflict: "user_id" }).then(sbCheck);
+    },
+    onSnapshot: function(next, err){
+      sb.from(table).select("data").eq("user_id", uid).maybeSingle().then(function(r){
+        if (r.error){ if (err) err(sbErrCode(r.error)); return; }
+        var body = r.data ? r.data.data : undefined;
+        next({ exists: !!r.data, data: function(){ return body; }, metadata: { hasPendingWrites: false } });
+      }, function(e){ if (err) err(sbErrCode(e)); });
+      return function(){};
+    }
+  };
+}
+// The series list: loaded on sign-in, after every change, and whenever the app comes back into view.
+function sbSeriesCollection(uid){
+  var docs = [], nextFn = null, errFn = null;
+  function emit(){
+    docs.sort(function(a, b){ return (a.savedAt || "") < (b.savedAt || "") ? 1 : -1; });
+    if (nextFn) nextFn({ docs: docs.map(function(d){ return { data: function(){ return d; } }; }) });
+  }
+  function load(){
+    return sb.from("bb_series").select("data").eq("user_id", uid).order("saved_at", { ascending: false }).limit(500).then(function(r){
+      if (r.error){ if (errFn) errFn(sbErrCode(r.error)); return; }
+      docs = (r.data || []).map(function(row){ return row.data; }).filter(Boolean);
+      emit();
+    }, function(e){ if (errFn) errFn(sbErrCode(e)); });
+  }
+  function put(body){
+    return sb.from("bb_series").upsert({
+      user_id: uid, id: body.id, saved_at: body.savedAt || new Date().toISOString(),
+      type: body.type === "practice" ? "practice" : "league", data: body, updated_at: new Date().toISOString()
+    }, { onConflict: "user_id,id" }).then(sbCheck).then(function(){
+      docs = docs.filter(function(d){ return d.id !== body.id; }); docs.push(body); emit();
+    });
+  }
+  var query = { onSnapshot: function(next, err){ nextFn = next; errFn = err; load(); return function(){}; } };
+  query.orderBy = function(){ return query; };
+  query.limit = function(){ return query; };
+  return {
+    reload: load,
+    orderBy: query.orderBy, limit: query.limit, onSnapshot: query.onSnapshot,
+    doc: function(id){
+      return {
+        set: function(body){ return put(JSON.parse(JSON.stringify(body))); },
+        update: function(patch){
+          var cur = docs.filter(function(d){ return d.id === id; })[0];
+          if (!cur) return Promise.reject({ code: "not_found" });
+          var merged = JSON.parse(JSON.stringify(cur));
+          Object.keys(patch).forEach(function(k){ merged[k] = patch[k]; });
+          return put(merged);
+        },
+        delete: function(){
+          return sb.from("bb_series").delete().eq("user_id", uid).eq("id", id).then(sbCheck).then(function(){
+            docs = docs.filter(function(d){ return d.id !== id; }); emit();
+          });
+        }
+      };
+    }
+  };
+}
+function startCloud(){
+  var uid = sbUser.id;
+  cloud.why = "";
+  cloud.profileDoc = sbSingleDoc("bb_profiles", uid);
+  cloud.profileDoc.onSnapshot(function(snap){
+    if (!snap.exists){
+      if (!profile.email && sbUser.email){ profile.email = sbUser.email; state.profile = profile; saveState(); fillProfileInputs(); }
+      return;
+    }
+    profile = cleanProfile(snap.data());
+    state.profile = profile;
+    saveState();
+    fillProfileInputs();
+    renderHistory();
+  }, function(){ cloud.profileDoc = null; });
+  cloud.goalsDoc = sbSingleDoc("bb_goals", uid);
+  cloud.goalsDoc.onSnapshot(function(snap){
+    if (!snap.exists) return;
+    SEASON_GOALS = cleanGoals(snap.data());
+    state.goals = SEASON_GOALS;
+    saveState();
+    fillGoalInputs();
+    renderHistory();
+  }, function(){ cloud.goalsDoc = null; });
+  cloud.col = sbSeriesCollection(uid);
+  cloud.col.orderBy("savedAt", "desc").limit(500).onSnapshot(function(snap){
+    cloud.docs = snap.docs.map(function(d){ return d.data(); }).filter(Boolean);
+    cloud.ready = true;
+    renderHistory();
+  }, function(e){
+    cloud.col = null; cloud.ready = true; cloud.why = "the database reported \"" + ((e && e.code) || "an error") + "\"";
+    renderHistory();
+  });
+}
+function stopCloud(why){
+  sbUser = null;
+  cloud.col = null; cloud.profileDoc = null; cloud.goalsDoc = null; cloud.docs = [];
+  cloud.ready = true; cloud.why = why;
+  renderHistory();
+}
+function showGate(show){ document.getElementById("auth-gate").classList.toggle("hidden", !show); }
+function authRedirect(){ return window.location.origin + window.location.pathname; }
+function initCloud(){
+  // CSV export is an ordinary browser download here
+  cloud.dl = { save: function(req){
+    var url = URL.createObjectURL(new Blob([req.data], { type: "text/csv;charset=utf-8" }));
+    var a = document.createElement("a"); a.href = url; a.download = req.filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+    return Promise.resolve({ status: "saved" });
+  } };
+  if (!window.supabase || !window.supabase.createClient){
+    cloud.ready = true; cloud.why = "the sign-in service didn't load; check your connection and reload";
+    renderHistory(); return;
+  }
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  sb.auth.onAuthStateChange(function(ev, session){
+    // never call back into Supabase from inside this callback; defer the work
+    setTimeout(function(){
+      if (session && session.user){
+        if (!sbUser || sbUser.id !== session.user.id){ sbUser = session.user; showGate(false); startCloud(); }
+      } else if (ev === "INITIAL_SESSION" || ev === "SIGNED_OUT"){
+        stopCloud("you're not signed in");
+        showGate(!state.skipAuth);
+      }
+    }, 0);
+  });
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "visible" && cloud.col && cloud.col.reload) cloud.col.reload();
+  });
+}
+(function(){
+  var emailEl = document.getElementById("auth-email"), statusEl = document.getElementById("auth-status");
+  function email(){ return emailEl.value.trim(); }
+  document.getElementById("auth-send-btn").addEventListener("click", function(){
+    if (!sb){ statusEl.textContent = "The sign-in service didn't load. Check your connection and reload."; return; }
+    if (!/^\S+@\S+\.\S+$/.test(email())){ statusEl.textContent = "Enter your email address first."; return; }
+    statusEl.textContent = "Sending…";
+    sb.auth.signInWithOtp({ email: email(), options: { emailRedirectTo: authRedirect() } }).then(function(r){
+      if (r.error){ statusEl.textContent = "Couldn't send the email: " + r.error.message; return; }
+      statusEl.textContent = "Check your email and tap the sign-in link. If the email shows a code, you can type it below instead.";
+      document.getElementById("auth-code-row").classList.remove("hidden");
+    }, function(){ statusEl.textContent = "Couldn't send the email just now. Try again in a moment."; });
+  });
+  document.getElementById("auth-verify-btn").addEventListener("click", function(){
+    var code = document.getElementById("auth-code").value.trim();
+    if (!sb || !code) return;
+    statusEl.textContent = "Checking…";
+    sb.auth.verifyOtp({ email: email(), token: code, type: "email" }).then(function(r){
+      statusEl.textContent = r.error ? "That code didn't work: " + r.error.message : "";
+    }, function(){ statusEl.textContent = "Couldn't check the code just now. Try again in a moment."; });
+  });
+  document.getElementById("auth-skip-btn").addEventListener("click", function(){
+    state.skipAuth = true; saveState(); showGate(false);
+  });
+  document.getElementById("menu-auth-btn").addEventListener("click", function(){
+    if (!sbUser){ state.skipAuth = false; saveState(); statusEl.textContent = ""; showGate(true); return; }
+    // signing out clears this device's copy so the next bowler on it starts clean
+    sb.auth.signOut().then(function(){
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e){}
+      window.location.reload();
+    });
+  });
+  document.getElementById("menu-btn").addEventListener("click", function(){
+    document.getElementById("menu-auth-btn").textContent = sbUser ? "Sign out" : "Sign in";
+  });
+})();
+// League nights and practice sessions are saved the same way but reported separately.
+function sessionType(){ return state.sessionType === "practice" ? "practice" : "league"; }
+function seriesType(h){ return h && h.type === "practice" ? "practice" : "league"; }
+function applySessionType(){
+  var practice = sessionType() === "practice";
+  document.getElementById("setup-session-type").value = sessionType();
+  document.getElementById("save-history-btn").textContent = practice ? "Save to practice log" : "Save to season history";
+}
+document.getElementById("setup-session-type").addEventListener("change", function(e){
+  state.sessionType = e.target.value === "practice" ? "practice" : "league";
+  state.savedSeriesId = state.savedSeriesId; // same session keeps its id; saving again re-files it under the new type
+  document.getElementById("save-status").textContent = "";
+  saveState();
+  applySessionType();
+});
+var historyTab = "league";
+function setHistoryTab(tab){
+  historyTab = tab === "practice" ? "practice" : "league";
+  pendingDeleteKey = null; editKey = null; editDraft = null;
+  renderHistory();
+}
+function buildSeriesDoc(){
+  var agg = aggregateStats(state.games);
+  if (!state.savedSeriesId) state.savedSeriesId = "s" + Date.now().toString(36);
+  return {
+    schema: 1,
+    id: state.savedSeriesId,
+    type: sessionType(),
+    savedAt: new Date().toISOString(),
+    date: new Date().toLocaleDateString(),
+    center: state.center, lanes: state.lanes,
+    arsenal: state.arsenal.slice(),
+    strikeBall: state.strikeBall, spareBall: state.spareBall,
+    startFeet: state.startFeet, startArrow: state.startArrow,
+    scores: state.games.map(function(g){ return computeGameStats(g).finalScore; }),
+    total: agg.total,
+    average: state.games.length ? (agg.total/state.games.length).toFixed(1) : "0.0",
+    stats: agg,
+    games: JSON.parse(JSON.stringify(state.games)).map(function(g, gi){
+      g.stats = computeGameStats(state.games[gi]);
+      return g;
+    })
+  };
+}
+function saveSeriesLocal(doc){
+  var replaced = false;
+  state.seriesHistory = state.seriesHistory.map(function(h){
+    if (h.id && h.id === doc.id){ replaced = true; return doc; }
+    return h;
+  });
+  if (!replaced) state.seriesHistory.push(doc);
+  saveState();
+}
+var savingSeries = false;
+document.getElementById("save-history-btn").addEventListener("click", function(){
+  if (savingSeries) return;
+  var statusEl = document.getElementById("save-status");
+  if (state.practice){ statusEl.textContent = "Test mode is on, so this was not saved. Turn it off in Setup to save for real."; return; }
+  if (!state.games.length){ statusEl.textContent = "Nothing to save yet."; return; }
+  var doc = buildSeriesDoc();
+  saveState();
+  if (!cloud.col){
+    saveSeriesLocal(doc);
+    statusEl.textContent = "Saved on this device only (account storage isn't available in this view).";
+    return;
+  }
+  savingSeries = true;
+  statusEl.textContent = "Saving…";
+  cloud.col.doc(doc.id).set(doc).then(function(){
+    savingSeries = false;
+    statusEl.textContent = doc.type === "practice" ? "Saved to your practice log." : "Saved to your season history.";
+  }, function(){
+    savingSeries = false;
+    saveSeriesLocal(doc);
+    statusEl.textContent = "Couldn't reach account storage, so this series was saved on this device only. Tap Save again later to retry.";
+  });
+});
+function resetSeries(){
+  state.savedSeriesId = null;
+  document.getElementById("save-status").textContent = "";
+  state.games = [];
+  state.lanes = "";
+  document.getElementById("setup-lanes").value = "";
+  returnView = null;
+  saveState();
+  showView("setup");
+  updateSetupPrimaryButton();
+}
+document.getElementById("new-series-btn").addEventListener("click", function(){
+  resetSeries();
+});
+document.getElementById("reset-series-btn").addEventListener("click", function(){
+  if (state.games.length && !confirm("This clears tonight's games in progress (your saved season history is untouched). Continue?")) return;
+  resetSeries();
+});
+
+// ---------- header nav & export ----------
+function updateSetupPrimaryButton(){
+  var btn = document.getElementById("start-series-btn");
+  if (returnView){
+    btn.textContent = "Save & back to " + returnView;
+  } else {
+    btn.textContent = "Start Game 1";
+  }
+}
+document.getElementById("header-setup-btn").addEventListener("click", function(){
+  var activeViewName = views.filter(function(v){ return !document.getElementById("view-"+v).classList.contains("hidden"); })[0];
+  if (activeViewName === "setup") return;
+  // only offer "Save & back" when a series is actually under way; from the reports or
+  // profile, setup opens ready to start a new series
+  returnView = ((activeViewName === "game" || activeViewName === "summary") && state.games.length) ? activeViewName : null;
+  initSetupFields();
+  showView("setup");
+});
+function ballUsedList(f){
+  return f.balls.map(function(b){ return b.ballUsed || ""; }).join(" / ");
+}
+function buildScoreboardHTML(g, scores){
+  var html = "<div class=\"pdf-scoreboard\">";
+  for (var fi=0; fi<10; fi++){
+    var marks = frameMarksForIndex(g.frames, fi).join(" ");
+    var sc = scores[fi]===null ? "" : scores[fi];
+    html += "<div class=\"pdf-frame\"><div class=\"fnum\">" + (fi+1) + "</div><div class=\"fmarks\">" + marks + "</div><div class=\"fscore\">" + sc + "</div></div>";
+  }
+  html += "</div>";
+  return html;
+}
+function buildPrintReport(){
+  var html = "";
+  html += "<h1>Bowling Bro' Series Report</h1>";
+  html += "<p>" + state.center + (state.lanes ? (" - Lanes " + state.lanes) : "") + " - " + new Date().toLocaleDateString() + "</p>";
+  html += "<p>Arsenal: " + state.arsenal.join(", ") + "</p>";
+  html += "<p>Strike ball: " + state.strikeBall + " - Spare ball: " + state.spareBall + " - Starting line: " + state.startFeet + " feet / " + state.startArrow + " arrow</p>";
+  state.games.forEach(function(g, gi){
+    var scores = computeScoresFromFrames(g.frames);
+    var s = computeGameStats(g);
+    html += "<h2>Game " + (gi+1) + " - Score: " + s.finalScore + "</h2>";
+    html += buildScoreboardHTML(g, scores);
+    html += "<div class=\"pdf-game-stats\">" + gameStatLines(s).map(function(line){
+      return "<div><strong>" + line[0] + ":</strong> " + line[1] + "</div>";
+    }).join("") + "</div>";
+    html += "<table><tr><th>Frame</th><th>Marks</th><th>Line (ft/arrow)</th><th>Ball(s)</th><th>Running score</th><th>Note</th></tr>";
+    g.frames.forEach(function(f, fi){
+      var marks = frameMarksForIndex(g.frames, fi).join(" ");
+      var line = (f.feet!==null && f.feet!==undefined ? f.feet : "") + " / " + (f.arrow!==null && f.arrow!==undefined ? f.arrow : "");
+      html += "<tr><td>" + (fi+1) + "</td><td>" + marks + "</td><td>" + line + "</td><td>" + ballUsedList(f) + "</td><td>" + (scores[fi]===null?"":scores[fi]) + "</td><td>" + frameNoteDisplay(f) + "</td></tr>";
+    });
+    html += "</table>";
+  });
+  var agg = aggregateStats(state.games);
+  html += "<h2>Series Summary</h2>";
+  html += "<p>Total: " + agg.total + " - Average: " + (state.games.length ? (agg.total/state.games.length).toFixed(1) : "0.0") + "</p>";
+  html += "<div class=\"pdf-game-stats\">" +
+    "<div><strong>Strike %:</strong> " + pct(agg.strikes, agg.frameCount) + "%</div>" +
+    "<div><strong>Spare % (of " + agg.spareOpportunities + " chances):</strong> " + pct(agg.spares, agg.spareOpportunities) + "%</div>" +
+    "<div><strong>Single-pin % (of " + agg.singlePinOpportunities + " leaves):</strong> " + pct(agg.singlePinMade, agg.singlePinOpportunities) + "%</div>" +
+    "<div><strong>Split % (of " + agg.splitOpportunities + " first balls):</strong> " + pct(agg.splitsLeft, agg.splitOpportunities) + "%</div>" +
+    "<div><strong>Open frames:</strong> " + agg.opens + "</div>" +
+    "</div>";
+  document.getElementById("print-report").innerHTML = html;
+}
+document.getElementById("export-pdf-btn").addEventListener("click", function(){
+  buildPrintReport();
+  window.print();
+});
+
+// ---------- history ----------
+function allSeries(){
+  // account series first (newest first), then anything that only exists on this device
+  var seen = {};
+  var out = [];
+  cloud.docs.forEach(function(h){ if (h.id) seen[h.id] = true; out.push({h: h, local: false}); });
+  state.seriesHistory.slice().reverse().forEach(function(h){
+    if (h.id && seen[h.id]) return;
+    out.push({h: h, local: true});
+  });
+  return out;
+}
+function seriesScores(h){
+  if (h.scores) return h.scores;
+  return (h.games || []).map(function(g){ return (g && typeof g === "object") ? g.finalScore : g; });
+}
+function renderHistory(){
+  var el = document.getElementById("history-list");
+  var statusEl = document.getElementById("history-status");
+  var everything = allSeries();
+  var practiceTab = historyTab === "practice";
+  var items = everything.filter(function(it){ return seriesType(it.h) === historyTab; });
+  document.getElementById("history-tab-league").className = "full" + (practiceTab ? "" : " primary");
+  document.getElementById("history-tab-practice").className = "full" + (practiceTab ? " primary" : "");
+  document.getElementById("history-list-title").textContent = practiceTab ? "Practice sessions" : "Season history";
+  el.innerHTML = "";
+  statusEl.textContent = !cloud.ready ? "Loading your saved series…"
+    : cloud.col ? "Saved to your account — available on any device you sign in on."
+    : "Account storage isn't available here (" + (cloud.why || "unknown reason") + "), so this shows only series saved on this device.";
+  if (!items.length && cloud.ready){
+    var empty = document.createElement("p");
+    empty.style.cssText = "font-size:13px;color:#6b6b6b;";
+    empty.textContent = practiceTab ? "No practice sessions saved yet. Choose \"Practice session\" in Setup before you start one." : "No saved nights yet.";
+    el.appendChild(empty);
+  }
+  renderDetailTable(el, items);
+  renderSeason(items);
+  renderChart(items);
+  var hasDetail = everything.some(function(it){ return hasFrameDetail(it.h); });
+  document.getElementById("export-csv-btn").classList.toggle("hidden", !cloud.dl || !hasDetail);
+}
+// ---------- profile ----------
+// Kept in the signed-in viewer's private area, so each person who uses the app has their own.
+var PROFILE_KEYS = ["name", "email", "hand", "homeCenter", "league", "team"];
+function cleanProfile(src){
+  var out = {};
+  PROFILE_KEYS.forEach(function(k){ out[k] = (src && typeof src[k] === "string") ? src[k].slice(0, 120) : ""; });
+  return out;
+}
+var profile = cleanProfile(state.profile);
+var profileReturn = "setup";
+function fillProfileInputs(){
+  PROFILE_KEYS.forEach(function(k){
+    var el = document.getElementById("profile-" + k);
+    if (document.activeElement !== el) el.value = profile[k];
+  });
+}
+function goToView(name){
+  if (name === "game" && state.games.length){ showView("game"); renderBallUsedOptions(); refreshGameScreen(); }
+  else if (name === "summary" && state.games.length){ showSummary(); }
+  else if (name === "history"){ renderHistory(); showView("history"); }
+  else { initSetupFields(); showView("setup"); }
+}
+document.getElementById("header-profile-btn").addEventListener("click", function(){
+  var active = views.filter(function(v){ return !document.getElementById("view-"+v).classList.contains("hidden"); })[0];
+  profileReturn = active || "setup";
+  document.getElementById("profile-status").textContent = "";
+  document.getElementById("goals-status").textContent = "";
+  fillProfileInputs();
+  fillGoalInputs(true);
+  showView("profile");
+});
+document.getElementById("profile-back-btn").addEventListener("click", function(){ goToView(profileReturn); });
+var profileWrite = Promise.resolve();
+document.getElementById("profile-save-btn").addEventListener("click", function(){
+  var next = {};
+  PROFILE_KEYS.forEach(function(k){ next[k] = document.getElementById("profile-" + k).value.trim(); });
+  profile = cleanProfile(next);
+  state.profile = profile;
+  saveState();
+  renderHistory();
+  var statusEl = document.getElementById("profile-status");
+  if (!cloud.profileDoc){ statusEl.textContent = "Profile saved on this device only (account storage isn't available in this view)."; return; }
+  statusEl.textContent = "Saving…";
+  var body = JSON.parse(JSON.stringify(profile));
+  profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(function(){
+    statusEl.textContent = "Profile saved.";
+  }, function(){
+    statusEl.textContent = "Profile saved on this device, but couldn't sync to your account just now.";
+  });
+});
+
+// ---------- season summary & goals ----------
+// Goals are a list the bowler builds: each one picks a measure and a target number.
+var GOAL_TYPES = {
+  avg:         { label: "Season average above a number", score: false, targetLabel: "Average", tMax: 300, dT: 190 },
+  gamePct:     { label: "% of games at or above a score", score: true, scoreLabel: "Game score", targetLabel: "% of games", tMax: 100, sMax: 300, dS: 200, dT: 50 },
+  seriesPct:   { label: "% of series at or above a score", score: true, scoreLabel: "Series score", targetLabel: "% of series", tMax: 100, sMax: 3000, dS: 600, dT: 40 },
+  gameCount:   { label: "Number of games at or above a score", score: true, scoreLabel: "Game score", targetLabel: "How many", tMax: 999, sMax: 300, dS: 250, dT: 1 },
+  seriesCount: { label: "Number of series at or above a score", score: true, scoreLabel: "Series score", targetLabel: "How many", tMax: 999, sMax: 3000, dS: 700, dT: 1 },
+  highGame:    { label: "High game of at least a score", score: false, targetLabel: "Score", tMax: 300, dT: 250 },
+  highSeries:  { label: "High series of at least a score", score: false, targetLabel: "Score", tMax: 3000, dT: 650 },
+  spread:      { label: "Average high-low spread at or below", score: false, targetLabel: "Pins", tMax: 300, dT: 40 }
+};
+var GOAL_TYPE_KEYS = Object.keys(GOAL_TYPES);
+function legacyGoalList(o){
+  o = o || {};
+  function v(k, d){ var n = Number(o[k]); return (isFinite(n) && n >= 0) ? n : d; }
+  return [
+    { type: "avg", target: v("average", 190) },
+    { type: "gamePct", score: 175, target: v("game175Pct", 90) },
+    { type: "gamePct", score: 200, target: v("game200Pct", 50) },
+    { type: "seriesPct", score: 600, target: v("series600Pct", 40) },
+    { type: "seriesCount", score: 700, target: v("series700Count", 1) }
+  ];
+}
+function cleanGoals(src){
+  var list;
+  if (Array.isArray(src)) list = src;
+  else if (src && Array.isArray(src.list)) list = src.list;
+  else list = legacyGoalList(src);
+  var out = [];
+  list.forEach(function(g, i){
+    if (!g || !GOAL_TYPES[g.type] || out.length >= 12) return;
+    var def = GOAL_TYPES[g.type];
+    var t = Number(g.target), s = Number(g.score);
+    var clean = {
+      id: (typeof g.id === "string" && g.id) ? g.id.slice(0, 24) : ("g" + i + "-" + g.type),
+      type: g.type,
+      target: (isFinite(t) && t >= 0) ? Math.min(t, def.tMax) : def.dT
+    };
+    if (def.score) clean.score = (isFinite(s) && s >= 0) ? Math.min(s, def.sMax) : def.dS;
+    out.push(clean);
+  });
+  return out;
+}
+var SEASON_GOALS = cleanGoals(state.goals);
+function goalAverage(){
+  for (var i = 0; i < SEASON_GOALS.length; i++){ if (SEASON_GOALS[i].type === "avg") return SEASON_GOALS[i].target; }
+  return 190;
+}
+var goalsWrite = Promise.resolve();
+function persistGoals(){
+  // the editor's fields hold references to these goal objects, so update in place rather than rebuilding the list
+  state.goals = SEASON_GOALS;
+  saveState();
+  renderHistory();
+  var statusEl = document.getElementById("goals-status");
+  if (!cloud.goalsDoc){ statusEl.textContent = "Goals saved on this device."; return; }
+  var body = { v: 2, list: JSON.parse(JSON.stringify(SEASON_GOALS)) };
+  goalsWrite = goalsWrite.then(function(){ return cloud.goalsDoc.set(body); }).then(function(){
+    statusEl.textContent = "Goals saved.";
+  }, function(){
+    statusEl.textContent = "Goals saved on this device, but couldn't sync to your account just now.";
+  });
+}
+// Rebuilds the goal editor on the profile screen. Skipped while the bowler is typing in it
+// (unless forced), so a background sync never steals focus.
+function fillGoalInputs(force){
+  var holder = document.getElementById("goal-editor");
+  if (!force && holder.contains(document.activeElement)) return;
+  holder.innerHTML = "";
+  if (!SEASON_GOALS.length){
+    var none = document.createElement("p");
+    none.style.cssText = "font-size:13px;color:#6b6b6b;margin:0 0 10px;";
+    none.textContent = "No goals yet. Add one below.";
+    holder.appendChild(none);
+  }
+  SEASON_GOALS.forEach(function(g, idx){
+    var def = GOAL_TYPES[g.type];
+    var box = document.createElement("div"); box.className = "goal-edit";
+    var sl = document.createElement("label"); sl.textContent = "Goal " + (idx + 1) + " measures"; sl.setAttribute("for", "goal-type-" + idx);
+    var sel = document.createElement("select"); sel.id = "goal-type-" + idx;
+    GOAL_TYPE_KEYS.forEach(function(k){
+      var o = document.createElement("option"); o.value = k; o.textContent = GOAL_TYPES[k].label; sel.appendChild(o);
+    });
+    sel.value = g.type;
+    sel.addEventListener("change", function(){
+      var nd = GOAL_TYPES[sel.value];
+      g.type = sel.value; g.target = nd.dT;
+      if (nd.score) g.score = nd.dS; else delete g.score;
+      persistGoals(); fillGoalInputs(true);
+    });
+    box.appendChild(sl); box.appendChild(sel);
+    var row = document.createElement("div"); row.className = "row"; row.style.alignItems = "flex-end";
+    function numField(labelText, key, max){
+      var w = document.createElement("div");
+      var l = document.createElement("label"); l.textContent = labelText; l.setAttribute("for", "goal-" + key + "-" + idx);
+      var inp = document.createElement("input"); inp.type = "number"; inp.id = "goal-" + key + "-" + idx;
+      inp.min = "0"; inp.max = String(max); inp.setAttribute("inputmode", "decimal"); inp.value = g[key];
+      inp.addEventListener("change", function(){
+        var n = inp.value === "" ? NaN : Number(inp.value);
+        g[key] = (isFinite(n) && n >= 0) ? Math.min(n, max) : (key === "score" ? def.dS : def.dT);
+        inp.value = g[key];
+        persistGoals();
+      });
+      w.appendChild(l); w.appendChild(inp);
+      return w;
+    }
+    if (def.score) row.appendChild(numField(def.scoreLabel, "score", def.sMax));
+    row.appendChild(numField(def.targetLabel, "target", def.tMax));
+    var rw = document.createElement("div"); rw.style.flex = "0 0 auto";
+    var rm = document.createElement("button"); rm.textContent = "Remove"; rm.style.cssText = "color:#a33;margin-bottom:10px;";
+    rm.addEventListener("click", function(){
+      SEASON_GOALS.splice(idx, 1);
+      persistGoals(); fillGoalInputs(true);
+    });
+    rw.appendChild(rm); row.appendChild(rw);
+    box.appendChild(row);
+    holder.appendChild(box);
+  });
+  document.getElementById("goal-add-btn").classList.toggle("hidden", SEASON_GOALS.length >= 12);
+}
+document.getElementById("goal-add-btn").addEventListener("click", function(){
+  SEASON_GOALS.push({ id: "g" + Date.now().toString(36), type: "gamePct", score: 200, target: 50 });
+  persistGoals(); fillGoalInputs(true);
+});
+
+function plural(n, word){ return n + " " + word + ((n === 1 || /s$/.test(word)) ? "" : "s"); }
+function fmtNum(n){ return (Math.round(n * 10) / 10).toString(); }
+function seasonStats(items){
+  var s = { games: [], totals: [], spreads: [], pins: 0 };
+  items.forEach(function(it){
+    var sc = seriesScores(it.h).filter(function(x){ return typeof x === "number" && !isNaN(x); });
+    if (!sc.length) return;
+    var t = 0; sc.forEach(function(x){ s.games.push(x); t += x; });
+    s.totals.push(t); s.pins += t;
+    if (sc.length > 1) s.spreads.push(Math.max.apply(null, sc) - Math.min.apply(null, sc));
+  });
+  s.avg = s.games.length ? s.pins / s.games.length : 0;
+  s.highGame = s.games.length ? Math.max.apply(null, s.games) : 0;
+  s.highSeries = s.totals.length ? Math.max.apply(null, s.totals) : 0;
+  var sp = 0; s.spreads.forEach(function(x){ sp += x; });
+  s.avgSpread = s.spreads.length ? sp / s.spreads.length : null;
+  return s;
+}
+function evalGoal(g, s){
+  var T = g.target, S = g.score;
+  function share(list, unit){
+    var count = list.filter(function(x){ return x >= S; }).length, total = list.length;
+    var p = 100 * count / total, met = p >= T;
+    var need = Math.ceil(T * total / 100 - 1e-9) - count;
+    return {
+      name: fmtNum(T) + "% of " + (unit === "game" ? "games" : "series") + " " + fmtNum(S) + " or better",
+      met: met, fill: met ? 1 : Math.min(1, p / T),
+      detail: count + " of " + plural(total, unit) + " (" + Math.round(p) + "%) · goal " + fmtNum(T) + "%" + (met ? "" : " · " + need + " short so far")
+    };
+  }
+  function howMany(list, unit, best){
+    var count = list.filter(function(x){ return x >= S; }).length, met = count >= T;
+    var one = T === 1;
+    return {
+      name: "At least " + (one ? "one " + fmtNum(S) + " " + unit : fmtNum(T) + " " + (unit === "game" ? "games" : "series") + " of " + fmtNum(S) + " or better"),
+      met: met, fill: met ? 1 : (one ? Math.min(1, best / S) : count / T),
+      detail: met ? count + " so far · best " + best
+        : (one ? "Best so far " + best + " · " + fmtNum(S - best) + " pins short" : count + " of " + fmtNum(T) + " so far · best " + best)
+    };
+  }
+  function best(value, label){
+    var met = value >= T;
+    return {
+      name: label + " of " + fmtNum(T) + " or better", met: met, fill: met ? 1 : Math.min(1, value / T),
+      detail: "Best so far " + value + (met ? "" : " · " + fmtNum(T - value) + " pins short")
+    };
+  }
+  switch (g.type){
+    case "avg":
+      return {
+        name: "Season average above " + fmtNum(T), met: s.avg > T, fill: s.avg > T ? 1 : Math.min(1, s.avg / T),
+        detail: s.avg.toFixed(1) + " average · " + (s.avg > T ? (s.avg - T).toFixed(1) + " pins above the goal" : (T - s.avg).toFixed(1) + " pins below the goal")
+      };
+    case "gamePct": return share(s.games, "game");
+    case "seriesPct": return share(s.totals, "series");
+    case "gameCount": return howMany(s.games, "game", s.highGame);
+    case "seriesCount": return howMany(s.totals, "series", s.highSeries);
+    case "highGame": return best(s.highGame, "High game");
+    case "highSeries": return best(s.highSeries, "High series");
+    case "spread":
+      if (s.avgSpread === null) return { name: "Average high-low spread of " + fmtNum(T) + " pins or less", met: false, fill: 0, detail: "Needs a series with at least two games" };
+      var ok = s.avgSpread <= T;
+      return {
+        name: "Average high-low spread of " + fmtNum(T) + " pins or less", met: ok, fill: ok ? 1 : Math.min(1, T / s.avgSpread),
+        detail: s.avgSpread.toFixed(1) + " pins average · " + (ok ? (T - s.avgSpread).toFixed(1) + " inside the goal" : (s.avgSpread - T).toFixed(1) + " over the goal")
+      };
+  }
+  return null;
+}
+function renderSeason(items){
+  var s = seasonStats(items);
+  var has = s.games.length > 0;
+  var practiceTab = historyTab === "practice";
+  document.getElementById("season-card").classList.toggle("hidden", !has);
+  document.getElementById("goals-card").classList.toggle("hidden", !has || practiceTab);
+  if (!has) return;
+  document.getElementById("season-title").textContent = (practiceTab ? "Practice to date" : "Season to date") + (profile.name ? " — " + profile.name : "");
+  document.getElementById("season-nights-label").textContent = practiceTab ? "Sessions" : "Weeks";
+  document.getElementById("season-avg").textContent = s.avg.toFixed(1);
+  document.getElementById("season-games").textContent = s.games.length;
+  document.getElementById("season-pins").textContent = s.pins.toLocaleString();
+  document.getElementById("season-high-game").textContent = s.highGame;
+  document.getElementById("season-high-series").textContent = s.highSeries;
+  document.getElementById("season-nights").textContent = s.totals.length;
+  document.getElementById("season-spread").textContent = s.spreads.length
+    ? s.avgSpread.toFixed(1) + " pins · tightest " + Math.min.apply(null, s.spreads) + ", widest " + Math.max.apply(null, s.spreads)
+    : "—";
+
+  var list = document.getElementById("goals-list");
+  list.innerHTML = "";
+  if (!SEASON_GOALS.length){
+    var none = document.createElement("p");
+    none.style.cssText = "font-size:13px;color:#6b6b6b;margin:0;";
+    none.textContent = "No goals set. Add some on the Profile screen.";
+    list.appendChild(none);
+  }
+  SEASON_GOALS.forEach(function(goal){
+    var g = evalGoal(goal, s);
+    if (!g) return;
+    var cls = g.met ? "met" : "short";
+    var row = document.createElement("div"); row.className = "goal";
+    var top = document.createElement("div"); top.className = "goal-top";
+    var name = document.createElement("span"); name.className = "goal-name"; name.textContent = g.name;
+    var badge = document.createElement("span"); badge.className = "goal-badge " + cls; badge.textContent = g.met ? "✓ On track" : "Not yet";
+    top.appendChild(name); top.appendChild(badge);
+    var bar = document.createElement("div"); bar.className = "goal-bar";
+    var fill = document.createElement("div"); fill.className = "goal-fill " + cls; fill.style.width = Math.round(g.fill * 100) + "%";
+    bar.appendChild(fill);
+    var detail = document.createElement("div"); detail.className = "goal-detail"; detail.textContent = g.detail;
+    row.appendChild(top); row.appendChild(bar); row.appendChild(detail);
+    list.appendChild(row);
+  });
+}
+
+// ---------- trend chart ----------
+// One measure per view so every view has a single y-axis: Scores, Series, Consistency.
+var SVGNS = "http://www.w3.org/2000/svg";
+var CHART_VIEWS = [["scores", "Scores"], ["series", "Series"], ["spread", "Consistency"]];
+var CHART_C = { game: "#7c5cc4", night: "#2f6fed", run: "#d9480f", grid: "#e8e6dc", ink: "#6b6b6b" };
+var chartView = "scores";
+function svgEl(tag, attrs, text){
+  var e = document.createElementNS(SVGNS, tag);
+  Object.keys(attrs || {}).forEach(function(k){ e.setAttribute(k, attrs[k]); });
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function renderChart(items){
+  var card = document.getElementById("chart-card");
+  var pinsRun = 0, gamesRun = 0;
+  var data = sortChrono(items).map(function(it){
+    var sc = seriesScores(it.h).filter(isNum);
+    if (!sc.length) return null;
+    var t = 0; sc.forEach(function(x){ t += x; });
+    pinsRun += t; gamesRun += sc.length;
+    return {
+      label: String(it.h.date || "").replace(/\/\d{4}$/, ""), sc: sc, total: t, avg: t / sc.length, run: pinsRun / gamesRun,
+      hi: Math.max.apply(null, sc), lo: Math.min.apply(null, sc)
+    };
+  }).filter(Boolean);
+  card.classList.toggle("hidden", !data.length);
+  if (!data.length) return;
+  var practiceTab = historyTab === "practice";
+
+  var tabs = document.getElementById("chart-tabs");
+  tabs.innerHTML = "";
+  CHART_VIEWS.forEach(function(v){
+    var chip = document.createElement("button");
+    chip.className = "preset-chip" + (chartView === v[0] ? " selected" : "");
+    chip.textContent = v[1];
+    chip.setAttribute("aria-pressed", chartView === v[0] ? "true" : "false");
+    chip.addEventListener("click", function(){ chartView = v[0]; renderChart(items); });
+    tabs.appendChild(chip);
+  });
+
+  var W = 340, H = 196, L = 32, R = 44, T = 12, B = 24;
+  var pw = W - L - R, ph = H - T - B, n = data.length, band = pw / n;
+  function x(i){ return L + (i + 0.5) * band; }
+  var vals = [], refs = [], zero = false, title, legend = [];
+  if (chartView === "scores"){
+    title = "Game scores by " + (practiceTab ? "session" : "week");
+    data.forEach(function(d){ vals = vals.concat(d.sc, [d.avg, d.run]); });
+    if (!practiceTab) refs.push({ v: goalAverage(), text: "goal " + fmtNum(goalAverage()) });
+    legend = [["dot", CHART_C.game, "Each game"], ["line", CHART_C.night, (practiceTab ? "Session" : "Night") + " average"], ["dash", CHART_C.run, "Running average"]];
+  } else if (chartView === "series"){
+    title = "Series total by " + (practiceTab ? "session" : "week");
+    data.forEach(function(d){ vals.push(d.total); });
+    if (!practiceTab){
+      var seen = {};
+      SEASON_GOALS.forEach(function(g){
+        var v = (g.type === "seriesPct" || g.type === "seriesCount") ? g.score : (g.type === "highSeries" ? g.target : null);
+        if (v !== null && !seen[v] && refs.length < 3){ seen[v] = true; refs.push({ v: v, text: fmtNum(v) }); }
+      });
+    }
+  } else {
+    title = "High-low spread by " + (practiceTab ? "session" : "week") + " (lower is steadier)";
+    zero = true;
+    data.forEach(function(d){ vals.push(d.hi - d.lo); });
+    var multi = data.filter(function(d){ return d.sc.length > 1; });
+    if (multi.length){
+      var sum = 0; multi.forEach(function(d){ sum += d.hi - d.lo; });
+      refs.push({ v: sum / multi.length, text: "avg " + (sum / multi.length).toFixed(1) });
+    }
+  }
+  document.getElementById("chart-title").textContent = title;
+  refs.forEach(function(r){ vals.push(r.v); });
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  var step = [5, 10, 20, 25, 50, 100, 200, 250, 500].filter(function(s){ return (hi - (zero ? 0 : lo)) / s <= 5; })[0] || 1000;
+  var yMin = zero ? 0 : Math.floor((lo - step * 0.25) / step) * step;
+  var yMax = Math.ceil((hi + step * 0.25) / step) * step;
+  if (yMax === yMin) yMax = yMin + step;
+  function y(v){ return T + ph - (v - yMin) / (yMax - yMin) * ph; }
+
+  var svg = svgEl("svg", { viewBox: "0 0 " + W + " " + H, width: "100%", role: "img", "aria-label": title + ". The table below has the same numbers." });
+  svg.style.display = "block";
+  for (var gv = yMin; gv <= yMax + 0.001; gv += step){
+    svg.appendChild(svgEl("line", { x1: L, x2: W - R, y1: y(gv), y2: y(gv), stroke: CHART_C.grid, "stroke-width": 1 }));
+    svg.appendChild(svgEl("text", { x: L - 5, y: y(gv) + 3, "text-anchor": "end", "font-size": 9, fill: CHART_C.ink }, gv));
+  }
+  var every = Math.ceil(n / 7);
+  data.forEach(function(d, i){
+    if (i % every === 0) svg.appendChild(svgEl("text", { x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 9, fill: CHART_C.ink }, d.label));
+  });
+  refs.forEach(function(r){
+    svg.appendChild(svgEl("line", { x1: L, x2: W - R, y1: y(r.v), y2: y(r.v), stroke: "#1a1a1a", "stroke-width": 1, "stroke-dasharray": "2 3", opacity: 0.55 }));
+    svg.appendChild(svgEl("text", { x: W - R + 4, y: y(r.v) + 3, "text-anchor": "start", "font-size": 9, fill: "#1a1a1a" }, r.text));
+  });
+  var cross = svgEl("line", { x1: 0, x2: 0, y1: T, y2: T + ph, stroke: "#1a1a1a", "stroke-width": 1, opacity: 0 });
+  svg.appendChild(cross);
+  function path(key){ return data.map(function(d, i){ return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(d[key]).toFixed(1); }).join(" "); }
+  var labelPoints = n <= 10;
+  if (chartView === "scores"){
+    data.forEach(function(d, i){
+      d.sc.forEach(function(s, gi){
+        var off = d.sc.length > 1 ? (gi / (d.sc.length - 1) - 0.5) * Math.min(14, band * 0.4) : 0;
+        svg.appendChild(svgEl("circle", { cx: x(i) + off, cy: y(s), r: 3.5, fill: CHART_C.game, stroke: "#fff", "stroke-width": 1.5 }));
+      });
+    });
+    svg.appendChild(svgEl("path", { d: path("run"), fill: "none", stroke: CHART_C.run, "stroke-width": 2, "stroke-dasharray": "5 3", "stroke-linejoin": "round" }));
+    svg.appendChild(svgEl("path", { d: path("avg"), fill: "none", stroke: CHART_C.night, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    data.forEach(function(d, i){ svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.avg), r: 4, fill: CHART_C.night, stroke: "#fff", "stroke-width": 2 })); });
+  } else if (chartView === "series"){
+    svg.appendChild(svgEl("path", { d: path("total"), fill: "none", stroke: CHART_C.night, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    data.forEach(function(d, i){
+      svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.total), r: 4, fill: CHART_C.night, stroke: "#fff", "stroke-width": 2 }));
+      if (labelPoints) svg.appendChild(svgEl("text", { x: x(i), y: y(d.total) - 8, "text-anchor": "middle", "font-size": 9, "font-weight": 600, fill: "#1a1a1a" }, d.total));
+    });
+  } else {
+    var bw = Math.max(4, Math.min(24, band - 2));
+    data.forEach(function(d, i){
+      if (d.sc.length < 2) return;
+      var v = d.hi - d.lo, top = y(v), base = y(0), r = Math.min(4, bw / 2, Math.max(0, base - top));
+      var x0 = x(i) - bw / 2, x1 = x(i) + bw / 2;
+      svg.appendChild(svgEl("path", { d: "M" + x0 + " " + base + " V" + (top + r) + " Q" + x0 + " " + top + " " + (x0 + r) + " " + top + " H" + (x1 - r) + " Q" + x1 + " " + top + " " + x1 + " " + (top + r) + " V" + base + " Z", fill: CHART_C.night }));
+      if (labelPoints) svg.appendChild(svgEl("text", { x: x(i), y: top - 4, "text-anchor": "middle", "font-size": 9, "font-weight": 600, fill: "#1a1a1a" }, v));
+    });
+  }
+  var readout = document.getElementById("chart-readout");
+  var unit = practiceTab ? "session" : "week";
+  readout.textContent = "Tap or hover a " + unit + " to see its numbers.";
+  function show(i){
+    var d = data[i];
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", 0.25);
+    readout.textContent = d.label + " · " + (chartView === "scores"
+      ? "games " + d.sc.join(", ") + " · average " + d.avg.toFixed(1) + " · running average " + d.run.toFixed(1)
+      : chartView === "series" ? "series " + d.total + " (" + d.sc.join(", ") + ")"
+      : (d.sc.length > 1 ? "high " + d.hi + ", low " + d.lo + " · spread " + (d.hi - d.lo) : "only one game, no spread"));
+  }
+  data.forEach(function(d, i){
+    var hit = svgEl("rect", { x: L + i * band, y: T, width: band, height: ph + B, fill: "transparent" });
+    hit.style.cursor = "pointer";
+    hit.addEventListener("pointerenter", function(){ show(i); });
+    hit.addEventListener("click", function(){ show(i); });
+    svg.appendChild(hit);
+  });
+  var holder = document.getElementById("chart-holder");
+  holder.innerHTML = "";
+  holder.appendChild(svg);
+
+  var lg = document.getElementById("chart-legend");
+  lg.innerHTML = "";
+  legend.forEach(function(item){
+    var wrap = document.createElement("span");
+    var sw = svgEl("svg", { width: 22, height: 10, viewBox: "0 0 22 10", "aria-hidden": "true" });
+    if (item[0] === "dot") sw.appendChild(svgEl("circle", { cx: 11, cy: 5, r: 3.5, fill: item[1] }));
+    else sw.appendChild(svgEl("line", { x1: 1, x2: 21, y1: 5, y2: 5, stroke: item[1], "stroke-width": 2, "stroke-dasharray": item[0] === "dash" ? "5 3" : "" }));
+    wrap.appendChild(sw);
+    wrap.appendChild(document.createTextNode(item[2]));
+    lg.appendChild(wrap);
+  });
+}
+
+// ---------- detail table (the spreadsheet view behind the report) ----------
+var editKey = null, editDraft = null;
+function isNum(s){ return typeof s === "number" && !isNaN(s); }
+function sortChrono(items){
+  return items.slice().sort(function(a, b){
+    var x = a.h.savedAt || "", y = b.h.savedAt || "";
+    return x < y ? -1 : (x > y ? 1 : 0);
+  });
+}
+function spreadClass(v){ return v < 20 ? "good" : (v >= 40 ? "bad" : ""); }
+function cell(tag, text, cls){
+  var c = document.createElement(tag);
+  c.textContent = (text === null || text === undefined) ? "" : text;
+  if (cls) c.className = cls;
+  return c;
+}
+function renderDetailTable(el, items){
+  var G = { average: goalAverage() }, league = historyTab !== "practice";
+  var maxGames = 0;
+  var data = sortChrono(items).map(function(it, idx){
+    var sc = seriesScores(it.h).filter(isNum);
+    maxGames = Math.max(maxGames, sc.length);
+    return { it: it, key: it.h.id || ("legacy-" + idx), sc: sc };
+  }).filter(function(d){ return d.sc.length; });
+  if (!data.length) return;
+  function gameCls(s){ return s >= G.average ? "good" : (s < 175 ? "bad" : ""); }
+
+  var colSum = [], colN = [], pins = 0, games = 0, spreadSum = 0, spreadN = 0;
+  var bodyRows = [];
+  data.forEach(function(d){
+    var h = d.it.h, total = 0;
+    d.sc.forEach(function(s, i){ total += s; colSum[i] = (colSum[i] || 0) + s; colN[i] = (colN[i] || 0) + 1; });
+    pins += total; games += d.sc.length;
+    var avg = total / d.sc.length;
+    var tr = document.createElement("tr");
+    if (editKey === d.key) tr.className = "editing";
+    tr.appendChild(cell("td", String(h.date || "").replace(/\/\d{4}$/, "")));
+    for (var i = 0; i < maxGames; i++){
+      tr.appendChild(isNum(d.sc[i]) ? cell("td", d.sc[i], gameCls(d.sc[i])) : cell("td", ""));
+    }
+    tr.appendChild(cell("td", total, total >= 200 * d.sc.length ? "good" : (total < 175 * d.sc.length ? "bad" : "")));
+    tr.appendChild(cell("td", avg.toFixed(1), avg >= G.average ? "good" : (avg < 175 ? "bad" : "")));
+    if (d.sc.length > 1){
+      var spread = Math.max.apply(null, d.sc) - Math.min.apply(null, d.sc);
+      spreadSum += spread; spreadN++;
+      tr.appendChild(cell("td", spread, spreadClass(spread)));
+    } else { tr.appendChild(cell("td", "")); }
+    tr.appendChild(cell("td", (pins / games).toFixed(1)));
+    if (league) tr.appendChild(cell("td", isNum(h.rank) ? h.rank : ""));
+    tr.appendChild(cell("td", (h.note || "") + (d.it.local && cloud.col ? (h.note ? " · " : "") + "this device only" : ""), "note"));
+    tr.addEventListener("click", function(){
+      if (editKey === d.key){ editKey = null; editDraft = null; }
+      else { editKey = d.key; editDraft = { rank: isNum(h.rank) ? String(h.rank) : "", note: h.note || "" }; }
+      pendingDeleteKey = null;
+      renderHistory();
+    });
+    bodyRows.push(tr);
+  });
+
+  var table = document.createElement("table"); table.className = "detail-table";
+  var thead = document.createElement("thead");
+  var avgRow = document.createElement("tr"); avgRow.className = "col-avgs";
+  avgRow.appendChild(cell("td", "Avg"));
+  for (var i = 0; i < maxGames; i++) avgRow.appendChild(cell("td", colN[i] ? (colSum[i] / colN[i]).toFixed(1) : ""));
+  avgRow.appendChild(cell("td", pins, "strong"));
+  var overall = pins / games;
+  avgRow.appendChild(cell("td", overall.toFixed(1), "strong" + (overall >= G.average ? " good" : "")));
+  avgRow.appendChild(cell("td", spreadN ? (spreadSum / spreadN).toFixed(1) : ""));
+  avgRow.appendChild(cell("td", ""));
+  if (league) avgRow.appendChild(cell("td", ""));
+  avgRow.appendChild(cell("td", ""));
+  var headRow = document.createElement("tr");
+  headRow.appendChild(cell("th", league ? "League" : "Practice"));
+  for (var j = 0; j < maxGames; j++) headRow.appendChild(cell("th", "Game " + (j + 1)));
+  ["Series", "Average", "+/- HL", "Running avg"].forEach(function(t){ headRow.appendChild(cell("th", t)); });
+  if (league) headRow.appendChild(cell("th", "Rank"));
+  var noteTh = cell("th", "Notes"); noteTh.style.textAlign = "left"; headRow.appendChild(noteTh);
+  thead.appendChild(avgRow); thead.appendChild(headRow);
+  var tbody = document.createElement("tbody");
+  bodyRows.forEach(function(r){ tbody.appendChild(r); });
+  table.appendChild(thead); table.appendChild(tbody);
+  var wrap = document.createElement("div"); wrap.className = "detail-wrap";
+  wrap.appendChild(table);
+  el.appendChild(wrap);
+
+  var hint = document.createElement("p");
+  hint.style.cssText = "font-size:11px;color:#999;margin:8px 0 0;";
+  hint.textContent = "Swipe sideways for more columns. Tap a row to add " + (league ? "your rank or a note" : "a note") + ", or to delete it.";
+  el.appendChild(hint);
+
+  var editing = data.filter(function(d){ return d.key === editKey; })[0];
+  if (!editing || !editDraft) return;
+  var box = document.createElement("div"); box.className = "detail-edit";
+  var title = document.createElement("div");
+  title.style.cssText = "font-size:13px;font-weight:600;margin-bottom:8px;";
+  title.textContent = (editing.it.h.date || "") + " — " + editing.sc.join(", ");
+  box.appendChild(title);
+  if (league){
+    var rl = document.createElement("label"); rl.textContent = "League rank that week"; rl.setAttribute("for", "edit-rank");
+    var ri = document.createElement("input"); ri.type = "number"; ri.id = "edit-rank"; ri.min = "1"; ri.setAttribute("inputmode", "numeric"); ri.value = editDraft.rank;
+    ri.addEventListener("input", function(){ editDraft.rank = ri.value; });
+    box.appendChild(rl); box.appendChild(ri);
+  }
+  var nl = document.createElement("label"); nl.textContent = "Note"; nl.setAttribute("for", "edit-note");
+  var ni = document.createElement("input"); ni.type = "text"; ni.id = "edit-note"; ni.maxLength = 200; ni.value = editDraft.note;
+  ni.addEventListener("input", function(){ editDraft.note = ni.value; });
+  box.appendChild(nl); box.appendChild(ni);
+  var btns = document.createElement("div"); btns.className = "row";
+  var saveBtn = document.createElement("button"); saveBtn.className = "primary full"; saveBtn.textContent = "Save";
+  saveBtn.addEventListener("click", function(){ updateSeriesMeta(editing.it, editDraft); });
+  var delBtn = document.createElement("button"); delBtn.className = "full";
+  delBtn.style.color = "#a33";
+  delBtn.textContent = pendingDeleteKey === editing.key ? "Tap again to delete" : "Delete";
+  delBtn.addEventListener("click", function(){
+    if (pendingDeleteKey !== editing.key){ pendingDeleteKey = editing.key; renderHistory(); return; }
+    pendingDeleteKey = null; editKey = null; editDraft = null;
+    deleteSeries(editing.it);
+  });
+  [saveBtn, delBtn].forEach(function(b){ var w = document.createElement("div"); w.appendChild(b); btns.appendChild(w); });
+  box.appendChild(btns);
+  el.appendChild(box);
+}
+function updateSeriesMeta(it, draft){
+  var h = it.h;
+  var r = parseInt(draft.rank, 10);
+  var patch = { rank: (isNum(r) && r > 0) ? r : null, note: String(draft.note || "").trim().slice(0, 200) };
+  var statusEl = document.getElementById("csv-status");
+  editKey = null; editDraft = null;
+  if (it.local || !cloud.col){
+    state.seriesHistory.forEach(function(x){ if (x === h || (h.id && x.id === h.id)){ x.rank = patch.rank; x.note = patch.note; } });
+    saveState();
+    statusEl.textContent = "Saved.";
+    renderHistory();
+    return;
+  }
+  renderHistory();
+  cloud.col.doc(h.id).update(patch).then(function(){
+    statusEl.textContent = "Saved.";
+  }, function(){
+    statusEl.textContent = "Couldn't save that change just now. Try again in a moment.";
+  });
+}
+var pendingDeleteKey = null;
+function deleteSeries(it){
+  var h = it.h;
+  var statusEl = document.getElementById("csv-status");
+  statusEl.textContent = "";
+  if (it.local || !cloud.col){
+    state.seriesHistory = state.seriesHistory.filter(function(x){ return x !== h && !(h.id && x.id === h.id); });
+    saveState();
+    renderHistory();
+    return;
+  }
+  if (state.savedSeriesId === h.id) state.savedSeriesId = null;
+  cloud.col.doc(h.id).delete().then(function(){
+    statusEl.textContent = "Series deleted.";
+  }, function(){
+    statusEl.textContent = "Couldn't delete that series just now. Try again in a moment.";
+    renderHistory();
+  });
+}
+function applyPracticeMode(){
+  document.getElementById("practice-banner").classList.toggle("hidden", !state.practice);
+  document.getElementById("practice-toggle").checked = !!state.practice;
+}
+document.getElementById("practice-toggle").addEventListener("change", function(e){
+  state.practice = e.target.checked;
+  document.getElementById("save-status").textContent = "";
+  saveState();
+  applyPracticeMode();
+});
+function hasFrameDetail(h){
+  return !!(h.games && h.games.length && typeof h.games[0] === "object" && h.games[0].frames);
+}
+function csvCell(v){
+  var s = (v === null || v === undefined) ? "" : String(v);
+  return /[",\n\r]/.test(s) ? "\"" + s.replace(/"/g, "\"\"") + "\"" : s;
+}
+function buildSeriesCsv(){
+  var rows = [["series_id","session_type","saved_at","date","center","lanes","game","game_score","frame","ball","pins_knocked","mark","pins_left_standing","ball_used","feet_board","arrow_board","preset_notes","note"]];
+  allSeries().forEach(function(it){
+    var h = it.h;
+    if (!hasFrameDetail(h)) return;
+    h.games.forEach(function(g, gi){
+      var score = g.finalScore !== null && g.finalScore !== undefined ? g.finalScore : (g.stats ? g.stats.finalScore : "");
+      g.frames.forEach(function(f, fi){
+        var marks = frameMarksForIndex(g.frames, fi);
+        (f.balls || []).forEach(function(b, bi){
+          if (!b) return;
+          var standing = ((f._pinSets && f._pinSets[bi]) || []).map(function(i){ return i + 1; }).sort(function(a, c){ return a - c; });
+          rows.push([
+            h.id || "", seriesType(h), h.savedAt || "", h.date || "", h.center || "", h.lanes || "",
+            gi + 1, score, fi + 1, bi + 1, b.knocked, marks[bi] || "",
+            standing.join(" "), b.ballUsed || "",
+            (f.lines && f.lines[bi] && hasVal(f.lines[bi].feet)) ? f.lines[bi].feet : (hasVal(f.feet) ? f.feet : ""),
+            (f.lines && f.lines[bi] && hasVal(f.lines[bi].arrow)) ? f.lines[bi].arrow : (hasVal(f.arrow) ? f.arrow : ""),
+            (f.presetNotes || []).join("; "), f.note || ""
+          ]);
+        });
+      });
+    });
+  });
+  return rows.map(function(r){ return r.map(csvCell).join(","); }).join("\r\n") + "\r\n";
+}
+document.getElementById("export-csv-btn").addEventListener("click", function(){
+  var statusEl = document.getElementById("csv-status");
+  if (!cloud.dl) return;
+  statusEl.textContent = "";
+  cloud.dl.save({ filename: "bowling-bro-series.csv", data: buildSeriesCsv() }).then(function(){
+    statusEl.textContent = "CSV saved.";
+  }, function(e){
+    statusEl.textContent = (e && e.code === "declined") ? "" : "Couldn't save the CSV just now. Try again in a moment.";
+  });
+});
+// ---------- header menu ----------
+var menuBtn = document.getElementById("menu-btn"), menuPanel = document.getElementById("menu-panel");
+function closeMenu(){ menuPanel.classList.add("hidden"); menuBtn.setAttribute("aria-expanded", "false"); }
+menuBtn.addEventListener("click", function(e){
+  e.stopPropagation();
+  var opening = menuPanel.classList.contains("hidden");
+  if (!opening){ closeMenu(); return; }
+  var onGame = !document.getElementById("view-game").classList.contains("hidden");
+  document.getElementById("menu-game-btn").classList.toggle("hidden", onGame || !(state.setupDone && state.games.length));
+  menuPanel.classList.remove("hidden");
+  menuBtn.setAttribute("aria-expanded", "true");
+});
+document.addEventListener("click", closeMenu);
+document.getElementById("menu-game-btn").addEventListener("click", function(){ returnView = null; goToView("game"); });
+document.getElementById("menu-league-btn").addEventListener("click", function(){ historyTab = "league"; editKey = null; goToView("history"); });
+document.getElementById("menu-practice-btn").addEventListener("click", function(){ historyTab = "practice"; editKey = null; goToView("history"); });
+document.getElementById("history-tab-league").addEventListener("click", function(){ setHistoryTab("league"); });
+document.getElementById("history-tab-practice").addEventListener("click", function(){ setHistoryTab("practice"); });
+document.getElementById("view-history-link").addEventListener("click", function(){
+  historyTab = sessionType();
+  document.getElementById("csv-status").textContent = "";
+  renderHistory();
+  showView("history");
+});
+document.getElementById("history-back-btn").addEventListener("click", function(){
+  showView(state.setupDone && state.games.length && !allGamesFreshlyReset() ? "game" : "setup");
+});
+function allGamesFreshlyReset(){ return state.games.length===0; }
+
+// ---------- init ----------
+function initSetupFields(){
+  document.getElementById("setup-center").value = state.center;
+  document.getElementById("setup-lanes").value = state.lanes;
+  document.getElementById("setup-feet").value = state.startFeet;
+  document.getElementById("setup-arrow").value = state.startArrow;
+  renderArsenalUI();
+  updateSetupPrimaryButton();
+  applySessionType();
+}
+initSetupFields();
+applyPracticeMode();
+initCloud();
+if (state.setupDone && state.games.length){
+  curGameIdx = state.games.length-1;
+  var g = state.games[curGameIdx];
+  curFrame = 0;
+  for (var i=0;i<10;i++){ if (!isFrameDone(g.frames[i], i)){ curFrame=i; break; } if (i===9) curFrame=9; }
+  curBall = g.frames[curFrame].balls.length;
+  if (curFrame===9 && curBall>0){
+    var nums0 = frameNumeric(g.frames[9]);
+    if (nums0.length===1) curBall=1; else if(nums0.length===2) curBall=2; else curBall=0;
+  }
+  enterGameView();
+} else {
+  showView("setup");
+}
+function isFrameDone(f, idx){
+  var nums = frameNumeric(f);
+  if (idx<9) return nums.length===2 || (nums.length===1 && nums[0]===10);
+  return nums.length===3 || (nums.length===2 && nums[0]!==10 && nums[0]+nums[1]!==10);
+}
+})();
+</script>
+</body>
+</html>
