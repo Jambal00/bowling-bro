@@ -215,7 +215,6 @@ button.preset-chip { color: #1a1a1a; }
       <input type="text" id="wiz-name" autocomplete="name" maxlength="80" placeholder="Shown on your stats" />
       <label for="wiz-hand">Bowling hand</label>
       <select id="wiz-hand">
-        <option value="">Prefer not to say</option>
         <option value="right">Right-handed</option>
         <option value="left">Left-handed</option>
         <option value="two">Two-handed</option>
@@ -533,7 +532,6 @@ button.preset-chip { color: #1a1a1a; }
       <input type="text" id="profile-email" inputmode="email" autocomplete="email" maxlength="120" />
       <label for="profile-hand">Bowling hand</label>
       <select id="profile-hand">
-        <option value="">Prefer not to say</option>
         <option value="right">Right-handed</option>
         <option value="left">Left-handed</option>
         <option value="two">Two-handed</option>
@@ -1730,6 +1728,7 @@ var PROFILE_KEYS = ["name", "email", "hand", "homeCenter", "league", "team"];
 function cleanProfile(src){
   var out = {};
   PROFILE_KEYS.forEach(function(k){ out[k] = (src && typeof src[k] === "string") ? src[k].slice(0, 120) : ""; });
+  if (["right", "left", "two"].indexOf(out.hand) < 0) out.hand = "right";   // right-handed unless the bowler says otherwise
   return out;
 }
 var profile = cleanProfile(state.profile);
@@ -1808,7 +1807,7 @@ function openWizard(isNewBowler){
   var avgGoal = presetGoal("avg");
   wiz = { arsenal: (state.arsenal || []).slice(), strike: state.strikeBall || "", spare: state.spareBall || "" };
   document.getElementById("wiz-name").value = profile.name || "";
-  document.getElementById("wiz-hand").value = profile.hand || "";
+  document.getElementById("wiz-hand").value = profile.hand || "right";
   document.getElementById("wiz-center").value = state.center || profile.homeCenter || "";
   document.getElementById("wiz-ball-input").value = "";
   document.getElementById("wiz-avg").value = avgGoal ? avgGoal.target : "";
