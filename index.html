@@ -178,9 +178,9 @@ button.preset-chip { color: #1a1a1a; }
     <div class="card">
       <label for="auth-email">Email</label>
       <input type="text" id="auth-email" inputmode="email" autocomplete="email" autocapitalize="off" />
-      <button class="primary full" id="auth-send-btn">Email me a sign-in link</button>
+      <button class="primary full" id="auth-send-btn">Email me a sign-in code</button>
       <div id="auth-code-row" class="hidden" style="margin-top:14px;">
-        <label for="auth-code">Code from the email (optional)</label>
+        <label for="auth-code">Code from the email</label>
         <input type="text" id="auth-code" inputmode="numeric" autocomplete="one-time-code" />
         <button class="full" id="auth-verify-btn">Sign in with code</button>
       </div>
@@ -1370,7 +1370,7 @@ function initCloud(){
     statusEl.textContent = "Sending…";
     sb.auth.signInWithOtp({ email: email(), options: { emailRedirectTo: authRedirect() } }).then(function(r){
       if (r.error){ statusEl.textContent = "Couldn't send the email: " + r.error.message; return; }
-      statusEl.textContent = "Check your email and tap the sign-in link. If the email shows a code, you can type it below instead.";
+      statusEl.textContent = "Check your email for a sign-in code and enter it below. If you don't see it, check your spam or junk folder. You can also tap the link in the email.";
       document.getElementById("auth-code-row").classList.remove("hidden");
     }, function(){ statusEl.textContent = "Couldn't send the email just now. Try again in a moment."; });
   });
