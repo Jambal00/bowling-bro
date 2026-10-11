@@ -435,9 +435,6 @@ button.preset-chip { color: #1a1a1a; }
         <div><label>Games</label><div id="season-games" class="stat-sm"></div></div>
         <div><label id="season-nights-label">Weeks</label><div id="season-nights" class="stat-sm"></div></div>
       </div>
-      <div style="margin-top:10px;">
-        <label>Consistency (average high-low spread per series)</label><div id="season-spread" class="stat-sm"></div>
-      </div>
     </div>
     <div class="card hidden" id="chart-card">
       <h2 id="chart-title">Trend</h2>
@@ -2065,9 +2062,6 @@ function renderSeason(items){
   document.getElementById("season-high-game").textContent = s.highGame;
   document.getElementById("season-high-series").textContent = s.highSeries;
   document.getElementById("season-nights").textContent = s.totals.length;
-  document.getElementById("season-spread").textContent = s.spreads.length
-    ? s.avgSpread.toFixed(1) + " pins · tightest " + Math.min.apply(null, s.spreads) + ", widest " + Math.max.apply(null, s.spreads)
-    : "—";
 
   var list = document.getElementById("goals-list");
   list.innerHTML = "";
