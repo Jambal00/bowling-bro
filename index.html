@@ -116,6 +116,8 @@ body.in-game .header { margin-bottom: 6px; }
 button.preset-chip { color: #1a1a1a; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: #444; margin-bottom: 4px; }
 .chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend-stat { flex: 1 1 0; min-width: 76px; margin-bottom: 4px; }
+.legend-stat-sub { font-size: 11px; color: #6b6b6b; }
 .goal-edit { border-bottom: 1px solid #eee; padding: 0 0 2px; margin-bottom: 12px; }
 .chart-range { display: inline-flex; border: 1px solid #d8d5c8; border-radius: 999px; overflow: hidden; margin: 0 0 8px; }
 .chart-range button { border: none; border-radius: 0; background: #fff; padding: 5px 12px; font-size: 12px; color: #444; }
@@ -2193,6 +2195,7 @@ function renderChart(items){
 
   // Range switch, offered only once there are more weeks than fit comfortably. The running
   // average above is already worked out over every week, so trimming here only changes the view.
+  var fullData = data;   // every week, for figures that should not change with the range switch
   var rangeEl = document.getElementById("chart-range"), longSeason = data.length > CHART_RECENT;
   rangeEl.classList.toggle("hidden", !longSeason);
   rangeEl.innerHTML = "";
@@ -2229,8 +2232,20 @@ function renderChart(items){
     if (!practiceTab && goalAverage() !== null) refs.push({ v: goalAverage(), text: "goal " + fmtNum(goalAverage()), color: CHART_C.goal });
     var maxGames = 0;
     data.forEach(function(d){ maxGames = Math.max(maxGames, d.games.length); });
-    for (var lg0 = 0; lg0 < Math.min(maxGames, GAME_COLORS.length); lg0++) legend.push(["line", gameColor(lg0), "Game " + (lg0 + 1)]);
-    if (maxGames > GAME_COLORS.length) legend.push(["line", CHART_C.extra, "Game " + (GAME_COLORS.length + 1) + (maxGames > GAME_COLORS.length + 1 ? "+" : "")]);
+    // each game's average to date sits with its legend entry; it covers the whole season
+    // whichever range is showing, and games past the fourth share one figure like they share a colour
+    var gSum = [], gN = [];
+    fullData.forEach(function(d){
+      d.games.forEach(function(sc, gi){
+        if (!isNum(sc)) return;
+        var slot = Math.min(gi, GAME_COLORS.length);
+        gSum[slot] = (gSum[slot] || 0) + sc; gN[slot] = (gN[slot] || 0) + 1;
+      });
+    });
+    function gameAvgText(slot){ return gN[slot] ? (gSum[slot] / gN[slot]).toFixed(1) : "—"; }
+    var avgNote = practiceTab ? "average" : "season avg";
+    for (var lg0 = 0; lg0 < Math.min(maxGames, GAME_COLORS.length); lg0++) legend.push(["line", gameColor(lg0), "Game " + (lg0 + 1), gameAvgText(lg0), avgNote]);
+    if (maxGames > GAME_COLORS.length) legend.push(["line", CHART_C.extra, "Game " + (GAME_COLORS.length + 1) + (maxGames > GAME_COLORS.length + 1 ? "+" : ""), gameAvgText(GAME_COLORS.length), avgNote]);
   } else if (chartView === "running"){
     title = "Averages by " + (practiceTab ? "session" : "week");
     data.forEach(function(d){ vals.push(d.run, d.avg); });
@@ -2356,6 +2371,15 @@ function renderChart(items){
     else sw.appendChild(svgEl("line", { x1: 1, x2: 21, y1: 5, y2: 5, stroke: item[1], "stroke-width": item[0] === "line" ? 2 : (item[0] === "thin" ? 1 : 1.5), "stroke-dasharray": item[0] === "dash" ? "5 3" : "" }));
     wrap.appendChild(sw);
     wrap.appendChild(document.createTextNode(item[2]));
+    if (item[3] !== undefined){
+      // legend entry with a figure: the key on top, the number under it
+      var tile = document.createElement("div"); tile.className = "legend-stat";
+      var val = document.createElement("div"); val.className = "stat-sm"; val.textContent = item[3];
+      var sub = document.createElement("div"); sub.className = "legend-stat-sub"; sub.textContent = item[4] || "";
+      tile.appendChild(wrap); tile.appendChild(val); tile.appendChild(sub);
+      lg.appendChild(tile);
+      return;
+    }
     lg.appendChild(wrap);
   });
 }
