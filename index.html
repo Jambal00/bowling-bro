@@ -119,6 +119,9 @@ button.preset-chip { color: #1a1a1a; }
 .legend-stat { flex: 1 1 0; min-width: 76px; margin-bottom: 4px; }
 .legend-stat-sub { font-size: 11px; color: #6b6b6b; }
 .goal-edit { border-bottom: 1px solid #eee; padding: 0 0 2px; margin-bottom: 12px; }
+.radio-row { display: flex; gap: 28px; margin: 2px 0 12px; }
+.radio-row label { display: flex; align-items: center; gap: 8px; font-size: 15px; color: #1a1a1a; margin: 0; cursor: pointer; }
+.radio-row input { width: 20px; height: 20px; margin: 0; accent-color: #2f6fed; }
 .share-parts label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #1a1a1a; margin: 0; padding: 5px 0; }
 .share-parts input { width: 18px; height: 18px; margin: 0; }
 .chart-range { display: inline-flex; border: 1px solid #d8d5c8; border-radius: 999px; overflow: hidden; margin: 0 0 8px; }
@@ -310,18 +313,18 @@ button.preset-chip { color: #1a1a1a; }
   <div id="view-setup">
     <div class="card">
       <h2>Tonight's setup</h2>
-      <label for="setup-session-type">What are you bowling?</label>
-      <select id="setup-session-type">
-        <option value="league">League night</option>
-        <option value="practice">Practice session</option>
-      </select>
+      <label id="setup-session-label">What are you bowling?</label>
+      <div class="radio-row" role="radiogroup" aria-labelledby="setup-session-label">
+        <label><input type="radio" name="setup-session-type" id="setup-type-league" value="league" checked /> League</label>
+        <label><input type="radio" name="setup-session-type" id="setup-type-practice" value="practice" /> Practice</label>
+      </div>
       <div id="setup-mode-wrap">
-        <label for="setup-score-mode">How are you scoring tonight?</label>
-        <select id="setup-score-mode">
-          <option value="frames">Frame by frame (full shot stats)</option>
-          <option value="scores">Game scores only</option>
-        </select>
-        <p id="setup-mode-note" class="hidden" style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">You'll type in each game's final score as the night goes on. Strike %, spare % and the other shot stats aren't tracked for this night.</p>
+        <label id="setup-mode-label">How are you scoring tonight?</label>
+        <div class="radio-row" role="radiogroup" aria-labelledby="setup-mode-label" style="margin-bottom:6px;">
+          <label><input type="radio" name="setup-score-mode" id="setup-mode-frames" value="frames" checked /> Frame by frame</label>
+          <label><input type="radio" name="setup-score-mode" id="setup-mode-scores" value="scores" /> Game scores only</label>
+        </div>
+        <p id="setup-mode-note" style="font-size:12px;color:#6b6b6b;margin:0 0 12px;line-height:1.4;"></p>
       </div>
       <label>Bowling center</label>
       <input type="text" id="setup-center" placeholder="Where you're bowling" />
@@ -1609,16 +1612,19 @@ function sessionType(){ return state.sessionType === "practice" ? "practice" : "
 function seriesType(h){ return h && h.type === "practice" ? "practice" : "league"; }
 function applySessionType(){
   var practice = sessionType() === "practice";
-  document.getElementById("setup-session-type").value = sessionType();
+  document.getElementById("setup-type-league").checked = !practice;
+  document.getElementById("setup-type-practice").checked = practice;
   document.getElementById("save-history-btn").textContent = practice ? "Save to practice log" : "Save to season history";
 }
-document.getElementById("setup-session-type").addEventListener("change", function(e){
+["setup-type-league", "setup-type-practice"].forEach(function(id){ document.getElementById(id).addEventListener("change", sessionTypeChanged); });
+function sessionTypeChanged(e){
+  if (!e.target.checked) return;
   state.sessionType = e.target.value === "practice" ? "practice" : "league";
   state.savedSeriesId = state.savedSeriesId; // same session keeps its id; saving again re-files it under the new type
   document.getElementById("save-status").textContent = "";
   saveState();
   applySessionType();
-});
+}
 var historyTab = "league";
 function setHistoryTab(tab){
   historyTab = tab === "practice" ? "practice" : "league";
@@ -1764,17 +1770,21 @@ document.getElementById("night-done-btn").addEventListener("click", function(){
   // everything is already saved; clear tonight and show where it landed
   var wasPractice = sessionType() === "practice";
   state.night = null; state.lanes = "";
+  state.sessionType = "league";   // the next night starts on League again
+  applySessionType();
   document.getElementById("setup-lanes").value = "";
   returnView = null;
   saveState();
   historyTab = wasPractice ? "practice" : "league"; reportTab = "history";
   renderHistory(); showView("history");
 });
-document.getElementById("setup-score-mode").addEventListener("change", function(e){
+["setup-mode-frames", "setup-mode-scores"].forEach(function(id){ document.getElementById(id).addEventListener("change", scoreModeChanged); });
+function scoreModeChanged(e){
+  if (!e.target.checked) return;
   state.scoreMode = e.target.value === "scores" ? "scores" : "frames";
   saveState();
   updateSetupPrimaryButton();
-});
+}
 function saveSeriesLocal(doc){
   var replaced = false;
   state.seriesHistory = state.seriesHistory.map(function(h){
@@ -1809,6 +1819,8 @@ document.getElementById("save-history-btn").addEventListener("click", function()
   });
 });
 function resetSeries(){
+  state.sessionType = "league";   // every new night starts on League; Practice is chosen each time
+  applySessionType();
   state.night = null;
   state.savedSeriesId = null;
   document.getElementById("save-status").textContent = "";
@@ -1838,10 +1850,13 @@ function updateSetupPrimaryButton(){
   }
   // the bag, default balls and starting line only matter when scoring frame by frame
   document.getElementById("setup-frames-only").classList.toggle("hidden", scoreMode() === "scores");
-  document.getElementById("setup-mode-note").classList.toggle("hidden", scoreMode() !== "scores");
+  document.getElementById("setup-mode-note").textContent = scoreMode() === "scores"
+    ? "You'll type in each game's final score as the night goes on. Strike %, spare % and the other shot stats aren't tracked for this night."
+    : "Tap the pins after every ball. Gives you strike %, spare % and the other shot stats.";
   // the choice is made at the start of a night; it can't change part-way through
   document.getElementById("setup-mode-wrap").classList.toggle("hidden", !!returnView);
-  document.getElementById("setup-score-mode").value = scoreMode();
+  document.getElementById("setup-mode-frames").checked = scoreMode() === "frames";
+  document.getElementById("setup-mode-scores").checked = scoreMode() === "scores";
 }
 document.getElementById("header-setup-btn").addEventListener("click", function(){
   var activeViewName = views.filter(function(v){ return !document.getElementById("view-"+v).classList.contains("hidden"); })[0];
