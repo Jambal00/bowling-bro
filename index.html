@@ -315,12 +315,21 @@ button.preset-chip { color: #1a1a1a; }
         <option value="league">League night</option>
         <option value="practice">Practice session</option>
       </select>
+      <div id="setup-mode-wrap">
+        <label for="setup-score-mode">How are you scoring tonight?</label>
+        <select id="setup-score-mode">
+          <option value="frames">Frame by frame (full shot stats)</option>
+          <option value="scores">Game scores only</option>
+        </select>
+        <p id="setup-mode-note" class="hidden" style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">You'll type in each game's final score as the night goes on. Strike %, spare % and the other shot stats aren't tracked for this night.</p>
+      </div>
       <label>Bowling center</label>
       <input type="text" id="setup-center" placeholder="Where you're bowling" />
       <label>Lanes (enter once you're assigned)</label>
       <input type="text" id="setup-lanes" placeholder="e.g. 7 &amp; 8" />
     </div>
 
+    <div id="setup-frames-only">
     <div class="card">
       <h2>Arsenal for tonight</h2>
       <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Tap the balls you brought tonight. <span id="arsenal-count"></span></p>
@@ -361,18 +370,15 @@ button.preset-chip { color: #1a1a1a; }
       </div>
     </div>
 
-    <div class="card">
-      <h2>Test mode</h2>
-      <div style="display:flex;align-items:flex-start;gap:10px;">
-        <input type="checkbox" id="practice-toggle" style="width:20px;height:20px;margin:1px 0 0;flex:0 0 auto;" />
-        <label for="practice-toggle" style="font-size:13px;color:#1a1a1a;margin:0;">Just trying out the app — don't save anything to my league or practice history</label>
-      </div>
     </div>
-
     <button class="primary full" id="start-series-btn">Start Game 1</button>
     <div style="text-align:center;margin-top:10px;display:flex;justify-content:center;gap:16px;">
       <button class="small-link" id="view-history-link">See season history</button>
       <button class="small-link" id="reset-series-btn" style="color:#a33;">Clear games &amp; start fresh</button>
+    </div>
+    <div style="display:flex;align-items:flex-start;justify-content:center;gap:8px;margin-top:18px;">
+      <input type="checkbox" id="practice-toggle" style="width:16px;height:16px;margin:1px 0 0;flex:0 0 auto;" />
+      <label for="practice-toggle" style="font-size:12px;color:#8a8a8a;margin:0;line-height:1.4;">Test mode: just trying out the app, so don't save anything to my league or practice history</label>
     </div>
   </div>
 
@@ -449,6 +455,31 @@ button.preset-chip { color: #1a1a1a; }
       <button class="primary full" id="next-game-btn">Start next game</button>
       <div style="margin-top:8px;"><button class="full" id="end-series-btn">End series &amp; see summary</button></div>
     </div>
+  </div>
+
+  <!-- SCORES-ONLY VIEW -->
+  <div id="view-scores" class="hidden">
+    <div class="card">
+      <h2 id="night-title">Tonight's scores</h2>
+      <p id="night-sub" style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;"></p>
+      <label for="night-date">Date bowled</label>
+      <input type="date" id="night-date" style="width:100%;font-size:15px;padding:9px 10px;border-radius:8px;border:1px solid #d8d5c8;background:#fbfbf7;color:#1a1a1a;margin-bottom:10px;" />
+      <div id="night-games"></div>
+      <div class="row" style="align-items:flex-end;margin-top:4px;">
+        <div><label for="night-add-input" id="night-add-label">Game 1 score</label><input type="number" id="night-add-input" inputmode="numeric" min="0" max="300" placeholder="0 to 300" style="margin-bottom:0;" /></div>
+        <div style="flex:0 0 auto;"><button class="primary" id="night-add-btn">Add game</button></div>
+      </div>
+      <p id="night-status" style="font-size:12px;color:#444;margin:10px 0 0;min-height:16px;line-height:1.4;"></p>
+    </div>
+    <div class="card">
+      <div class="row">
+        <div><label>Series total</label><div id="night-total" class="stat-lg"></div></div>
+        <div><label>Average</label><div id="night-avg" class="stat-lg"></div></div>
+        <div><label>Games</label><div id="night-count" class="stat-lg"></div></div>
+      </div>
+    </div>
+    <button class="primary full" id="night-done-btn">Done for tonight</button>
+    <p style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0 0;line-height:1.4;">Each score is saved as you add it. You can close the app between games.</p>
   </div>
 
   <!-- SUMMARY VIEW -->
@@ -644,14 +675,14 @@ var history = [];
 var returnView = null;
 
 // ---------- view switching ----------
-var views = ["setup","game","summary","history","profile"];
+var views = ["setup","game","scores","summary","history","profile"];
 function showView(name){
   views.forEach(function(v){ document.getElementById("view-"+v).classList.toggle("hidden", v!==name); });
   document.body.classList.toggle("in-game", name==="game");
   document.getElementById("header-setup-btn").classList.toggle("hidden", name==="setup");
   document.getElementById("header-profile-btn").classList.toggle("hidden", name==="profile");
   if (name!=="game"){
-    var labels = {setup:"Setup", summary:"Series Summary", history:"Season History", profile:"Profile & Goals"};
+    var labels = {setup:"Setup", scores:"Game Scores", summary:"Series Summary", history:"Season History", profile:"Profile & Goals"};
     document.getElementById("game-label").textContent = labels[name] || "";
   }
 }
@@ -748,11 +779,22 @@ document.getElementById("start-series-btn").addEventListener("click", function()
   if (returnView){
     saveState();
     var target = returnView; returnView = null;
-    if (target === "game"){ showView("game"); renderBallUsedOptions(); refreshGameScreen(); }
+    if (target === "scores"){ showNight(); }
+    else if (target === "game"){ showView("game"); renderBallUsedOptions(); refreshGameScreen(); }
     else if (target === "summary"){ showSummary(); }
     else { showView(target); }
     return;
   }
+  if (scoreMode() === "scores"){
+    // game scores only: no frames, just a list of final scores for the night
+    state.setupDone = true;
+    state.games = [];
+    state.night = { id: "s" + Date.now().toString(36), date: todayIso(), scores: [] };
+    saveState();
+    showNight();
+    return;
+  }
+  state.night = null;
   state.setupDone = true;
   state.savedSeriesId = null;
   document.getElementById("save-status").textContent = "";
@@ -1606,6 +1648,133 @@ function buildSeriesDoc(){
     })
   };
 }
+// ---------- game-scores-only nights ----------
+// A bowler can skip frame-by-frame tracking for a night and just enter each game's final score.
+// The night is saved after every score, so the season report keeps up as the night goes on.
+function scoreMode(){ return state.scoreMode === "scores" ? "scores" : "frames"; }
+function nightActive(){ return !!(state.setupDone && state.night && Array.isArray(state.night.scores)); }
+function todayIso(){ var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+function nightDoc(){
+  var n = state.night, parts = n.date.split("-"), total = 0;
+  n.scores.forEach(function(x){ total += x; });
+  // a night entered for an earlier date files under that date; tonight keeps the current time
+  var when = n.date === todayIso() ? new Date() : new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 0, 0);
+  return {
+    schema: 1, id: n.id, type: sessionType(),
+    savedAt: when.toISOString(),
+    date: Number(parts[1]) + "/" + Number(parts[2]) + "/" + parts[0],
+    center: state.center, lanes: state.lanes,
+    scores: n.scores.slice(), total: total,
+    average: n.scores.length ? (total / n.scores.length).toFixed(1) : "0.0",
+    scoreOnly: true
+  };
+}
+var nightWrite = Promise.resolve();
+function saveNight(){
+  var statusEl = document.getElementById("night-status");
+  saveState();
+  if (!state.night.scores.length){
+    // every game was removed: take tonight's entry back out so the report doesn't keep stale scores
+    statusEl.textContent = "";
+    if (state.night.saved){
+      var goneId = state.night.id;
+      state.night.saved = false;
+      state.seriesHistory = state.seriesHistory.filter(function(h){ return h.id !== goneId; });
+      saveState();
+      if (cloud.col) nightWrite = nightWrite.then(function(){ return cloud.col.doc(goneId).delete(); }).then(null, function(){});
+      renderHistory();
+    }
+    return;
+  }
+  if (state.practice){ statusEl.textContent = "Test mode is on, so these scores are not being saved."; return; }
+  state.night.saved = true; saveState();
+  var doc = nightDoc(), what = plural(doc.scores.length, "game") + " saved to your " + (doc.type === "practice" ? "practice log" : "season history") + ".";
+  if (!cloud.col){ saveSeriesLocal(doc); statusEl.textContent = what + " (On this device only.)"; renderHistory(); return; }
+  statusEl.textContent = "Saving…";
+  nightWrite = nightWrite.then(function(){ return cloud.col.doc(doc.id).set(doc); }).then(function(){
+    statusEl.textContent = what;
+  }, function(){
+    saveSeriesLocal(doc);
+    statusEl.textContent = "Couldn't reach your account, so this is saved on this device for now. It will try again with your next score.";
+  });
+}
+function showNight(){
+  renderNight();
+  showView("scores");
+}
+function renderNight(){
+  var n = state.night, practice = sessionType() === "practice";
+  document.getElementById("night-title").textContent = practice ? "Practice scores" : "Tonight's scores";
+  document.getElementById("night-sub").textContent = [practice ? "Practice session" : "League night", state.center, state.lanes ? "Lanes " + state.lanes : ""].filter(Boolean).join(" · ");
+  var dateEl = document.getElementById("night-date");
+  dateEl.max = todayIso(); dateEl.value = n.date;
+  var list = document.getElementById("night-games"); list.innerHTML = "";
+  n.scores.forEach(function(sc, idx){
+    var row = document.createElement("div"); row.className = "row"; row.style.alignItems = "flex-end";
+    var w = document.createElement("div");
+    var l = document.createElement("label"); l.textContent = "Game " + (idx + 1); l.setAttribute("for", "night-game-" + idx);
+    var inp = document.createElement("input"); inp.type = "number"; inp.id = "night-game-" + idx;
+    inp.min = "0"; inp.max = "300"; inp.setAttribute("inputmode", "numeric"); inp.value = sc;
+    inp.addEventListener("change", function(){
+      var v = cleanScore(inp.value);
+      if (v === null){ inp.value = n.scores[idx]; return; }   // not a valid score: put the old one back
+      n.scores[idx] = v; inp.value = v;
+      renderNightTotals(); saveNight();
+    });
+    w.appendChild(l); w.appendChild(inp);
+    var rw = document.createElement("div"); rw.style.flex = "0 0 auto";
+    var rm = document.createElement("button"); rm.textContent = "Remove"; rm.style.cssText = "color:#a33;margin-bottom:10px;";
+    rm.addEventListener("click", function(){ n.scores.splice(idx, 1); renderNight(); saveNight(); });
+    rw.appendChild(rm);
+    row.appendChild(w); row.appendChild(rw);
+    list.appendChild(row);
+  });
+  document.getElementById("night-add-label").textContent = "Game " + (n.scores.length + 1) + " score";
+  renderNightTotals();
+}
+function renderNightTotals(){
+  var sc = state.night.scores, total = 0;
+  sc.forEach(function(x){ total += x; });
+  document.getElementById("night-total").textContent = sc.length ? total : "—";
+  document.getElementById("night-avg").textContent = sc.length ? (total / sc.length).toFixed(1) : "—";
+  document.getElementById("night-count").textContent = sc.length;
+}
+// a bowling score is a whole number from 0 to 300; anything else is rejected
+function cleanScore(raw){
+  if (raw === "" || raw === null) return null;
+  var v = Number(raw);
+  return (isFinite(v) && v >= 0 && v <= 300 && Math.floor(v) === v) ? v : null;
+}
+function nightAdd(){
+  var inp = document.getElementById("night-add-input"), v = cleanScore(inp.value);
+  if (v === null){ document.getElementById("night-status").textContent = "Enter a score from 0 to 300."; return; }
+  state.night.scores.push(v);
+  inp.value = "";
+  renderNight(); saveNight();
+}
+document.getElementById("night-add-btn").addEventListener("click", nightAdd);
+document.getElementById("night-add-input").addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); nightAdd(); } });
+document.getElementById("night-date").addEventListener("change", function(e){
+  var v = e.target.value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || v > todayIso()){ e.target.value = state.night.date; return; }
+  state.night.date = v;
+  saveNight();
+});
+document.getElementById("night-done-btn").addEventListener("click", function(){
+  // everything is already saved; clear tonight and show where it landed
+  var wasPractice = sessionType() === "practice";
+  state.night = null; state.lanes = "";
+  document.getElementById("setup-lanes").value = "";
+  returnView = null;
+  saveState();
+  historyTab = wasPractice ? "practice" : "league"; reportTab = "history";
+  renderHistory(); showView("history");
+});
+document.getElementById("setup-score-mode").addEventListener("change", function(e){
+  state.scoreMode = e.target.value === "scores" ? "scores" : "frames";
+  saveState();
+  updateSetupPrimaryButton();
+});
 function saveSeriesLocal(doc){
   var replaced = false;
   state.seriesHistory = state.seriesHistory.map(function(h){
@@ -1640,6 +1809,7 @@ document.getElementById("save-history-btn").addEventListener("click", function()
   });
 });
 function resetSeries(){
+  state.night = null;
   state.savedSeriesId = null;
   document.getElementById("save-status").textContent = "";
   state.games = [];
@@ -1662,17 +1832,24 @@ document.getElementById("reset-series-btn").addEventListener("click", function()
 function updateSetupPrimaryButton(){
   var btn = document.getElementById("start-series-btn");
   if (returnView){
-    btn.textContent = "Save & back to " + returnView;
+    btn.textContent = "Save & back to " + (returnView === "scores" ? "your scores" : returnView);
   } else {
-    btn.textContent = "Start Game 1";
+    btn.textContent = scoreMode() === "scores" ? "Enter game scores" : "Start Game 1";
   }
+  // the bag, default balls and starting line only matter when scoring frame by frame
+  document.getElementById("setup-frames-only").classList.toggle("hidden", scoreMode() === "scores");
+  document.getElementById("setup-mode-note").classList.toggle("hidden", scoreMode() !== "scores");
+  // the choice is made at the start of a night; it can't change part-way through
+  document.getElementById("setup-mode-wrap").classList.toggle("hidden", !!returnView);
+  document.getElementById("setup-score-mode").value = scoreMode();
 }
 document.getElementById("header-setup-btn").addEventListener("click", function(){
   var activeViewName = views.filter(function(v){ return !document.getElementById("view-"+v).classList.contains("hidden"); })[0];
   if (activeViewName === "setup") return;
   // only offer "Save & back" when a series is actually under way; from the reports or
   // profile, setup opens ready to start a new series
-  returnView = ((activeViewName === "game" || activeViewName === "summary") && state.games.length) ? activeViewName : null;
+  returnView = ((activeViewName === "game" || activeViewName === "summary") && state.games.length) ? activeViewName
+    : ((activeViewName === "scores" && nightActive()) ? "scores" : null);
   initSetupFields();
   showView("setup");
 });
@@ -1808,7 +1985,8 @@ function fillProfileInputs(){
   });
 }
 function goToView(name){
-  if (name === "game" && state.games.length){ showView("game"); renderBallUsedOptions(); refreshGameScreen(); }
+  if (name === "game" && nightActive()){ showNight(); }
+  else if (name === "game" && state.games.length){ showView("game"); renderBallUsedOptions(); refreshGameScreen(); }
   else if (name === "summary" && state.games.length){ showSummary(); }
   else if (name === "history"){ renderHistory(); showView("history"); }
   else { initSetupFields(); showView("setup"); }
@@ -3144,7 +3322,7 @@ menuBtn.addEventListener("click", function(e){
   var opening = menuPanel.classList.contains("hidden");
   if (!opening){ closeMenu(); return; }
   var onGame = !document.getElementById("view-game").classList.contains("hidden");
-  document.getElementById("menu-game-btn").classList.toggle("hidden", onGame || !(state.setupDone && state.games.length));
+  document.getElementById("menu-game-btn").classList.toggle("hidden", onGame || !(state.setupDone && (state.games.length || nightActive())) || !document.getElementById("view-scores").classList.contains("hidden"));
   menuPanel.classList.remove("hidden");
   menuBtn.setAttribute("aria-expanded", "true");
 });
@@ -3198,6 +3376,7 @@ document.getElementById("view-history-link").addEventListener("click", function(
   showView("history");
 });
 document.getElementById("history-back-btn").addEventListener("click", function(){
+  if (nightActive()){ showNight(); return; }
   showView(state.setupDone && state.games.length && !allGamesFreshlyReset() ? "game" : "setup");
 });
 function allGamesFreshlyReset(){ return state.games.length===0; }
@@ -3216,7 +3395,9 @@ function initSetupFields(){
 initSetupFields();
 applyPracticeMode();
 initCloud();
-if (state.setupDone && state.games.length){
+if (nightActive()){
+  showNight();
+} else if (state.setupDone && state.games.length){
   curGameIdx = state.games.length-1;
   var g = state.games[curGameIdx];
   curFrame = 0;
