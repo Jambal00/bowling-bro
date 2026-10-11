@@ -1371,10 +1371,16 @@ function initCloud(){
 (function(){
   var emailEl = document.getElementById("auth-email"), statusEl = document.getElementById("auth-status");
   function email(){ return emailEl.value.trim(); }
+  // Remember the last email used on this device so the sign-in screen is pre-filled next time.
+  // Kept under its own key so it survives sign-out, which clears the rest of this device's data.
+  var LAST_EMAIL_KEY = "bb_last_email";
+  try { var lastEmail = localStorage.getItem(LAST_EMAIL_KEY); if (lastEmail && !emailEl.value) emailEl.value = lastEmail; } catch(e){}
+  function rememberEmail(){ try { localStorage.setItem(LAST_EMAIL_KEY, email()); } catch(e){} }
   document.getElementById("auth-send-btn").addEventListener("click", function(){
     if (!sb){ statusEl.textContent = "The sign-in service didn't load. Check your connection and reload."; return; }
     if (!/^\S+@\S+\.\S+$/.test(email())){ statusEl.textContent = "Enter your email address first."; return; }
     statusEl.textContent = "Sending…";
+    rememberEmail();
     sb.auth.signInWithOtp({ email: email(), options: { emailRedirectTo: authRedirect() } }).then(function(r){
       if (r.error){ statusEl.textContent = "Couldn't send the email: " + r.error.message; return; }
       statusEl.textContent = "Check your email for a sign-in code and enter it below. If you don't see it, check your spam or junk folder. You can also tap the link in the email.";
