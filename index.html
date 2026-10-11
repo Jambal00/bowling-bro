@@ -204,6 +204,52 @@ button.preset-chip { color: #1a1a1a; }
     <div style="text-align:center;margin-top:6px;"><button class="small-link" id="auth-skip-btn">Try it without signing in (saves on this device only)</button></div>
   </div>
 </div>
+<div id="wizard" class="hidden" style="position:fixed;inset:0;background:#f2f1ea;z-index:55;overflow:auto;">
+  <div style="max-width:420px;margin:0 auto;padding:28px 18px 30px;">
+    <div id="wiz-progress" style="display:flex;gap:6px;margin-bottom:8px;"></div>
+    <div id="wiz-step-label" style="font-size:12px;color:#6b6b6b;margin-bottom:14px;"></div>
+    <h1 id="wiz-title" style="font-size:24px;margin:0 0 6px;"></h1>
+    <p id="wiz-blurb" style="font-size:14px;color:#6b6b6b;margin:0 0 16px;line-height:1.45;"></p>
+    <div class="card" data-wiz-step="0">
+      <label for="wiz-name">Your name</label>
+      <input type="text" id="wiz-name" autocomplete="name" maxlength="80" placeholder="Shown on your stats" />
+      <label for="wiz-hand">Bowling hand</label>
+      <select id="wiz-hand">
+        <option value="">Prefer not to say</option>
+        <option value="right">Right-handed</option>
+        <option value="left">Left-handed</option>
+        <option value="two">Two-handed</option>
+      </select>
+    </div>
+    <div class="card hidden" data-wiz-step="1">
+      <label for="wiz-center">Home bowling center</label>
+      <input type="text" id="wiz-center" maxlength="80" placeholder="Where you usually bowl" />
+      <label for="wiz-ball-input">Balls in your bag</label>
+      <div class="arsenal-list" id="wiz-arsenal-list"></div>
+      <div class="row">
+        <div><input type="text" id="wiz-ball-input" maxlength="60" placeholder="e.g. Storm Hy-Road" /></div>
+        <div style="flex:0 0 auto;"><button id="wiz-ball-add">Add</button></div>
+      </div>
+      <div id="wiz-ball-roles" class="hidden">
+        <div class="row">
+          <div><label for="wiz-strike">Strike ball</label><select id="wiz-strike"></select></div>
+          <div><label for="wiz-spare">Spare ball</label><select id="wiz-spare"></select></div>
+        </div>
+      </div>
+      <p style="font-size:12px;color:#6b6b6b;margin:0;line-height:1.4;">You can change these any night on the setup screen.</p>
+    </div>
+    <div class="card hidden" data-wiz-step="2">
+      <label for="wiz-avg">Season average you're aiming for</label>
+      <input type="number" id="wiz-avg" inputmode="decimal" min="0" max="300" placeholder="Leave blank for no goal" />
+      <p style="font-size:12px;color:#6b6b6b;margin:0;line-height:1.4;">This draws the goal line on your charts. More goals, like strike % or single-pin spares, are under Menu, Profile &amp; Goals.</p>
+    </div>
+    <div class="row" style="margin-top:4px;">
+      <div id="wiz-back-wrap"><button class="full" id="wiz-back">Back</button></div>
+      <div><button class="primary full" id="wiz-next">Next</button></div>
+    </div>
+    <div style="text-align:center;margin-top:14px;"><button class="small-link" id="wiz-skip">Skip setup for now</button></div>
+  </div>
+</div>
 <div id="install-sheet" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:60;display:flex;align-items:flex-end;justify-content:center;">
   <div role="dialog" aria-modal="true" aria-labelledby="install-title" style="background:#fff;width:100%;max-width:420px;border-radius:16px 16px 0 0;padding:18px 18px 22px;">
     <h2 id="install-title" style="font-size:17px;margin:0 0 8px;">Add Bowling Bro' to your Home Screen</h2>
@@ -215,7 +261,7 @@ button.preset-chip { color: #1a1a1a; }
 <div class="app">
 
   <div class="header">
-    <span class="place" id="place-label">Big Al's</span>
+    <span class="place" id="place-label">Bowling Bro'</span>
     <div style="display:flex;align-items:center;gap:10px;position:relative;">
       <span class="game-label" id="game-label"></span>
       <button id="menu-btn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" style="padding:8px 10px;line-height:0;">
@@ -244,7 +290,7 @@ button.preset-chip { color: #1a1a1a; }
         <option value="practice">Practice session</option>
       </select>
       <label>Bowling center</label>
-      <input type="text" id="setup-center" value="Big Al's" />
+      <input type="text" id="setup-center" placeholder="Where you're bowling" />
       <label>Lanes (enter once you're assigned)</label>
       <input type="text" id="setup-lanes" placeholder="e.g. 7 &amp; 8" />
     </div>
@@ -512,6 +558,7 @@ button.preset-chip { color: #1a1a1a; }
       <p id="goals-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;"></p>
     </div>
     <button class="full" id="profile-back-btn">Back</button>
+    <div style="text-align:center;margin-top:12px;"><button class="small-link" id="wizard-rerun-btn">Run first-time setup again</button></div>
   </div>
 
   <div id="print-report"></div>
@@ -526,11 +573,11 @@ var PRESET_NOTES = ["Light", "High", "Flush", "Missed right", "Missed left", "To
 
 function defaultState(){
   return {
-    center: "Big Al's",
+    center: "",
     lanes: "",
-    arsenal: ["Storm Bionic", "Storm Phase II Pearl", "Storm Hy-Road 40", "Storm Ion Max Pearl"],
-    strikeBall: "Storm Bionic",
-    spareBall: "Storm Hy-Road 40",
+    arsenal: [],
+    strikeBall: "",
+    spareBall: "",
     startFeet: 20,
     startArrow: 12,
     setupDone: false,
@@ -547,6 +594,7 @@ function loadState(){
 }
 function saveState(){
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){}
+  if (typeof syncGear === "function") syncGear();
 }
 var state = loadState();
 
@@ -1069,7 +1117,7 @@ document.getElementById("edit-frame-btn").addEventListener("click", function(){
   refreshGameScreen();
 });
 function refreshGameScreen(){
-  document.getElementById("place-label").textContent = state.center + (state.lanes ? (" · Lanes " + state.lanes) : "");
+  document.getElementById("place-label").textContent = (state.center || "Bowling Bro'") + (state.lanes ? (" · Lanes " + state.lanes) : "");
   document.getElementById("game-label").textContent = (sessionType() === "practice" ? "Practice · " : "") + "Game " + (curGameIdx+1);
   renderScoresheet();
   var g = curGame();
@@ -1335,12 +1383,17 @@ function startCloud(){
   cloud.why = "";
   cloud.profileDoc = sbSingleDoc("bb_profiles", uid);
   cloud.profileDoc.onSnapshot(function(snap){
+    cloud.profileLoaded = true;
     if (!snap.exists){
       if (!profile.email && sbUser.email){ profile.email = sbUser.email; state.profile = profile; saveState(); fillProfileInputs(); }
+      // no profile on the account yet = a brand-new bowler: walk them through setup once
+      if (!state.onboarded) openWizard(true);
       return;
     }
     profile = cleanProfile(snap.data());
     state.profile = profile;
+    state.onboarded = true;   // an account with a profile has been set up before, on this device or another
+    applyCloudGear(snap.data());
     saveState();
     fillProfileInputs();
     renderHistory();
@@ -1366,7 +1419,7 @@ function startCloud(){
 }
 function stopCloud(why){
   sbUser = null;
-  cloud.col = null; cloud.profileDoc = null; cloud.goalsDoc = null; cloud.docs = [];
+  cloud.col = null; cloud.profileDoc = null; cloud.goalsDoc = null; cloud.docs = []; cloud.profileLoaded = false;
   cloud.ready = true; cloud.why = why;
   renderHistory();
 }
@@ -1430,6 +1483,7 @@ function initCloud(){
   });
   document.getElementById("auth-skip-btn").addEventListener("click", function(){
     state.skipAuth = true; saveState(); showGate(false);
+    if (!state.onboarded && !state.setupDone && !(state.games || []).length && !(state.seriesHistory || []).length) openWizard(true);
   });
   document.getElementById("menu-auth-btn").addEventListener("click", function(){
     if (!sbUser){ state.skipAuth = false; saveState(); statusEl.textContent = ""; showGate(true); return; }
@@ -1703,6 +1757,147 @@ document.getElementById("header-profile-btn").addEventListener("click", function
 });
 document.getElementById("profile-back-btn").addEventListener("click", function(){ goToView(profileReturn); });
 var profileWrite = Promise.resolve();
+// The bowler's gear (home center, bag, strike and spare ball) is saved alongside the profile so it
+// follows them to a new phone instead of living on one device.
+function gearNow(){
+  return { center: state.center || "", arsenal: (state.arsenal || []).slice(), strikeBall: state.strikeBall || "", spareBall: state.spareBall || "" };
+}
+function profileDocBody(){
+  var body = JSON.parse(JSON.stringify(profile));
+  body.gear = gearNow();
+  body.onboarded = true;
+  return body;
+}
+var lastGearJson = null;
+function applyCloudGear(data){
+  var g = data && data.gear;
+  if (g && Array.isArray(g.arsenal)) lastGearJson = JSON.stringify({ center: g.center || "", arsenal: g.arsenal, strikeBall: g.strikeBall || "", spareBall: g.spareBall || "" });
+  // adopt the saved gear only on a device that has none of its own, so a night in progress is never disturbed
+  if (!g || !Array.isArray(g.arsenal) || !g.arsenal.length || (state.arsenal && state.arsenal.length)) return;
+  state.arsenal = g.arsenal.filter(function(x){ return typeof x === "string" && x; }).slice(0, 30);
+  state.strikeBall = state.arsenal.indexOf(g.strikeBall) >= 0 ? g.strikeBall : state.arsenal[0];
+  state.spareBall = state.arsenal.indexOf(g.spareBall) >= 0 ? g.spareBall : state.arsenal[0];
+  if (!state.center && typeof g.center === "string") state.center = g.center;
+  initSetupFields();
+}
+// called from saveState: push the gear to the account whenever it has changed
+function syncGear(){
+  if (typeof cloud === "undefined" || !cloud || !cloud.profileDoc || !cloud.profileLoaded || !state.onboarded) return;
+  var j = JSON.stringify(gearNow());
+  if (j === lastGearJson) return;
+  lastGearJson = j;
+  var body = profileDocBody();
+  profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(null, function(){});
+}
+
+// ---------- first-time setup wizard ----------
+var WIZ_STEPS = [
+  { title: "Welcome to Bowling Bro'", blurb: "Three quick steps and you're ready to bowl. Everything here can be changed later." },
+  { title: "Your bowling", blurb: "Where you bowl and what's in your bag, so each night starts ready to go." },
+  { title: "One goal to start", blurb: "Most bowlers start with an average to aim for." }
+];
+// these were the app's built-in defaults before each bowler had their own; never treat them as a new bowler's gear
+var LEGACY_ARSENAL = ["Storm Bionic", "Storm Phase II Pearl", "Storm Hy-Road 40", "Storm Ion Max Pearl"];
+var wiz = null, wizStep = 0;
+function openWizard(isNewBowler){
+  if (isNewBowler && JSON.stringify(state.arsenal || []) === JSON.stringify(LEGACY_ARSENAL)){
+    state.arsenal = []; state.strikeBall = ""; state.spareBall = "";
+    if (state.center === "Big Al's") state.center = "";
+    initSetupFields();
+  }
+  var avgGoal = presetGoal("avg");
+  wiz = { arsenal: (state.arsenal || []).slice(), strike: state.strikeBall || "", spare: state.spareBall || "" };
+  document.getElementById("wiz-name").value = profile.name || "";
+  document.getElementById("wiz-hand").value = profile.hand || "";
+  document.getElementById("wiz-center").value = state.center || profile.homeCenter || "";
+  document.getElementById("wiz-ball-input").value = "";
+  document.getElementById("wiz-avg").value = avgGoal ? avgGoal.target : "";
+  wizStep = 0;
+  renderWizard();
+  document.getElementById("wizard").classList.remove("hidden");
+}
+function renderWizard(){
+  var step = WIZ_STEPS[wizStep];
+  var prog = document.getElementById("wiz-progress"); prog.innerHTML = "";
+  WIZ_STEPS.forEach(function(_, i){
+    var seg = document.createElement("div");
+    seg.style.cssText = "flex:1;height:5px;border-radius:999px;background:" + (i <= wizStep ? "#2f6fed" : "#d8d5c8") + ";";
+    prog.appendChild(seg);
+  });
+  document.getElementById("wiz-step-label").textContent = "Step " + (wizStep + 1) + " of " + WIZ_STEPS.length;
+  document.getElementById("wiz-title").textContent = step.title;
+  document.getElementById("wiz-blurb").textContent = step.blurb;
+  Array.prototype.forEach.call(document.querySelectorAll("[data-wiz-step]"), function(el){
+    el.classList.toggle("hidden", Number(el.getAttribute("data-wiz-step")) !== wizStep);
+  });
+  document.getElementById("wiz-back-wrap").classList.toggle("hidden", wizStep === 0);
+  document.getElementById("wiz-next").textContent = wizStep === WIZ_STEPS.length - 1 ? "Finish" : "Next";
+  renderWizardBag();
+  document.getElementById("wizard").scrollTop = 0;
+}
+function renderWizardBag(){
+  var list = document.getElementById("wiz-arsenal-list"); list.innerHTML = "";
+  wiz.arsenal.forEach(function(name, idx){
+    var chip = document.createElement("span"); chip.className = "arsenal-chip";
+    var txt = document.createElement("span"); txt.textContent = name;
+    var rm = document.createElement("button"); rm.textContent = "x"; rm.setAttribute("aria-label", "Remove " + name);
+    rm.addEventListener("click", function(){ wiz.arsenal.splice(idx, 1); renderWizardBag(); });
+    chip.appendChild(txt); chip.appendChild(rm); list.appendChild(chip);
+  });
+  if (wiz.arsenal.indexOf(wiz.strike) < 0) wiz.strike = wiz.arsenal[0] || "";
+  if (wiz.arsenal.indexOf(wiz.spare) < 0) wiz.spare = wiz.arsenal[0] || "";
+  [["wiz-strike", "strike"], ["wiz-spare", "spare"]].forEach(function(pair){
+    var sel = document.getElementById(pair[0]); sel.innerHTML = "";
+    wiz.arsenal.forEach(function(name){ var o = document.createElement("option"); o.value = name; o.textContent = name; sel.appendChild(o); });
+    sel.value = wiz[pair[1]];
+  });
+  document.getElementById("wiz-ball-roles").classList.toggle("hidden", !wiz.arsenal.length);
+}
+function wizardAddBall(){
+  var inp = document.getElementById("wiz-ball-input"), name = inp.value.trim();
+  if (name && wiz.arsenal.indexOf(name) < 0 && wiz.arsenal.length < 30) wiz.arsenal.push(name);
+  inp.value = "";
+  renderWizardBag();
+}
+function closeWizard(){
+  state.onboarded = true;
+  if (cloud.profileDoc && cloud.profileLoaded){
+    // write the profile even on a skip, so the wizard doesn't come back on another device
+    lastGearJson = JSON.stringify(gearNow());
+    var body = profileDocBody();
+    profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(null, function(){});
+  }
+  saveState();
+  initSetupFields(); fillProfileInputs(); renderHistory();
+  document.getElementById("wizard").classList.add("hidden");
+}
+function finishWizard(){
+  profile.name = document.getElementById("wiz-name").value.trim().slice(0, 120);
+  profile.hand = document.getElementById("wiz-hand").value;
+  var center = document.getElementById("wiz-center").value.trim().slice(0, 80);
+  if (center){ state.center = center; profile.homeCenter = center; }
+  state.profile = profile;
+  state.arsenal = wiz.arsenal.slice();
+  state.strikeBall = wiz.strike; state.spareBall = wiz.spare;
+  var raw = document.getElementById("wiz-avg").value, n = raw === "" ? NaN : Number(raw), g = presetGoal("avg");
+  if (isFinite(n) && n > 0){
+    n = Math.min(n, 300);
+    if (g) g.target = n; else SEASON_GOALS.push({ id: "g-avg", type: "avg", target: n });
+    persistGoals();
+  }
+  closeWizard();
+}
+document.getElementById("wiz-ball-add").addEventListener("click", wizardAddBall);
+document.getElementById("wiz-ball-input").addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); wizardAddBall(); } });
+document.getElementById("wiz-strike").addEventListener("change", function(e){ wiz.strike = e.target.value; });
+document.getElementById("wiz-spare").addEventListener("change", function(e){ wiz.spare = e.target.value; });
+document.getElementById("wiz-back").addEventListener("click", function(){ if (wizStep > 0){ wizStep--; renderWizard(); } });
+document.getElementById("wiz-next").addEventListener("click", function(){
+  if (wizStep === 1 && document.getElementById("wiz-ball-input").value.trim()) wizardAddBall();   // a ball typed but not yet added still counts
+  if (wizStep < WIZ_STEPS.length - 1){ wizStep++; renderWizard(); } else finishWizard();
+});
+document.getElementById("wiz-skip").addEventListener("click", closeWizard);
+document.getElementById("wizard-rerun-btn").addEventListener("click", function(){ openWizard(false); });
 document.getElementById("profile-save-btn").addEventListener("click", function(){
   var next = {};
   PROFILE_KEYS.forEach(function(k){ next[k] = document.getElementById("profile-" + k).value.trim(); });
@@ -1713,7 +1908,7 @@ document.getElementById("profile-save-btn").addEventListener("click", function()
   var statusEl = document.getElementById("profile-status");
   if (!cloud.profileDoc){ statusEl.textContent = "Profile saved on this device only (account storage isn't available in this view)."; return; }
   statusEl.textContent = "Saving…";
-  var body = JSON.parse(JSON.stringify(profile));
+  var body = profileDocBody();
   profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(function(){
     statusEl.textContent = "Profile saved.";
   }, function(){
@@ -2669,6 +2864,7 @@ function allGamesFreshlyReset(){ return state.games.length===0; }
 
 // ---------- init ----------
 function initSetupFields(){
+  document.getElementById("place-label").textContent = state.center || "Bowling Bro'";
   document.getElementById("setup-center").value = state.center;
   document.getElementById("setup-lanes").value = state.lanes;
   document.getElementById("setup-feet").value = state.startFeet;
