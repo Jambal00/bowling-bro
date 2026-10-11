@@ -534,10 +534,10 @@ button.preset-chip { color: #1a1a1a; }
       <div class="row">
         <div><label>Average</label><div id="season-avg" class="stat-lg"></div></div>
         <div><label>High game</label><div id="season-high-game" class="stat-lg"></div></div>
-        <div><label>High series</label><div id="season-high-series" class="stat-lg"></div></div>
+        <div><label id="season-high-series-label">High series</label><div id="season-high-series" class="stat-lg"></div></div>
       </div>
       <div class="row" style="margin-top:10px;">
-        <div><label>Total pins</label><div id="season-pins" class="stat-sm"></div></div>
+        <div><label id="season-pins-label">Total pins</label><div id="season-pins" class="stat-sm"></div></div>
         <div><label>Games</label><div id="season-games" class="stat-sm"></div></div>
         <div><label id="season-nights-label">Weeks</label><div id="season-nights" class="stat-sm"></div></div>
       </div>
@@ -1922,13 +1922,19 @@ function seriesScores(h){
 var reportTab = "summary";
 function applyReportTab(hasGames){
   var practiceTab = historyTab === "practice";
-  if (practiceTab && reportTab === "goals") reportTab = "summary";   // goals are tracked on the league report only
+  // Practice is a simpler report: Summary and Sessions only. Goals are league-only, and practice
+  // shot stats sit on its Summary instead of a tab of their own.
+  if (practiceTab && (reportTab === "goals" || reportTab === "shots")) reportTab = "summary";
   Array.prototype.forEach.call(document.querySelectorAll("#report-tabs button"), function(btn){
     var t = btn.getAttribute("data-report-tab"), on = t === reportTab;
     btn.classList.toggle("selected", on);
     btn.setAttribute("aria-selected", on ? "true" : "false");
-    btn.classList.toggle("hidden", practiceTab && t === "goals");
+    btn.classList.toggle("hidden", practiceTab && (t === "goals" || t === "shots"));
+    if (t === "history") btn.textContent = practiceTab ? "Sessions" : "History";
   });
+  var shotsCard = document.getElementById("shots-card");
+  var shotsHome = document.querySelector('[data-report-panel="' + (practiceTab ? "summary" : "shots") + '"]');
+  if (shotsCard.parentNode !== shotsHome) shotsHome.appendChild(shotsCard);
   Array.prototype.forEach.call(document.querySelectorAll("[data-report-panel]"), function(panel){
     panel.classList.toggle("hidden", panel.getAttribute("data-report-panel") !== reportTab);
   });
@@ -2439,6 +2445,14 @@ function seasonStats(items){
   s.avg = s.games.length ? s.pins / s.games.length : 0;
   s.highGame = s.games.length ? Math.max.apply(null, s.games) : 0;
   s.highSeries = s.totals.length ? Math.max.apply(null, s.totals) : 0;
+  // practice sessions vary in length, so their best night is judged by average, not total pins
+  s.bestSessionAvg = 0;
+  items.forEach(function(it){
+    var sc = seriesScores(it.h).filter(isNum), t = 0;
+    if (!sc.length) return;
+    sc.forEach(function(x){ t += x; });
+    s.bestSessionAvg = Math.max(s.bestSessionAvg, t / sc.length);
+  });
   var sp = 0; s.spreads.forEach(function(x){ sp += x; });
   s.avgSpread = s.spreads.length ? sp / s.spreads.length : null;
   // shot stats come only from series that were scored frame by frame
@@ -2545,9 +2559,17 @@ function renderSeason(items){
   document.getElementById("season-nights-label").textContent = practiceTab ? "Sessions" : "Weeks";
   document.getElementById("season-avg").textContent = s.avg.toFixed(1);
   document.getElementById("season-games").textContent = s.games.length;
-  document.getElementById("season-pins").textContent = s.pins.toLocaleString();
+  if (practiceTab){
+    var lg = seasonStats(allSeries().filter(function(it){ return seriesType(it.h) === "league"; }));
+    document.getElementById("season-pins-label").textContent = "League average";
+    document.getElementById("season-pins").textContent = lg.games.length ? lg.avg.toFixed(1) : "—";
+  } else {
+    document.getElementById("season-pins-label").textContent = "Total pins";
+    document.getElementById("season-pins").textContent = s.pins.toLocaleString();
+  }
   document.getElementById("season-high-game").textContent = s.highGame;
-  document.getElementById("season-high-series").textContent = s.highSeries;
+  document.getElementById("season-high-series-label").textContent = practiceTab ? "Best session avg" : "High series";
+  document.getElementById("season-high-series").textContent = practiceTab ? s.bestSessionAvg.toFixed(1) : s.highSeries;
   document.getElementById("season-nights").textContent = s.totals.length;
 
   var list = document.getElementById("goals-list");
@@ -2577,7 +2599,8 @@ function renderShots(items){
     allGames = allGames.concat(games);
     rows.push({ label: String(it.h.date || "").replace(/\/\d{4}$/, ""), agg: aggregateStats(games), n: games.length });
   });
-  card.classList.toggle("hidden", !gamesTotal);
+  // on the practice summary the card only appears once there is something to show
+  card.classList.toggle("hidden", !gamesTotal || (practiceTab && !rows.length));
   document.getElementById("shot-goals-card").classList.add("hidden");
   body.innerHTML = "";
   if (!gamesTotal) return;
@@ -2646,7 +2669,7 @@ function renderShots(items){
 // The summary is drawn as one self-contained SVG so the same picture serves the on-screen
 // preview, the image handed to the phone's share sheet, and the PDF.
 var shareOpts = { which: "league", range: "all", totals: true, chart: true, shots: true, goals: true, shotGoals: true, table: true };
-var SHARE_PARTS = [["totals", "Season totals"], ["chart", "Trend chart"], ["shots", "Shot stats"], ["goals", "Scoring goals"], ["shotGoals", "Shot-by-shot goals"], ["table", "Week-by-week scores"]];
+var SHARE_PARTS = [["totals", "Season totals"], ["chart", "Chart"], ["shots", "Shot stats"], ["goals", "Scoring goals"], ["shotGoals", "Shot-by-shot goals"], ["table", "Week-by-week or session list"]];
 var SHEET_ROWS_MAX = 15;
 function buildStatsSheet(opts){
   var W = 800, P = 40, IW = W - 2 * P, y = 0, out = [];
@@ -2685,6 +2708,8 @@ function buildStatsSheet(opts){
     var practice = type === "practice", unit = practice ? "session" : "week";
     var items = allSeries().filter(function(it){ return seriesType(it.h) === type; });
     var st = seasonStats(items);
+    var lgStats = seasonStats(allSeries().filter(function(it){ return seriesType(it.h) === "league"; }));
+    var leagueAvgText = lgStats.games.length ? lgStats.avg.toFixed(1) : "—";
     y += 34; text(P, y, practice ? "Practice" : "League season", 22, 700);
     if (!st.games.length){ y += 26; text(P, y, practice ? "No practice sessions saved yet." : "No league nights saved yet.", 14, 400, MUTE); return; }
     var pinsRun = 0, gamesRun = 0;
@@ -2699,16 +2724,41 @@ function buildStatsSheet(opts){
 
     if (opts.totals){
       heading("Season to date");
-      tiles([["Average", st.avg.toFixed(1)], ["High game", String(st.highGame)], ["High series", String(st.highSeries)],
-             ["Games", String(st.games.length)], [practice ? "Sessions" : "Weeks", String(st.totals.length)], ["Total pins", st.pins.toLocaleString()]], 6);
+      tiles([["Average", st.avg.toFixed(1)], ["High game", String(st.highGame)], practice ? ["Best session avg", st.bestSessionAvg.toFixed(1)] : ["High series", String(st.highSeries)],
+             ["Games", String(st.games.length)], [practice ? "Sessions" : "Weeks", String(st.totals.length)],
+             practice ? ["League average", leagueAvgText] : ["Total pins", st.pins.toLocaleString()]], 6);
     }
 
-    if (opts.chart && view.length > 1){
+    if (opts.chart && practice && view.length){
+      heading("Sessions" + (view.length < rows.length ? " · last " + view.length : ""));
+      var bx0 = P + 34, bx1 = W - P - 10, btop = y + 34, bph = 170, bn = view.length, bband = (bx1 - bx0) / bn;
+      rect(P, y + 8, 22, 8, "#d6d2c4", 4); text(P + 28, y + 16, "Low to high game", 12, 400, MUTE);
+      out.push('<circle cx="' + (P + 160) + '" cy="' + (y + 12) + '" r="4" fill="' + INK + '"/>'); text(P + 170, y + 16, "Session average", 12, 400, MUTE);
+      line(P + 290, y + 12, P + 312, y + 12, BLUE, 3); text(P + 318, y + 16, "Running average", 12, 400, MUTE);
+      var bvals = []; view.forEach(function(d){ bvals.push(Math.max.apply(null, d.sc), Math.min.apply(null, d.sc), d.run); });
+      var blo = Math.min.apply(null, bvals), bhi = Math.max.apply(null, bvals);
+      var bstep = [5, 10, 20, 25, 50, 100].filter(function(sv){ return (bhi - blo) / sv <= 5; })[0] || 100;
+      var bMin = Math.floor((blo - bstep * 0.25) / bstep) * bstep, bMax = Math.ceil((bhi + bstep * 0.4) / bstep) * bstep;
+      var bpx = function(i){ return bx0 + (i + 0.5) * bband; }, bpy = function(v){ return btop + bph - (v - bMin) / (bMax - bMin) * bph; };
+      for (var bg = bMin; bg <= bMax + 0.001; bg += bstep){ line(bx0, bpy(bg), bx1, bpy(bg), "#ece9df"); text(bx0 - 8, bpy(bg) + 4, bg, 11, 400, MUTE, "end"); }
+      var bevery = Math.ceil(bn / 10), bbw = Math.max(5, Math.min(22, bband * 0.4));
+      view.forEach(function(d, i){
+        if ((bn - 1 - i) % bevery === 0) text(bpx(i), btop + bph + 18, d.label, 11, 400, MUTE, "middle");
+        if (d.sc.length > 1) out.push('<line x1="' + bpx(i).toFixed(1) + '" x2="' + bpx(i).toFixed(1) + '" y1="' + bpy(Math.min.apply(null, d.sc)).toFixed(1) + '" y2="' + bpy(Math.max.apply(null, d.sc)).toFixed(1) + '" stroke="#d6d2c4" stroke-width="' + bbw.toFixed(1) + '" stroke-linecap="round"/>');
+      });
+      out.push('<polyline fill="none" stroke="' + BLUE + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + view.map(function(d, i){ return bpx(i).toFixed(1) + "," + bpy(d.run).toFixed(1); }).join(" ") + '"/>');
+      view.forEach(function(d, i){
+        out.push('<circle cx="' + bpx(i).toFixed(1) + '" cy="' + bpy(d.avg).toFixed(1) + '" r="' + (bn > 14 ? 3 : 5) + '" fill="' + INK + '" stroke="#fff" stroke-width="1.5"/>');
+        if (bn <= 12) text(bpx(i), bpy(Math.max.apply(null, d.sc)) - 12, d.avg.toFixed(1), 11, 700, INK, "middle", true);
+      });
+      y = btop + bph + 26;
+    }
+    if (opts.chart && !practice && view.length > 1){
       heading("Trend" + (view.length < rows.length ? " · last " + view.length + " " + unit + "s" : ""));
       var goal = practice ? null : goalAverage();
       var x0 = P + 34, x1 = W - P - (goal !== null ? 64 : 10), top = y + 30, ph = 170, n = view.length, band = (x1 - x0) / n;
       line(P, y + 12, P + 22, y + 12, BLUE, 3); text(P + 28, y + 16, "Running average", 12, 400, MUTE);
-      line(P + 150, y + 12, P + 172, y + 12, GREY, 3); text(P + 178, y + 16, (practice ? "Session" : "Weekly") + " series total", 12, 400, MUTE);
+      line(P + 150, y + 12, P + 172, y + 12, GREY, 3); text(P + 178, y + 16, practice ? "Session average" : "Weekly series total", 12, 400, MUTE);
       var vals = []; view.forEach(function(d){ vals.push(d.run, d.avg); }); if (goal !== null) vals.push(goal);
       var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
       var step = [5, 10, 20, 25, 50, 100].filter(function(sv){ return (hi - lo) / sv <= 5; })[0] || 100;
@@ -2726,7 +2776,7 @@ function buildStatsSheet(opts){
       if (n <= 10) view.forEach(function(d, i){
         var runOnTop = d.run >= d.avg;
         if (n <= 7 || (n - 1 - i) % 2 === 0) text(px(i), py(d.run) + (runOnTop ? -10 : 18), d.run.toFixed(1), 11, 700, INK, "middle", true);
-        text(px(i), py(d.avg) + (runOnTop ? 18 : -10), d.total, 11, 700, MUTE, "middle", true);
+        text(px(i), py(d.avg) + (runOnTop ? 18 : -10), practice ? d.avg.toFixed(1) : d.total, 11, 700, MUTE, "middle", true);
       });
       y = top + ph + 26;
     }
@@ -2760,18 +2810,35 @@ function buildStatsSheet(opts){
       }
     }
 
-    if (opts.table){
+    if (opts.table && practice){
+      var pshown = view.length > SHEET_ROWS_MAX ? view.slice(-SHEET_ROWS_MAX) : view;
+      heading("Session by session" + (pshown.length < rows.length ? " · last " + pshown.length + " of " + rows.length : ""));
+      var pcols = ["Session", "Games", "Average", "High", "Low", "Running avg"], pcw = IW / pcols.length;
+      y += 4; rect(P, y, IW, 26, "#fde9b4", 4);
+      pcols.forEach(function(c, ci){ text(P + ci * pcw + (ci ? pcw / 2 : 10), y + 18, c, 12, 700, INK, ci ? "middle" : "start"); });
+      y += 26;
+      pshown.forEach(function(d){
+        [d.label, d.sc.length, d.avg.toFixed(1), Math.max.apply(null, d.sc), Math.min.apply(null, d.sc), d.run.toFixed(1)].forEach(function(c, ci){
+          text(P + ci * pcw + (ci ? pcw / 2 : 10), y + 18, c, 13, ci === 2 ? 700 : 400, INK, ci ? "middle" : "start");
+        });
+        y += 26; line(P, y, W - P, y, "#f1efe6");
+      });
+    }
+    if (opts.table && !practice){
       var shown = view.length > SHEET_ROWS_MAX ? view.slice(-SHEET_ROWS_MAX) : view;
       heading((practice ? "Session by session" : "Week by week") + (shown.length < rows.length ? " · last " + shown.length + " of " + rows.length : ""));
-      var maxG = 0; shown.forEach(function(d){ maxG = Math.max(maxG, d.sc.length); }); maxG = Math.min(maxG, 6);
-      var cols = [practice ? "Date" : "Week of"]; for (var gi = 0; gi < maxG; gi++) cols.push("Game " + (gi + 1)); cols.push("Series", "Average", "Running avg");
+      var maxG = 0; shown.forEach(function(d){ maxG = Math.max(maxG, d.sc.length); }); maxG = Math.min(maxG, 12);
+      // long practice sessions: shorten the headings and type so every game still gets its own column
+      var wide = maxG > 6, hs = wide ? 10 : 12, cs = wide ? 11 : 13;
+      var cols = [practice ? "Date" : "Week of"]; for (var gi = 0; gi < maxG; gi++) cols.push((wide ? "G" : "Game ") + (gi + 1));
+      cols.push((wide || practice) ? "Total" : "Series", wide ? "Avg" : "Average", wide ? "Run avg" : "Running avg");
       var cw = IW / cols.length, rh = 26;
       y += 4; rect(P, y, IW, rh, "#fde9b4", 4);
-      cols.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, 12, 700, INK, ci ? "middle" : "start"); });
+      cols.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, hs, 700, INK, ci ? "middle" : "start"); });
       y += rh;
       shown.forEach(function(d){
         var cells = [d.label]; for (var k = 0; k < maxG; k++) cells.push(isNum(d.sc[k]) ? d.sc[k] : ""); cells.push(d.total, d.avg.toFixed(1), d.run.toFixed(1));
-        cells.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, 13, ci === maxG + 1 ? 700 : 400, INK, ci ? "middle" : "start"); });
+        cells.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, cs, ci === maxG + 1 ? 700 : 400, INK, ci ? "middle" : "start"); });
         y += rh; line(P, y, W - P, y, "#f1efe6");
       });
     }
@@ -2888,6 +2955,67 @@ function svgEl(tag, attrs, text){
   if (text !== undefined) e.textContent = text;
   return e;
 }
+// Practice sessions vary from a couple of games to ten or more, so each session is drawn as one
+// mark: a bar from its low game to its high game, a dot at its average, and the running
+// practice average as a line across the sessions.
+function renderPracticeChart(data){
+  document.getElementById("chart-title").textContent = "Practice sessions";
+  var W = 340, H = 196, L = 32, R = 12, T = 16, B = 24;
+  var pw = W - L - R, ph = H - T - B, n = data.length, band = pw / n;
+  function x(i){ return L + (i + 0.5) * band; }
+  var vals = [];
+  data.forEach(function(d){ vals.push(d.hi, d.lo, d.run); });
+  var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+  var step = [5, 10, 20, 25, 50, 100].filter(function(sv){ return (hi - lo) / sv <= 5; })[0] || 100;
+  var yMin = Math.floor((lo - step * 0.25) / step) * step, yMax = Math.ceil((hi + step * 0.4) / step) * step;
+  function y(v){ return T + ph - (v - yMin) / (yMax - yMin) * ph; }
+  var svg = svgEl("svg", { viewBox: "0 0 " + W + " " + H, width: "100%", role: "img", "aria-label": "Each practice session's low game, high game and average, with the running practice average. The Sessions tab has the same numbers." });
+  svg.style.display = "block";
+  for (var gv = yMin; gv <= yMax + 0.001; gv += step){
+    svg.appendChild(svgEl("line", { x1: L, x2: W - R, y1: y(gv), y2: y(gv), stroke: CHART_C.grid, "stroke-width": 1 }));
+    svg.appendChild(svgEl("text", { x: L - 5, y: y(gv) + 3, "text-anchor": "end", "font-size": 9, fill: CHART_C.ink }, gv));
+  }
+  var every = Math.ceil(n / 7);
+  data.forEach(function(d, i){
+    if ((n - 1 - i) % every === 0) svg.appendChild(svgEl("text", { x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 9, fill: CHART_C.ink }, d.label));
+  });
+  var cross = svgEl("line", { x1: 0, x2: 0, y1: T, y2: T + ph, stroke: "#1a1a1a", "stroke-width": 1, opacity: 0 });
+  svg.appendChild(cross);
+  var bw = Math.max(3, Math.min(12, band * 0.45)), dense = n > 14;
+  data.forEach(function(d, i){
+    // low-to-high bar (a one-game session is just its dot)
+    if (d.sc.length > 1) svg.appendChild(svgEl("line", { x1: x(i), x2: x(i), y1: y(d.lo), y2: y(d.hi), stroke: "#d6d2c4", "stroke-width": bw, "stroke-linecap": "round" }));
+  });
+  svg.appendChild(svgEl("path", { d: data.map(function(d, i){ return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(d.run).toFixed(1); }).join(" "), fill: "none", stroke: CHART_C.night, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+  data.forEach(function(d, i){
+    svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.avg), r: dense ? 2.5 : 4, fill: "#1a1a1a", stroke: "#fff", "stroke-width": dense ? 1 : 1.5 }));
+    if (n <= 10) svg.appendChild(svgEl("text", { x: x(i), y: y(d.hi) - 7, "text-anchor": "middle", "font-size": 9, "font-weight": 600, fill: "#1a1a1a", stroke: "#fff", "stroke-width": 3, "stroke-linejoin": "round", "paint-order": "stroke" }, d.avg.toFixed(1)));
+  });
+  var readout = document.getElementById("chart-readout");
+  readout.style.whiteSpace = ""; readout.style.fontSize = "12px";
+  readout.textContent = "Tap or hover a session to see its numbers.";
+  data.forEach(function(d, i){
+    var hit = svgEl("rect", { x: L + i * band, y: T, width: band, height: ph + B, fill: "transparent" });
+    hit.style.cursor = "pointer";
+    function show(){
+      cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", 0.25);
+      readout.textContent = d.label + " · " + plural(d.sc.length, "game") + " · average " + d.avg.toFixed(1)
+        + (d.sc.length > 1 ? " · high " + d.hi + ", low " + d.lo : "") + " · running average " + d.run.toFixed(1);
+    }
+    hit.addEventListener("pointerenter", show); hit.addEventListener("click", show);
+    svg.appendChild(hit);
+  });
+  var holder = document.getElementById("chart-holder"); holder.innerHTML = ""; holder.appendChild(svg);
+  var lgEl = document.getElementById("chart-legend"); lgEl.innerHTML = "";
+  [["range", "Low to high game"], ["dot", "Session average"], ["line", "Running average"]].forEach(function(item){
+    var wrap = document.createElement("span");
+    var sw = svgEl("svg", { width: 22, height: 10, viewBox: "0 0 22 10", "aria-hidden": "true" });
+    if (item[0] === "dot") sw.appendChild(svgEl("circle", { cx: 11, cy: 5, r: 3.5, fill: "#1a1a1a" }));
+    else sw.appendChild(svgEl("line", { x1: 3, x2: 19, y1: 5, y2: 5, stroke: item[0] === "range" ? "#d6d2c4" : CHART_C.night, "stroke-width": item[0] === "range" ? 6 : 2, "stroke-linecap": "round" }));
+    wrap.appendChild(sw); wrap.appendChild(document.createTextNode(item[1]));
+    lgEl.appendChild(wrap);
+  });
+}
 function renderChart(items){
   var card = document.getElementById("chart-card");
   var pinsRun = 0, gamesRun = 0;
@@ -2925,6 +3053,8 @@ function renderChart(items){
   }
 
   var tabs = document.getElementById("chart-tabs");
+  tabs.classList.toggle("hidden", practiceTab);
+  if (practiceTab){ renderPracticeChart(data); return; }
   tabs.innerHTML = "";
   CHART_VIEWS.forEach(function(v){
     var chip = document.createElement("button");
@@ -2962,7 +3092,7 @@ function renderChart(items){
   } else if (chartView === "running"){
     title = "Averages by " + (practiceTab ? "session" : "week");
     data.forEach(function(d){ vals.push(d.run, d.avg); });
-    legend = [["line", CHART_C.night, "Running average"], ["line", CHART_C.week, (practiceTab ? "Session" : "Weekly") + " series total"]];
+    legend = [["line", CHART_C.night, "Running average"], ["line", CHART_C.week, practiceTab ? "Session average" : "Weekly series total"]];
     if (!practiceTab && goalAverage() !== null) refs.push({ v: goalAverage(), text: "goal " + fmtNum(goalAverage()), color: CHART_C.goal });
   } else {
     title = "High-low spread by " + (practiceTab ? "session" : "week") + " (lower is steadier)";
@@ -3034,7 +3164,7 @@ function renderChart(items){
       // running average: with more than 7 weeks the five-character labels would touch, so label
       // every other week, counting back from the latest so the newest one always shows
       if (n <= 7 || (n - 1 - i) % 2 === 0) pointLabel(x(i), y(d.run) + (runOnTop ? -8 : 14), d.run.toFixed(1), "#1a1a1a");
-      pointLabel(x(i), y(d.avg) + (runOnTop ? 14 : -8), d.total, CHART_C.ink);            // that week's series total
+      pointLabel(x(i), y(d.avg) + (runOnTop ? 14 : -8), practiceTab ? d.avg.toFixed(1) : d.total, CHART_C.ink);   // league: that week's series total; practice: that session's average
     });
   } else {
     var bw = Math.max(4, Math.min(24, band - 2));
@@ -3127,6 +3257,42 @@ function renderDetailTable(el, items){
   if (!data.length) return;
   function gameCls(s){ return vsGoal(s, G.average, G.floor); }
 
+  if (!league){
+    // practice: one row per session, newest first; the games themselves show when a row is opened
+    var pPins = 0, pGames = 0, pRows = [];
+    data.forEach(function(d){
+      var h = d.it.h, total = 0;
+      d.sc.forEach(function(sc){ total += sc; });
+      pPins += total; pGames += d.sc.length;
+      var tr = document.createElement("tr");
+      if (editKey === d.key) tr.className = "editing";
+      tr.appendChild(cell("td", String(h.date || "").replace(/\/\d{4}$/, "")));
+      tr.appendChild(cell("td", d.sc.length));
+      tr.appendChild(cell("td", (total / d.sc.length).toFixed(1), "strong"));
+      tr.appendChild(cell("td", Math.max.apply(null, d.sc)));
+      tr.appendChild(cell("td", Math.min.apply(null, d.sc)));
+      tr.appendChild(cell("td", (pPins / pGames).toFixed(1)));
+      tr.appendChild(cell("td", (h.note || "") + (d.it.local && cloud.col ? (h.note ? " · " : "") + "this device only" : ""), "note"));
+      tr.addEventListener("click", function(){
+        if (editKey === d.key){ editKey = null; editDraft = null; }
+        else { editKey = d.key; editDraft = { rank: "", note: h.note || "" }; }
+        pendingDeleteKey = null;
+        renderHistory();
+      });
+      pRows.unshift(tr);
+    });
+    var pTable = document.createElement("table"); pTable.className = "detail-table";
+    var pHead = document.createElement("thead"), pHr = document.createElement("tr");
+    ["Session", "Games", "Average", "High", "Low", "Running avg"].forEach(function(t){ pHr.appendChild(cell("th", t)); });
+    var pNoteTh = cell("th", "Notes"); pNoteTh.style.textAlign = "left"; pHr.appendChild(pNoteTh);
+    pHead.appendChild(pHr); pTable.appendChild(pHead);
+    var pBody = document.createElement("tbody"); pRows.forEach(function(r){ pBody.appendChild(r); }); pTable.appendChild(pBody);
+    var pWrap = document.createElement("div"); pWrap.className = "detail-wrap"; pWrap.appendChild(pTable); el.appendChild(pWrap);
+    var pHint = document.createElement("p");
+    pHint.style.cssText = "font-size:11px;color:#999;margin:8px 0 0;";
+    pHint.textContent = "Tap a session to see its game scores, add a note, or delete it.";
+    el.appendChild(pHint);
+  } else {
   var colSum = [], colN = [], pins = 0, games = 0, spreadSum = 0, spreadN = 0;
   var bodyRows = [];
   data.forEach(function(d){
@@ -3174,7 +3340,7 @@ function renderDetailTable(el, items){
   var headRow = document.createElement("tr");
   headRow.appendChild(cell("th", league ? "League" : "Practice"));
   for (var j = 0; j < maxGames; j++) headRow.appendChild(cell("th", "Game " + (j + 1)));
-  ["Series", "Average", "+/- HL", "Running avg"].forEach(function(t){ headRow.appendChild(cell("th", t)); });
+  [league ? "Series" : "Total", "Average", "+/- HL", "Running avg"].forEach(function(t){ headRow.appendChild(cell("th", t)); });
   if (league) headRow.appendChild(cell("th", "Rank"));
   var noteTh = cell("th", "Notes"); noteTh.style.textAlign = "left"; headRow.appendChild(noteTh);
   thead.appendChild(avgRow); thead.appendChild(headRow);
@@ -3189,14 +3355,26 @@ function renderDetailTable(el, items){
   hint.style.cssText = "font-size:11px;color:#999;margin:8px 0 0;";
   hint.textContent = "Swipe sideways for more columns. Tap a row to add " + (league ? "your rank or a note" : "a note") + ", or to delete it.";
   el.appendChild(hint);
+  }
 
   var editing = data.filter(function(d){ return d.key === editKey; })[0];
   if (!editing || !editDraft) return;
   var box = document.createElement("div"); box.className = "detail-edit";
   var title = document.createElement("div");
   title.style.cssText = "font-size:13px;font-weight:600;margin-bottom:8px;";
-  title.textContent = (editing.it.h.date || "") + " — " + editing.sc.join(", ");
+  title.textContent = league ? (editing.it.h.date || "") + " — " + editing.sc.join(", ") : (editing.it.h.date || "") + " · " + plural(editing.sc.length, "game");
   box.appendChild(title);
+  if (!league){
+    // the session's games, in the order bowled
+    var gl = document.createElement("div"); gl.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;";
+    editing.sc.forEach(function(sc, gi){
+      var chip = document.createElement("span");
+      chip.style.cssText = "font-size:13px;padding:4px 9px;border-radius:8px;background:#f2f1ea;border:1px solid #e2e0d5;font-variant-numeric:tabular-nums;";
+      chip.textContent = "G" + (gi + 1) + "  " + sc;
+      gl.appendChild(chip);
+    });
+    box.appendChild(gl);
+  }
   if (league){
     var rl = document.createElement("label"); rl.textContent = "League rank that week"; rl.setAttribute("for", "edit-rank");
     var ri = document.createElement("input"); ri.type = "number"; ri.id = "edit-rank"; ri.min = "1"; ri.setAttribute("inputmode", "numeric"); ri.value = editDraft.rank;
