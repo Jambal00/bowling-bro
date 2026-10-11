@@ -2467,8 +2467,8 @@ function renderShots(items){
 // ---------- shareable stats summary ----------
 // The summary is drawn as one self-contained SVG so the same picture serves the on-screen
 // preview, the image handed to the phone's share sheet, and the PDF.
-var shareOpts = { which: "league", range: "all", totals: true, chart: true, shots: true, goals: true, table: true };
-var SHARE_PARTS = [["totals", "Season totals"], ["chart", "Trend chart"], ["shots", "Shot stats"], ["goals", "Goals and progress"], ["table", "Week-by-week scores"]];
+var shareOpts = { which: "league", range: "all", totals: true, chart: true, shots: true, goals: true, shotGoals: true, table: true };
+var SHARE_PARTS = [["totals", "Season totals"], ["chart", "Trend chart"], ["shots", "Shot stats"], ["goals", "Scoring goals"], ["shotGoals", "Shot-by-shot goals"], ["table", "Week-by-week scores"]];
 var SHEET_ROWS_MAX = 15;
 function buildStatsSheet(opts){
   var W = 800, P = 40, IW = W - 2 * P, y = 0, out = [];
@@ -2567,8 +2567,8 @@ function buildStatsSheet(opts){
       }
     }
 
-    if (opts.goals && !practice){
-      var gl = scoringGoals().concat(shotGoals());
+    if ((opts.goals || opts.shotGoals) && !practice){
+      var gl = (opts.goals ? scoringGoals() : []).concat(opts.shotGoals ? shotGoals() : []);
       if (gl.length){
         heading("Goals");
         gl.forEach(function(goal){
@@ -2643,7 +2643,7 @@ function renderShareSheet(){
     var l = document.createElement("label"), cb = document.createElement("input");
     cb.type = "checkbox"; cb.checked = !!shareOpts[pt[0]];
     cb.addEventListener("change", function(){ shareOpts[pt[0]] = cb.checked; renderShareSheet(); });
-    l.appendChild(cb); l.appendChild(document.createTextNode(pt[1] + (pt[0] === "goals" ? " (league only)" : "")));
+    l.appendChild(cb); l.appendChild(document.createTextNode(pt[1] + ((pt[0] === "goals" || pt[0] === "shotGoals") ? " (league only)" : "")));
     parts.appendChild(l);
   });
   currentSheet = buildStatsSheet(shareOpts);
