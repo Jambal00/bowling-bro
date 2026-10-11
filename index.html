@@ -119,6 +119,8 @@ button.preset-chip { color: #1a1a1a; }
 .legend-stat { flex: 1 1 0; min-width: 76px; margin-bottom: 4px; }
 .legend-stat-sub { font-size: 11px; color: #6b6b6b; }
 .goal-edit { border-bottom: 1px solid #eee; padding: 0 0 2px; margin-bottom: 12px; }
+.share-parts label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #1a1a1a; margin: 0; padding: 5px 0; }
+.share-parts input { width: 18px; height: 18px; margin: 0; }
 .chart-range { display: inline-flex; border: 1px solid #d8d5c8; border-radius: 999px; overflow: hidden; margin: 0 0 8px; }
 .chart-range button { border: none; border-radius: 0; background: #fff; padding: 5px 12px; font-size: 12px; color: #444; }
 .chart-range button.selected { background: #1a1a1a; color: #fff; font-weight: 600; }
@@ -170,6 +172,9 @@ button.preset-chip { color: #1a1a1a; }
   #print-report, #print-report * { visibility: visible; }
   #print-report { position: absolute; left: 0; top: 0; width: 100%; padding: 10px; display: block; font-size: 15px; }
   #print-report p { font-size: 14px; margin: 4px 0; }
+  @page sheet { size: portrait; margin: 10mm; }
+  #print-report.sheet { page: sheet; padding: 0; }
+  #print-report img.sheet-img { display: block; width: 100%; max-width: 190mm; height: auto; margin: 0 auto; }
   #print-report table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
   #print-report th, #print-report td { border: 1px solid #999; padding: 6px 8px; font-size: 13px; text-align: left; }
   #print-report h1 { font-size: 24px; margin-bottom: 6px; }
@@ -247,6 +252,28 @@ button.preset-chip { color: #1a1a1a; }
       <div><button class="primary full" id="wiz-next">Next</button></div>
     </div>
     <div style="text-align:center;margin-top:14px;"><button class="small-link" id="wiz-skip">Skip setup for now</button></div>
+  </div>
+</div>
+<div id="share-sheet" class="hidden" style="position:fixed;inset:0;background:#f2f1ea;z-index:55;overflow:auto;">
+  <div style="max-width:420px;margin:0 auto;padding:18px 14px 30px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h1 style="font-size:22px;margin:0;">Share your stats</h1>
+      <button id="share-close-btn">Close</button>
+    </div>
+    <div class="card">
+      <label>Which report</label>
+      <div class="chart-range" id="share-which"></div>
+      <label style="margin-top:6px;">What to include</label>
+      <div id="share-parts" class="share-parts"></div>
+      <label style="margin-top:10px;">How far back (chart and table)</label>
+      <div class="chart-range" id="share-range" style="margin-bottom:0;"></div>
+    </div>
+    <div class="card" style="padding:8px;">
+      <div id="share-preview" style="border:1px solid #e2e0d5;border-radius:8px;overflow:hidden;background:#fff;line-height:0;"></div>
+    </div>
+    <button class="primary full" id="share-send-btn">Share as an image</button>
+    <button class="full" id="share-pdf-btn" style="margin-top:8px;">Save as PDF</button>
+    <p id="share-status" style="font-size:12px;color:#444;text-align:center;margin:8px 0 0;min-height:16px;line-height:1.4;"></p>
   </div>
 </div>
 <div id="install-sheet" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:60;display:flex;align-items:flex-end;justify-content:center;">
@@ -520,6 +547,7 @@ button.preset-chip { color: #1a1a1a; }
     <button class="primary full hidden" id="export-csv-btn" style="margin-bottom:8px;">Export all series as CSV</button>
     <p id="csv-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:0 0 8px;"></p>
     </div>
+    <button class="full" id="share-stats-btn" style="margin-bottom:8px;">Share a stats summary</button>
     <button class="full" id="history-back-btn">Back</button>
   </div>
 
@@ -1689,6 +1717,7 @@ function buildPrintReport(){
   html += "<div class=\"pdf-game-stats\">" + gameStatLines(agg).map(function(line){
     return "<div><strong>" + line[0] + ":</strong> " + line[1] + "</div>";
   }).join("") + "</div>";
+  document.getElementById("print-report").className = "";
   document.getElementById("print-report").innerHTML = html;
 }
 document.getElementById("export-pdf-btn").addEventListener("click", function(){
@@ -2434,6 +2463,234 @@ function renderShots(items){
   var wrap = document.createElement("div"); wrap.className = "detail-wrap"; wrap.appendChild(table);
   body.appendChild(wrap);
 }
+
+// ---------- shareable stats summary ----------
+// The summary is drawn as one self-contained SVG so the same picture serves the on-screen
+// preview, the image handed to the phone's share sheet, and the PDF.
+var shareOpts = { which: "league", range: "all", totals: true, chart: true, shots: true, goals: true, table: true };
+var SHARE_PARTS = [["totals", "Season totals"], ["chart", "Trend chart"], ["shots", "Shot stats"], ["goals", "Goals and progress"], ["table", "Week-by-week scores"]];
+var SHEET_ROWS_MAX = 15;
+function buildStatsSheet(opts){
+  var W = 800, P = 40, IW = W - 2 * P, y = 0, out = [];
+  var INK = "#1a1a1a", MUTE = "#6b6b6b", RULE = "#e2e0d5", BLUE = "#2f6fed", GREY = "#8f8c80", GREEN = "#1d7a46", AMBER = "#b26a00";
+  function esc(t){ return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function text(x, yy, t, size, weight, fill, anchor, halo){
+    // halo = a white outline behind the glyphs, for labels that sit on top of chart lines
+    out.push('<text x="' + x + '" y="' + yy + '" font-size="' + size + '" font-weight="' + (weight || 400) + '" fill="' + (fill || INK) + '" text-anchor="' + (anchor || "start") + '"'
+      + (halo ? ' stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke"' : '') + '>' + esc(t) + '</text>');
+  }
+  function rect(x, yy, w, h, fill, rx){ out.push('<rect x="' + x + '" y="' + yy + '" width="' + Math.max(0, w) + '" height="' + h + '" rx="' + (rx || 0) + '" fill="' + fill + '"/>'); }
+  function line(x1, y1, x2, y2, stroke, w, dash){ out.push('<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + stroke + '" stroke-width="' + (w || 1) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : '') + '/>'); }
+  function heading(t){ y += 30; text(P, y, t.toUpperCase(), 13, 700, MUTE); y += 8; line(P, y, W - P, y, RULE); y += 6; }
+  function tiles(list, cols){
+    var cw = IW / cols;
+    list.forEach(function(tl, i){
+      var cx = P + (i % cols) * cw, cy = y + Math.floor(i / cols) * 74;
+      text(cx, cy + 18, tl[0], 13, 400, MUTE);
+      text(cx, cy + 46, tl[1], 26, 700);
+      if (tl[2]) text(cx, cy + 63, tl[2], 12, 400, MUTE);
+    });
+    y += Math.ceil(list.length / cols) * 74;
+  }
+
+  // ----- page header -----
+  var today = new Date(), dateText = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
+  rect(0, 0, W, 96, BLUE);
+  text(P, 42, profile.name || "Bowling stats", 28, 700, "#fff");
+  var where = state.center || profile.homeCenter || "";
+  text(P, 70, [where, profile.league, profile.team].filter(Boolean).join(" · ") || "Bowling Bro' stats summary", 15, 400, "#dbe6ff");
+  text(W - P, 42, "Bowling Bro'", 15, 700, "#fff", "end");
+  text(W - P, 70, "As of " + dateText, 13, 400, "#dbe6ff", "end");
+  y = 96;
+
+  function section(type){
+    var practice = type === "practice", unit = practice ? "session" : "week";
+    var items = allSeries().filter(function(it){ return seriesType(it.h) === type; });
+    var st = seasonStats(items);
+    y += 34; text(P, y, practice ? "Practice" : "League season", 22, 700);
+    if (!st.games.length){ y += 26; text(P, y, practice ? "No practice sessions saved yet." : "No league nights saved yet.", 14, 400, MUTE); return; }
+    var pinsRun = 0, gamesRun = 0;
+    var rows = sortChrono(items).map(function(it){
+      var raw = seriesScores(it.h) || [], sc = raw.filter(isNum);
+      if (!sc.length) return null;
+      var t = 0; sc.forEach(function(x){ t += x; });
+      pinsRun += t; gamesRun += sc.length;
+      return { label: String(it.h.date || "").replace(/\/\d{4}$/, ""), sc: sc, total: t, avg: t / sc.length, run: pinsRun / gamesRun };
+    }).filter(Boolean);
+    var view = (opts.range === "recent" && rows.length > CHART_RECENT) ? rows.slice(-CHART_RECENT) : rows;
+
+    if (opts.totals){
+      heading("Season to date");
+      tiles([["Average", st.avg.toFixed(1)], ["High game", String(st.highGame)], ["High series", String(st.highSeries)],
+             ["Games", String(st.games.length)], [practice ? "Sessions" : "Weeks", String(st.totals.length)], ["Total pins", st.pins.toLocaleString()]], 6);
+    }
+
+    if (opts.chart && view.length > 1){
+      heading("Trend" + (view.length < rows.length ? " · last " + view.length + " " + unit + "s" : ""));
+      var goal = practice ? null : goalAverage();
+      var x0 = P + 34, x1 = W - P - (goal !== null ? 64 : 10), top = y + 30, ph = 170, n = view.length, band = (x1 - x0) / n;
+      line(P, y + 12, P + 22, y + 12, BLUE, 3); text(P + 28, y + 16, "Running average", 12, 400, MUTE);
+      line(P + 150, y + 12, P + 172, y + 12, GREY, 3); text(P + 178, y + 16, (practice ? "Session" : "Weekly") + " series total", 12, 400, MUTE);
+      var vals = []; view.forEach(function(d){ vals.push(d.run, d.avg); }); if (goal !== null) vals.push(goal);
+      var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+      var step = [5, 10, 20, 25, 50, 100].filter(function(sv){ return (hi - lo) / sv <= 5; })[0] || 100;
+      var yMin = Math.floor((lo - step * 0.25) / step) * step, yMax = Math.ceil((hi + step * 0.25) / step) * step;
+      var px = function(i){ return x0 + (i + 0.5) * band; }, py = function(v){ return top + ph - (v - yMin) / (yMax - yMin) * ph; };
+      for (var gv = yMin; gv <= yMax + 0.001; gv += step){ line(x0, py(gv), x1, py(gv), "#ece9df"); text(x0 - 8, py(gv) + 4, gv, 11, 400, MUTE, "end"); }
+      var every = Math.ceil(n / 10);
+      view.forEach(function(d, i){ if ((n - 1 - i) % every === 0) text(px(i), top + ph + 18, d.label, 11, 400, MUTE, "middle"); });
+      if (goal !== null){ line(x0, py(goal), x1, py(goal), GREEN, 1.5, "5 4"); text(x1 + 6, py(goal) + 4, "goal " + fmtNum(goal), 11, 700, GREEN); }
+      var poly = function(key, stroke){
+        out.push('<polyline fill="none" stroke="' + stroke + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="' + view.map(function(d, i){ return px(i).toFixed(1) + "," + py(d[key]).toFixed(1); }).join(" ") + '"/>');
+        view.forEach(function(d, i){ out.push('<circle cx="' + px(i).toFixed(1) + '" cy="' + py(d[key]).toFixed(1) + '" r="' + (n > 14 ? 2.5 : 4) + '" fill="' + stroke + '" stroke="#fff" stroke-width="1.5"/>'); });
+      };
+      poly("avg", GREY); poly("run", BLUE);
+      if (n <= 10) view.forEach(function(d, i){
+        var runOnTop = d.run >= d.avg;
+        if (n <= 7 || (n - 1 - i) % 2 === 0) text(px(i), py(d.run) + (runOnTop ? -10 : 18), d.run.toFixed(1), 11, 700, INK, "middle", true);
+        text(px(i), py(d.avg) + (runOnTop ? 18 : -10), d.total, 11, 700, MUTE, "middle", true);
+      });
+      y = top + ph + 26;
+    }
+
+    if (opts.shots){
+      heading("Shot stats");
+      if (!st.shots){ y += 16; text(P, y, "No games scored frame by frame yet.", 14, 400, MUTE); y += 8; }
+      else {
+        var a = st.shots;
+        y += 14; text(P, y, "From " + plural(st.shotGames, "game") + " scored frame by frame" + (st.shotGames < st.games.length ? " (of " + st.games.length + ")" : "") + ".", 12, 400, MUTE); y += 4;
+        tiles([["Strike %", pctText(a.strikes, a.firstBalls), a.strikes + " of " + a.firstBalls + " first balls"],
+               ["Spare %", pctText(a.spares, a.spareOpportunities), a.spares + " of " + a.spareOpportunities + " chances"],
+               ["Single-pin %", pctText(a.singlePinMade, a.singlePinOpportunities), a.singlePinMade + " of " + a.singlePinOpportunities + " leaves"],
+               ["Split %", pctText(a.splitsLeft, a.splitOpportunities), a.splitsLeft + " of " + a.splitOpportunities + " first balls"],
+               ["Open frames", (a.opens / st.shotGames).toFixed(1), "per game"]], 5);
+      }
+    }
+
+    if (opts.goals && !practice){
+      var gl = scoringGoals().concat(shotGoals());
+      if (gl.length){
+        heading("Goals");
+        gl.forEach(function(goal){
+          var g = evalGoal(goal, st); if (!g) return;
+          var col = g.pending ? MUTE : (g.met ? GREEN : AMBER);
+          y += 24; text(P, y, g.name, 15, 700);
+          text(W - P, y, g.pending ? "No data yet" : (g.met ? "✓ On track" : "Not yet"), 13, 700, col, "end");
+          y += 10; rect(P, y, IW, 7, "#eeece2", 4); rect(P, y, IW * Math.max(0, Math.min(1, g.fill)), 7, g.pending ? "#eeece2" : (g.met ? "#2e8b57" : "#f2a900"), 4);
+          y += 22; text(P, y, g.detail, 12, 400, MUTE); y += 6;
+        });
+      }
+    }
+
+    if (opts.table){
+      var shown = view.length > SHEET_ROWS_MAX ? view.slice(-SHEET_ROWS_MAX) : view;
+      heading((practice ? "Session by session" : "Week by week") + (shown.length < rows.length ? " · last " + shown.length + " of " + rows.length : ""));
+      var maxG = 0; shown.forEach(function(d){ maxG = Math.max(maxG, d.sc.length); }); maxG = Math.min(maxG, 6);
+      var cols = [practice ? "Date" : "Week of"]; for (var gi = 0; gi < maxG; gi++) cols.push("Game " + (gi + 1)); cols.push("Series", "Average", "Running avg");
+      var cw = IW / cols.length, rh = 26;
+      y += 4; rect(P, y, IW, rh, "#fde9b4", 4);
+      cols.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, 12, 700, INK, ci ? "middle" : "start"); });
+      y += rh;
+      shown.forEach(function(d){
+        var cells = [d.label]; for (var k = 0; k < maxG; k++) cells.push(isNum(d.sc[k]) ? d.sc[k] : ""); cells.push(d.total, d.avg.toFixed(1), d.run.toFixed(1));
+        cells.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, 13, ci === maxG + 1 ? 700 : 400, INK, ci ? "middle" : "start"); });
+        y += rh; line(P, y, W - P, y, "#f1efe6");
+      });
+    }
+  }
+  (opts.which === "both" ? ["league", "practice"] : [opts.which]).forEach(function(type, i){
+    if (i){ y += 26; line(P, y, W - P, y, RULE, 2); }
+    section(type);
+  });
+  y += 40; text(P, y, "Made with Bowling Bro'", 11, 400, MUTE); y += 24;
+  var H = Math.ceil(y);
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif">'
+    + '<rect width="' + W + '" height="' + H + '" fill="#ffffff"/>' + out.join("") + '</svg>';
+  return { svg: svg, width: W, height: H };
+}
+function sheetDataUrl(sheet){ return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(sheet.svg); }
+function sheetToPng(sheet){
+  return new Promise(function(resolve, reject){
+    var img = new Image();
+    img.onload = function(){
+      var scale = 2, c = document.createElement("canvas");
+      c.width = sheet.width * scale; c.height = sheet.height * scale;
+      var ctx = c.getContext("2d");
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      c.toBlob(function(b){ if (b) resolve(b); else reject(new Error("no image")); }, "image/png");
+    };
+    img.onerror = function(){ reject(new Error("could not draw")); };
+    img.src = sheetDataUrl(sheet);
+  });
+}
+var currentSheet = null;
+function renderShareSheet(){
+  function seg(elId, key, choices){
+    var el = document.getElementById(elId); el.innerHTML = "";
+    choices.forEach(function(ch){
+      var b = document.createElement("button"); b.textContent = ch[1];
+      b.className = shareOpts[key] === ch[0] ? "selected" : "";
+      b.setAttribute("aria-pressed", shareOpts[key] === ch[0] ? "true" : "false");
+      b.addEventListener("click", function(){ shareOpts[key] = ch[0]; renderShareSheet(); });
+      el.appendChild(b);
+    });
+  }
+  seg("share-which", "which", [["league", "League"], ["practice", "Practice"], ["both", "Both"]]);
+  seg("share-range", "range", [["all", "Full season"], ["recent", "Last " + CHART_RECENT + " weeks"]]);
+  var parts = document.getElementById("share-parts"); parts.innerHTML = "";
+  SHARE_PARTS.forEach(function(pt){
+    var l = document.createElement("label"), cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = !!shareOpts[pt[0]];
+    cb.addEventListener("change", function(){ shareOpts[pt[0]] = cb.checked; renderShareSheet(); });
+    l.appendChild(cb); l.appendChild(document.createTextNode(pt[1] + (pt[0] === "goals" ? " (league only)" : "")));
+    parts.appendChild(l);
+  });
+  currentSheet = buildStatsSheet(shareOpts);
+  var prev = document.getElementById("share-preview"); prev.innerHTML = "";
+  var img = document.createElement("img");
+  img.alt = "Preview of your stats summary"; img.style.cssText = "width:100%;height:auto;display:block;";
+  img.src = sheetDataUrl(currentSheet);
+  prev.appendChild(img);
+  document.getElementById("share-status").textContent = "";
+}
+document.getElementById("share-stats-btn").addEventListener("click", function(){
+  shareOpts.which = historyTab === "practice" ? "practice" : "league";
+  renderShareSheet();
+  document.getElementById("share-sheet").classList.remove("hidden");
+  document.getElementById("share-sheet").scrollTop = 0;
+});
+document.getElementById("share-close-btn").addEventListener("click", function(){ document.getElementById("share-sheet").classList.add("hidden"); });
+document.getElementById("share-send-btn").addEventListener("click", function(){
+  var statusEl = document.getElementById("share-status");
+  if (!currentSheet) return;
+  statusEl.textContent = "Preparing the image…";
+  var fileName = "bowling-bro-stats.png";
+  sheetToPng(currentSheet).then(function(blob){
+    var file = null;
+    try { file = new File([blob], fileName, { type: "image/png" }); } catch(e){}
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })){
+      // the phone's own share menu: Messages, Mail, AirDrop and so on
+      return navigator.share({ files: [file], title: "Bowling stats" }).then(function(){ statusEl.textContent = "Shared."; },
+        function(e){ statusEl.textContent = (e && e.name === "AbortError") ? "" : "Couldn't open the share menu. Try Save as PDF."; });
+    }
+    // no share menu here (most desktop browsers): save the picture instead
+    var url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+    statusEl.textContent = "Image saved to your downloads. Attach it to a text or email.";
+  }, function(){ statusEl.textContent = "Couldn't make the image on this device. Try Save as PDF."; });
+});
+document.getElementById("share-pdf-btn").addEventListener("click", function(){
+  if (!currentSheet) return;
+  var holder = document.getElementById("print-report");
+  holder.className = "sheet";
+  holder.innerHTML = "";
+  var img = document.createElement("img"); img.className = "sheet-img"; img.alt = "Stats summary";
+  img.onload = function(){ window.print(); };
+  img.src = sheetDataUrl(currentSheet);
+  holder.appendChild(img);
+});
 
 // ---------- trend chart ----------
 // One y-axis per view: Average, Scores, Consistency.
