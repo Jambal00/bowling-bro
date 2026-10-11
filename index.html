@@ -117,6 +117,13 @@ button.preset-chip { color: #1a1a1a; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: #444; margin-bottom: 4px; }
 .chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .goal-edit { border-bottom: 1px solid #eee; padding: 0 0 2px; margin-bottom: 12px; }
+.goal-group { font-size: 12px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 2px; }
+.goal-group-note { font-size: 11px; color: #6b6b6b; margin: 0 0 6px; line-height: 1.35; }
+.goal-preset { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #f1efe6; }
+.goal-preset label { font-size: 14px; color: #1a1a1a; margin: 0; flex: 1; }
+.goal-preset label small { display: block; font-size: 11px; color: #6b6b6b; }
+.goal-preset input { width: 96px; flex: 0 0 96px; margin: 0; text-align: center; }
+.goal-badge.pending { background: #eeece2; color: #6b6b6b; }
 .menu-panel { position: absolute; right: 0; top: 32px; z-index: 20; background: #fff; border: 1px solid #d8d5c8; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); padding: 6px; display: flex; flex-direction: column; min-width: 210px; }
 .menu-panel button { border: none; background: none; text-align: left; padding: 11px 12px; font-size: 14px; border-radius: 8px; }
 .menu-panel button:active { background: #f2f1ea; }
@@ -209,7 +216,7 @@ button.preset-chip { color: #1a1a1a; }
         <button id="header-setup-btn">Series setup</button>
         <button id="menu-league-btn">League report</button>
         <button id="menu-practice-btn">Practice report</button>
-        <button id="header-profile-btn">Profile</button>
+        <button id="header-profile-btn">Profile &amp; Goals</button>
         <button id="menu-install-btn">Add to Home Screen</button>
         <button id="menu-auth-btn">Sign in</button>
       </div>
@@ -472,9 +479,9 @@ button.preset-chip { color: #1a1a1a; }
     <p id="profile-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0;min-height:15px;"></p>
     <div class="card">
       <h2>Season goals</h2>
-      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;">Choose what each goal measures and the number you're aiming for. Changes save as you make them and show on your League report.</p>
+      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Fill in the goals you want and leave the rest blank. They show on your League report.</p>
       <div id="goal-editor"></div>
-      <button class="full" id="goal-add-btn">Add a goal</button>
+      <button class="full" id="goal-add-btn">Add a custom goal</button>
       <button class="primary full" id="goal-save-btn" style="margin-top:8px;">Save goals</button>
       <p id="goals-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;"></p>
     </div>
@@ -534,7 +541,7 @@ function showView(name){
   document.getElementById("header-setup-btn").classList.toggle("hidden", name==="setup");
   document.getElementById("header-profile-btn").classList.toggle("hidden", name==="profile");
   if (name!=="game"){
-    var labels = {setup:"Setup", summary:"Series Summary", history:"Season History", profile:"Profile"};
+    var labels = {setup:"Setup", summary:"Series Summary", history:"Season History", profile:"Profile & Goals"};
     document.getElementById("game-label").textContent = labels[name] || "";
   }
 }
@@ -1675,8 +1682,37 @@ var GOAL_TYPES = {
   seriesCount: { label: "Number of series at or above a score", score: true, scoreLabel: "Series score", targetLabel: "How many", tMax: 999, sMax: 3000, dS: 700, dT: 1 },
   highGame:    { label: "High game of at least a score", score: false, targetLabel: "Score", tMax: 300, dT: 250 },
   highSeries:  { label: "High series of at least a score", score: false, targetLabel: "Score", tMax: 3000, dT: 650 },
-  spread:      { label: "Average high-low spread at or below", score: false, targetLabel: "Pins", tMax: 300, dT: 40 }
+  spread:      { label: "Average high-low spread at or below", score: false, targetLabel: "Pins", tMax: 300, dT: 40 },
+  strikePct:   { label: "Strike % of at least", score: false, targetLabel: "%", tMax: 100, dT: 40 },
+  sparePct:    { label: "Spare % of at least", score: false, targetLabel: "%", tMax: 100, dT: 70 },
+  singlePinPct:{ label: "Single-pin spare % of at least", score: false, targetLabel: "%", tMax: 100, dT: 90 },
+  opens:       { label: "Open frames per game at most", score: false, targetLabel: "Per game", tMax: 10, dT: 2 }
 };
+// The ready-made goals offered on the Profile & Goals screen: one number each, blank = not set.
+var GOAL_PRESETS = [
+  { group: "Scoring", items: [
+    { type: "avg", label: "Season average", hint: "the line on your charts" },
+    { type: "highGame", label: "High game" },
+    { type: "highSeries", label: "High series" } ] },
+  { group: "Shot making", note: "Measured on nights you score frame by frame in the app.", items: [
+    { type: "strikePct", label: "Strike %", hint: "strikes per first ball" },
+    { type: "sparePct", label: "Spare %", hint: "spares per chance" },
+    { type: "singlePinPct", label: "Single-pin spare %" },
+    { type: "opens", label: "Open frames per game", hint: "at most" } ] }
+];
+var PRESET_TYPES = [];
+GOAL_PRESETS.forEach(function(grp){ grp.items.forEach(function(it){ PRESET_TYPES.push(it.type); }); });
+// everything else is a "custom" goal that takes a score as well as a target
+var CUSTOM_TYPE_KEYS = Object.keys(GOAL_TYPES).filter(function(k){ return PRESET_TYPES.indexOf(k) < 0; });
+function isCustomGoal(g){ return PRESET_TYPES.indexOf(g.type) < 0; }
+function presetGoal(type){ for (var i = 0; i < SEASON_GOALS.length; i++){ if (SEASON_GOALS[i].type === type) return SEASON_GOALS[i]; } return null; }
+// goals in the order they are shown: the ready-made ones first, then custom ones
+function orderedGoals(){
+  var out = [];
+  PRESET_TYPES.forEach(function(t){ var g = presetGoal(t); if (g) out.push(g); });
+  SEASON_GOALS.forEach(function(g){ if (isCustomGoal(g)) out.push(g); });
+  return out;
+}
 var GOAL_TYPE_KEYS = Object.keys(GOAL_TYPES);
 function legacyGoalList(o){
   o = o || {};
@@ -1742,18 +1778,50 @@ function fillGoalInputs(force){
   var holder = document.getElementById("goal-editor");
   if (!force && holder.contains(document.activeElement)) return;
   holder.innerHTML = "";
-  if (!SEASON_GOALS.length){
-    var none = document.createElement("p");
-    none.style.cssText = "font-size:13px;color:#6b6b6b;margin:0 0 10px;";
-    none.textContent = "No goals yet. Add one below.";
-    holder.appendChild(none);
-  }
+  // ready-made goals: one number each, blank means "no goal"
+  GOAL_PRESETS.forEach(function(grp){
+    var h = document.createElement("div"); h.className = "goal-group"; h.textContent = grp.group; holder.appendChild(h);
+    if (grp.note){ var n = document.createElement("p"); n.className = "goal-group-note"; n.textContent = grp.note; holder.appendChild(n); }
+    grp.items.forEach(function(it){
+      var def = GOAL_TYPES[it.type], cur = presetGoal(it.type);
+      var row = document.createElement("div"); row.className = "goal-preset";
+      var l = document.createElement("label"); l.setAttribute("for", "goal-preset-" + it.type); l.textContent = it.label;
+      if (it.hint){ var sm = document.createElement("small"); sm.textContent = it.hint; l.appendChild(sm); }
+      var inp = document.createElement("input"); inp.type = "number"; inp.id = "goal-preset-" + it.type;
+      inp.min = "0"; inp.max = String(def.tMax); inp.setAttribute("inputmode", "decimal"); inp.placeholder = "No goal";
+      inp.value = cur ? cur.target : "";
+      inp.addEventListener("change", function(){
+        var n = inp.value === "" ? NaN : Number(inp.value), g = presetGoal(it.type);
+        if (!isFinite(n) || n < 0){
+          // blank (or not a number) removes this goal
+          for (var k = SEASON_GOALS.length - 1; k >= 0; k--){ if (SEASON_GOALS[k].type === it.type) SEASON_GOALS.splice(k, 1); }
+          inp.value = "";
+        } else {
+          n = Math.min(n, def.tMax);
+          if (g) g.target = n; else SEASON_GOALS.push({ id: "g-" + it.type, type: it.type, target: n });
+          inp.value = n;
+        }
+        persistGoals();
+      });
+      row.appendChild(l); row.appendChild(inp);
+      holder.appendChild(row);
+    });
+  });
+  // custom goals: a measure, a score and a target
+  var customs = SEASON_GOALS.filter(isCustomGoal);
+  var ch = document.createElement("div"); ch.className = "goal-group"; ch.textContent = "More goals"; holder.appendChild(ch);
+  var cn = document.createElement("p"); cn.className = "goal-group-note";
+  cn.textContent = customs.length ? "Goals built around a score you choose." : "Optional. For example, 50% of games at 200 or better, or one 700 series.";
+  holder.appendChild(cn);
+  var shown = 0;
   SEASON_GOALS.forEach(function(g, idx){
+    if (!isCustomGoal(g)) return;
+    shown++;
     var def = GOAL_TYPES[g.type];
     var box = document.createElement("div"); box.className = "goal-edit";
-    var sl = document.createElement("label"); sl.textContent = "Goal " + (idx + 1) + " measures"; sl.setAttribute("for", "goal-type-" + idx);
+    var sl = document.createElement("label"); sl.textContent = "Custom goal " + shown + " measures"; sl.setAttribute("for", "goal-type-" + idx);
     var sel = document.createElement("select"); sel.id = "goal-type-" + idx;
-    GOAL_TYPE_KEYS.forEach(function(k){
+    CUSTOM_TYPE_KEYS.forEach(function(k){
       var o = document.createElement("option"); o.value = k; o.textContent = GOAL_TYPES[k].label; sel.appendChild(o);
     });
     sel.value = g.type;
@@ -1784,7 +1852,8 @@ function fillGoalInputs(force){
     var rw = document.createElement("div"); rw.style.flex = "0 0 auto";
     var rm = document.createElement("button"); rm.textContent = "Remove"; rm.style.cssText = "color:#a33;margin-bottom:10px;";
     rm.addEventListener("click", function(){
-      SEASON_GOALS.splice(idx, 1);
+      var at = SEASON_GOALS.indexOf(g);   // look it up now: earlier rows may have been added or removed since this was drawn
+      if (at >= 0) SEASON_GOALS.splice(at, 1);
       persistGoals(); fillGoalInputs(true);
     });
     rw.appendChild(rm); row.appendChild(rw);
@@ -1819,6 +1888,11 @@ function seasonStats(items){
   s.highSeries = s.totals.length ? Math.max.apply(null, s.totals) : 0;
   var sp = 0; s.spreads.forEach(function(x){ sp += x; });
   s.avgSpread = s.spreads.length ? sp / s.spreads.length : null;
+  // shot stats come only from series that were scored frame by frame
+  var shotGames = [];
+  items.forEach(function(it){ if (hasFrameDetail(it.h)) shotGames = shotGames.concat(it.h.games.filter(function(g){ return g && g.frames; })); });
+  s.shotGames = shotGames.length;
+  s.shots = shotGames.length ? aggregateStats(shotGames) : null;
   return s;
 }
 function evalGoal(g, s){
@@ -1850,6 +1924,15 @@ function evalGoal(g, s){
       detail: "Best so far " + value + (met ? "" : " · " + fmtNum(T - value) + " pins short")
     };
   }
+  // a made-out-of-chances percentage from the frame-by-frame games
+  function shotShare(label, made, chances, unit){
+    var name = label + " of " + fmtNum(T) + "% or better";
+    if (!s.shots) return { name: name, met: false, pending: true, fill: 0, detail: "No frame-by-frame games yet" };
+    if (!chances) return { name: name, met: false, pending: true, fill: 0, detail: "No " + unit + " yet" };
+    var p = 100 * made / chances, ok = p >= T;
+    return { name: name, met: ok, fill: ok ? 1 : (T ? Math.min(1, p / T) : 1),
+      detail: fmtNum(p) + "% · " + made + " of " + chances + " " + unit + " · goal " + fmtNum(T) + "%" };
+  }
   switch (g.type){
     case "avg":
       return {
@@ -1862,6 +1945,15 @@ function evalGoal(g, s){
     case "seriesCount": return howMany(s.totals, "series", s.highSeries);
     case "highGame": return best(s.highGame, "High game");
     case "highSeries": return best(s.highSeries, "High series");
+    case "strikePct": return shotShare("Strike %", s.shots && s.shots.strikes, s.shots && s.shots.firstBalls, "first balls");
+    case "sparePct": return shotShare("Spare %", s.shots && s.shots.spares, s.shots && s.shots.spareOpportunities, "chances");
+    case "singlePinPct": return shotShare("Single-pin spare %", s.shots && s.shots.singlePinMade, s.shots && s.shots.singlePinOpportunities, "single-pin leaves");
+    case "opens":
+      var oName = fmtNum(T) + " open " + (T === 1 ? "frame" : "frames") + " per game or fewer";
+      if (!s.shots) return { name: oName, met: false, pending: true, fill: 0, detail: "No frame-by-frame games yet" };
+      var per = s.shots.opens / s.shotGames, okO = per <= T;
+      return { name: oName, met: okO, fill: okO ? 1 : Math.min(1, T / per),
+        detail: per.toFixed(1) + " per game · " + s.shots.opens + " in " + plural(s.shotGames, "game") + (okO ? "" : " · " + (per - T).toFixed(1) + " over the goal") };
     case "spread":
       if (s.avgSpread === null) return { name: "Average high-low spread of " + fmtNum(T) + " pins or less", met: false, fill: 0, detail: "Needs a series with at least two games" };
       var ok = s.avgSpread <= T;
@@ -1896,17 +1988,17 @@ function renderSeason(items){
   if (!SEASON_GOALS.length){
     var none = document.createElement("p");
     none.style.cssText = "font-size:13px;color:#6b6b6b;margin:0;";
-    none.textContent = "No goals set. Add some on the Profile screen.";
+    none.textContent = "No goals set. Add some under Menu, Profile & Goals.";
     list.appendChild(none);
   }
-  SEASON_GOALS.forEach(function(goal){
+  orderedGoals().forEach(function(goal){
     var g = evalGoal(goal, s);
     if (!g) return;
-    var cls = g.met ? "met" : "short";
+    var cls = g.pending ? "pending" : (g.met ? "met" : "short");
     var row = document.createElement("div"); row.className = "goal";
     var top = document.createElement("div"); top.className = "goal-top";
     var name = document.createElement("span"); name.className = "goal-name"; name.textContent = g.name;
-    var badge = document.createElement("span"); badge.className = "goal-badge " + cls; badge.textContent = g.met ? "✓ On track" : "Not yet";
+    var badge = document.createElement("span"); badge.className = "goal-badge " + cls; badge.textContent = g.pending ? "No data yet" : (g.met ? "✓ On track" : "Not yet");
     top.appendChild(name); top.appendChild(badge);
     var bar = document.createElement("div"); bar.className = "goal-bar";
     var fill = document.createElement("div"); fill.className = "goal-fill " + cls; fill.style.width = Math.round(g.fill * 100) + "%";
