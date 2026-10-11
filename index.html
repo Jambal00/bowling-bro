@@ -130,7 +130,7 @@ button.preset-chip { color: #1a1a1a; }
 .goal-preset label small { display: block; font-size: 11px; color: #6b6b6b; }
 .goal-preset input { width: 96px; flex: 0 0 96px; margin: 0; text-align: center; }
 .goal-badge.pending { background: #eeece2; color: #6b6b6b; }
-.menu-panel { position: absolute; right: 0; top: 32px; z-index: 20; background: #fff; border: 1px solid #d8d5c8; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); padding: 6px; display: flex; flex-direction: column; min-width: 210px; }
+.menu-panel { position: absolute; right: 0; top: 40px; z-index: 20; background: #fff; border: 1px solid #d8d5c8; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.14); padding: 6px; display: flex; flex-direction: column; min-width: 210px; }
 .menu-panel button { border: none; background: none; text-align: left; padding: 11px 12px; font-size: 14px; border-radius: 8px; }
 .menu-panel button:active { background: #f2f1ea; }
 .detail-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -4px; }
@@ -216,7 +216,9 @@ button.preset-chip { color: #1a1a1a; }
     <span class="place" id="place-label">Big Al's</span>
     <div style="display:flex;align-items:center;gap:10px;position:relative;">
       <span class="game-label" id="game-label"></span>
-      <button id="menu-btn" aria-haspopup="true" aria-expanded="false" style="padding:5px 10px;font-size:13px;font-weight:600;">Menu ▾</button>
+      <button id="menu-btn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" style="padding:8px 10px;line-height:0;">
+        <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><path d="M1 2h18M1 8h18M1 14h18" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
       <div id="menu-panel" class="menu-panel hidden">
         <button id="menu-game-btn">Back to scoring</button>
         <button id="header-setup-btn">Series setup</button>
