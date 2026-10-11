@@ -470,7 +470,8 @@ button.preset-chip { color: #1a1a1a; }
       <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;">Choose what each goal measures and the number you're aiming for. Changes save as you make them and show on your League report.</p>
       <div id="goal-editor"></div>
       <button class="full" id="goal-add-btn">Add a goal</button>
-      <p id="goals-status" style="font-size:11px;color:#999;margin:8px 0 0;min-height:14px;"></p>
+      <button class="primary full" id="goal-save-btn" style="margin-top:8px;">Save goals</button>
+      <p id="goals-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;"></p>
     </div>
     <button class="full" id="profile-back-btn">Back</button>
   </div>
@@ -1783,6 +1784,11 @@ function fillGoalInputs(force){
   });
   document.getElementById("goal-add-btn").classList.toggle("hidden", SEASON_GOALS.length >= 12);
 }
+// Goals already save as each field changes; this button saves the whole list on demand and confirms it.
+document.getElementById("goal-save-btn").addEventListener("click", function(){
+  document.getElementById("goals-status").textContent = "Saving…";
+  persistGoals();
+});
 document.getElementById("goal-add-btn").addEventListener("click", function(){
   SEASON_GOALS.push({ id: "g" + Date.now().toString(36), type: "gamePct", score: 200, target: 50 });
   persistGoals(); fillGoalInputs(true);
