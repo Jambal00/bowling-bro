@@ -117,6 +117,12 @@ button.preset-chip { color: #1a1a1a; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: #444; margin-bottom: 4px; }
 .chart-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .goal-edit { border-bottom: 1px solid #eee; padding: 0 0 2px; margin-bottom: 12px; }
+.chart-range { display: inline-flex; border: 1px solid #d8d5c8; border-radius: 999px; overflow: hidden; margin: 0 0 8px; }
+.chart-range button { border: none; border-radius: 0; background: #fff; padding: 5px 12px; font-size: 12px; color: #444; }
+.chart-range button.selected { background: #1a1a1a; color: #fff; font-weight: 600; }
+.report-tabs { display: flex; border-bottom: 1px solid #d8d5c8; margin: 0 0 12px; }
+.report-tabs button { flex: 1; border: none; background: none; border-radius: 0; border-bottom: 3px solid transparent; padding: 10px 2px 8px; font-size: 14px; color: #6b6b6b; }
+.report-tabs button.selected { color: #2f6fed; border-bottom-color: #2f6fed; font-weight: 600; }
 .goal-group { font-size: 12px; font-weight: 700; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.04em; margin: 14px 0 2px; }
 .goal-group-note { font-size: 11px; color: #6b6b6b; margin: 0 0 6px; line-height: 1.35; }
 .goal-preset { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid #f1efe6; }
@@ -408,6 +414,14 @@ button.preset-chip { color: #1a1a1a; }
       <div><button class="full" id="history-tab-league">League</button></div>
       <div><button class="full" id="history-tab-practice">Practice</button></div>
     </div>
+    <div class="report-tabs" id="report-tabs" role="tablist">
+      <button data-report-tab="summary" role="tab">Summary</button>
+      <button data-report-tab="goals" role="tab">Goals</button>
+      <button data-report-tab="shots" role="tab">Shots</button>
+      <button data-report-tab="history" role="tab">History</button>
+    </div>
+    <div class="card hidden" id="report-empty"><p style="font-size:13px;color:#6b6b6b;margin:0;"></p></div>
+    <div data-report-panel="summary">
     <div class="card hidden" id="season-card">
       <h2 id="season-title">Season to date</h2>
       <div class="row">
@@ -424,22 +438,34 @@ button.preset-chip { color: #1a1a1a; }
         <label>Consistency (average high-low spread per series)</label><div id="season-spread" class="stat-sm"></div>
       </div>
     </div>
+    <div class="card hidden" id="chart-card">
+      <h2 id="chart-title">Trend</h2>
+      <div class="preset-row" id="chart-tabs"></div>
+      <div class="chart-range hidden" id="chart-range"></div>
+      <div class="chart-legend" id="chart-legend"></div>
+      <div id="chart-holder"></div>
+      <p id="chart-readout" style="font-size:12px;color:#444;margin:6px 0 0;min-height:30px;"></p>
+    </div>
+    </div>
+    <div data-report-panel="goals">
     <div class="card hidden" id="goals-card">
-      <h2>Season goals</h2>
+      <h2>Scoring goals</h2>
       <div id="goals-list"></div>
     </div>
+    <div class="card hidden" id="shot-goals-card">
+      <h2>Shot-by-shot goals</h2>
+      <p id="shot-goals-note" style="font-size:12px;color:#6b6b6b;margin:-4px 0 6px;line-height:1.4;"></p>
+      <div id="shot-goals-list"></div>
+    </div>
+    </div>
+    <div data-report-panel="shots">
     <div class="card hidden" id="shots-card">
       <h2>Shot stats</h2>
       <p id="shots-note" style="font-size:12px;color:#6b6b6b;margin:0 0 10px;line-height:1.4;"></p>
       <div id="shots-body"></div>
     </div>
-    <div class="card hidden" id="chart-card">
-      <h2 id="chart-title">Trend</h2>
-      <div class="preset-row" id="chart-tabs"></div>
-      <div class="chart-legend" id="chart-legend"></div>
-      <div id="chart-holder"></div>
-      <p id="chart-readout" style="font-size:12px;color:#444;margin:6px 0 0;min-height:30px;"></p>
     </div>
+    <div data-report-panel="history">
     <div class="card">
       <h2 id="history-list-title">Season history</h2>
       <p id="history-status" style="font-size:11px;color:#999;margin:-4px 0 8px;"></p>
@@ -447,6 +473,7 @@ button.preset-chip { color: #1a1a1a; }
     </div>
     <button class="primary full hidden" id="export-csv-btn" style="margin-bottom:8px;">Export all series as CSV</button>
     <p id="csv-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:0 0 8px;"></p>
+    </div>
     <button class="full" id="history-back-btn">Back</button>
   </div>
 
@@ -481,7 +508,6 @@ button.preset-chip { color: #1a1a1a; }
       <h2>Season goals</h2>
       <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Fill in the goals you want and leave the rest blank. They show on your League report.</p>
       <div id="goal-editor"></div>
-      <button class="full" id="goal-add-btn">Add a custom goal</button>
       <button class="primary full" id="goal-save-btn" style="margin-top:8px;">Save goals</button>
       <p id="goals-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;"></p>
     </div>
@@ -1595,6 +1621,28 @@ function seriesScores(h){
   if (h.scores) return h.scores;
   return (h.games || []).map(function(g){ return (g && typeof g === "object") ? g.finalScore : g; });
 }
+// The report is split into four tabs so each fits on about one screen.
+var reportTab = "summary";
+function applyReportTab(hasGames){
+  var practiceTab = historyTab === "practice";
+  if (practiceTab && reportTab === "goals") reportTab = "summary";   // goals are tracked on the league report only
+  Array.prototype.forEach.call(document.querySelectorAll("#report-tabs button"), function(btn){
+    var t = btn.getAttribute("data-report-tab"), on = t === reportTab;
+    btn.classList.toggle("selected", on);
+    btn.setAttribute("aria-selected", on ? "true" : "false");
+    btn.classList.toggle("hidden", practiceTab && t === "goals");
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("[data-report-panel]"), function(panel){
+    panel.classList.toggle("hidden", panel.getAttribute("data-report-panel") !== reportTab);
+  });
+  // the History tab has its own empty message; the others share this one
+  var empty = document.getElementById("report-empty");
+  empty.classList.toggle("hidden", hasGames || reportTab === "history");
+  empty.firstChild.textContent = practiceTab ? "Nothing here yet. Save a practice session to see it on this report." : "Nothing here yet. Save a league night to see your season on this report.";
+}
+Array.prototype.forEach.call(document.querySelectorAll("#report-tabs button"), function(btn){
+  btn.addEventListener("click", function(){ reportTab = btn.getAttribute("data-report-tab"); renderHistory(); });
+});
 function renderHistory(){
   var el = document.getElementById("history-list");
   var statusEl = document.getElementById("history-status");
@@ -1618,6 +1666,7 @@ function renderHistory(){
   renderSeason(items);
   renderShots(items);
   renderChart(items);
+  applyReportTab(items.some(function(it){ return seriesScores(it.h).filter(isNum).length > 0; }));
   var hasDetail = everything.some(function(it){ return hasFrameDetail(it.h); });
   document.getElementById("export-csv-btn").classList.toggle("hidden", !cloud.dl || !hasDetail);
 }
@@ -1690,11 +1739,11 @@ var GOAL_TYPES = {
 };
 // The ready-made goals offered on the Profile & Goals screen: one number each, blank = not set.
 var GOAL_PRESETS = [
-  { group: "Scoring", items: [
+  { group: "Scoring goals", items: [
     { type: "avg", label: "Season average", hint: "the line on your charts" },
     { type: "highGame", label: "High game" },
     { type: "highSeries", label: "High series" } ] },
-  { group: "Shot making", note: "Measured on nights you score frame by frame in the app.", items: [
+  { group: "Shot-by-shot goals", shots: true, note: "The detailed ones. Measured only on nights you score frame by frame in the app.", items: [
     { type: "strikePct", label: "Strike %", hint: "strikes per first ball" },
     { type: "sparePct", label: "Spare %", hint: "spares per chance" },
     { type: "singlePinPct", label: "Single-pin spare %" },
@@ -1706,11 +1755,20 @@ GOAL_PRESETS.forEach(function(grp){ grp.items.forEach(function(it){ PRESET_TYPES
 var CUSTOM_TYPE_KEYS = Object.keys(GOAL_TYPES).filter(function(k){ return PRESET_TYPES.indexOf(k) < 0; });
 function isCustomGoal(g){ return PRESET_TYPES.indexOf(g.type) < 0; }
 function presetGoal(type){ for (var i = 0; i < SEASON_GOALS.length; i++){ if (SEASON_GOALS[i].type === type) return SEASON_GOALS[i]; } return null; }
-// goals in the order they are shown: the ready-made ones first, then custom ones
-function orderedGoals(){
+// Two families of goal. Scoring goals are the big-picture ones (average, high game, high series
+// and the custom score-based goals); shot goals are the detailed ones that need frame-by-frame games.
+var SHOT_TYPES = [];
+GOAL_PRESETS.forEach(function(grp){ if (grp.shots) grp.items.forEach(function(it){ SHOT_TYPES.push(it.type); }); });
+function isShotGoal(g){ return SHOT_TYPES.indexOf(g.type) >= 0; }
+function scoringGoals(){
   var out = [];
-  PRESET_TYPES.forEach(function(t){ var g = presetGoal(t); if (g) out.push(g); });
+  PRESET_TYPES.forEach(function(t){ var g = presetGoal(t); if (g && !isShotGoal(g)) out.push(g); });
   SEASON_GOALS.forEach(function(g){ if (isCustomGoal(g)) out.push(g); });
+  return out;
+}
+function shotGoals(){
+  var out = [];
+  SHOT_TYPES.forEach(function(t){ var g = presetGoal(t); if (g) out.push(g); });
   return out;
 }
 var GOAL_TYPE_KEYS = Object.keys(GOAL_TYPES);
@@ -1779,7 +1837,7 @@ function fillGoalInputs(force){
   if (!force && holder.contains(document.activeElement)) return;
   holder.innerHTML = "";
   // ready-made goals: one number each, blank means "no goal"
-  GOAL_PRESETS.forEach(function(grp){
+  function presetGroup(grp){
     var h = document.createElement("div"); h.className = "goal-group"; h.textContent = grp.group; holder.appendChild(h);
     if (grp.note){ var n = document.createElement("p"); n.className = "goal-group-note"; n.textContent = grp.note; holder.appendChild(n); }
     grp.items.forEach(function(it){
@@ -1806,71 +1864,81 @@ function fillGoalInputs(force){
       row.appendChild(l); row.appendChild(inp);
       holder.appendChild(row);
     });
-  });
-  // custom goals: a measure, a score and a target
-  var customs = SEASON_GOALS.filter(isCustomGoal);
-  var ch = document.createElement("div"); ch.className = "goal-group"; ch.textContent = "More goals"; holder.appendChild(ch);
-  var cn = document.createElement("p"); cn.className = "goal-group-note";
-  cn.textContent = customs.length ? "Goals built around a score you choose." : "Optional. For example, 50% of games at 200 or better, or one 700 series.";
-  holder.appendChild(cn);
-  var shown = 0;
-  SEASON_GOALS.forEach(function(g, idx){
-    if (!isCustomGoal(g)) return;
-    shown++;
-    var def = GOAL_TYPES[g.type];
-    var box = document.createElement("div"); box.className = "goal-edit";
-    var sl = document.createElement("label"); sl.textContent = "Custom goal " + shown + " measures"; sl.setAttribute("for", "goal-type-" + idx);
-    var sel = document.createElement("select"); sel.id = "goal-type-" + idx;
-    CUSTOM_TYPE_KEYS.forEach(function(k){
-      var o = document.createElement("option"); o.value = k; o.textContent = GOAL_TYPES[k].label; sel.appendChild(o);
-    });
-    sel.value = g.type;
-    sel.addEventListener("change", function(){
-      var nd = GOAL_TYPES[sel.value];
-      g.type = sel.value; g.target = nd.dT;
-      if (nd.score) g.score = nd.dS; else delete g.score;
-      persistGoals(); fillGoalInputs(true);
-    });
-    box.appendChild(sl); box.appendChild(sel);
-    var row = document.createElement("div"); row.className = "row"; row.style.alignItems = "flex-end";
-    function numField(labelText, key, max){
-      var w = document.createElement("div");
-      var l = document.createElement("label"); l.textContent = labelText; l.setAttribute("for", "goal-" + key + "-" + idx);
-      var inp = document.createElement("input"); inp.type = "number"; inp.id = "goal-" + key + "-" + idx;
-      inp.min = "0"; inp.max = String(max); inp.setAttribute("inputmode", "decimal"); inp.value = g[key];
-      inp.addEventListener("change", function(){
-        var n = inp.value === "" ? NaN : Number(inp.value);
-        g[key] = (isFinite(n) && n >= 0) ? Math.min(n, max) : (key === "score" ? def.dS : def.dT);
-        inp.value = g[key];
-        persistGoals();
+  }
+  function customGroup(){
+    // custom goals: a measure, a score and a target
+    var customs = SEASON_GOALS.filter(isCustomGoal);
+    var ch = document.createElement("div"); ch.className = "goal-group"; ch.textContent = "More scoring goals"; holder.appendChild(ch);
+    var cn = document.createElement("p"); cn.className = "goal-group-note";
+    cn.textContent = customs.length ? "Goals built around a score you choose." : "Optional. For example, 50% of games at 200 or better, or one 700 series.";
+    holder.appendChild(cn);
+    var shown = 0;
+    SEASON_GOALS.forEach(function(g, idx){
+      if (!isCustomGoal(g)) return;
+      shown++;
+      var def = GOAL_TYPES[g.type];
+      var box = document.createElement("div"); box.className = "goal-edit";
+      var sl = document.createElement("label"); sl.textContent = "Custom goal " + shown + " measures"; sl.setAttribute("for", "goal-type-" + idx);
+      var sel = document.createElement("select"); sel.id = "goal-type-" + idx;
+      CUSTOM_TYPE_KEYS.forEach(function(k){
+        var o = document.createElement("option"); o.value = k; o.textContent = GOAL_TYPES[k].label; sel.appendChild(o);
       });
-      w.appendChild(l); w.appendChild(inp);
-      return w;
-    }
-    if (def.score) row.appendChild(numField(def.scoreLabel, "score", def.sMax));
-    row.appendChild(numField(def.targetLabel, "target", def.tMax));
-    var rw = document.createElement("div"); rw.style.flex = "0 0 auto";
-    var rm = document.createElement("button"); rm.textContent = "Remove"; rm.style.cssText = "color:#a33;margin-bottom:10px;";
-    rm.addEventListener("click", function(){
-      var at = SEASON_GOALS.indexOf(g);   // look it up now: earlier rows may have been added or removed since this was drawn
-      if (at >= 0) SEASON_GOALS.splice(at, 1);
-      persistGoals(); fillGoalInputs(true);
+      sel.value = g.type;
+      sel.addEventListener("change", function(){
+        var nd = GOAL_TYPES[sel.value];
+        g.type = sel.value; g.target = nd.dT;
+        if (nd.score) g.score = nd.dS; else delete g.score;
+        persistGoals(); fillGoalInputs(true);
+      });
+      box.appendChild(sl); box.appendChild(sel);
+      var row = document.createElement("div"); row.className = "row"; row.style.alignItems = "flex-end";
+      function numField(labelText, key, max){
+        var w = document.createElement("div");
+        var l = document.createElement("label"); l.textContent = labelText; l.setAttribute("for", "goal-" + key + "-" + idx);
+        var inp = document.createElement("input"); inp.type = "number"; inp.id = "goal-" + key + "-" + idx;
+        inp.min = "0"; inp.max = String(max); inp.setAttribute("inputmode", "decimal"); inp.value = g[key];
+        inp.addEventListener("change", function(){
+          var n = inp.value === "" ? NaN : Number(inp.value);
+          g[key] = (isFinite(n) && n >= 0) ? Math.min(n, max) : (key === "score" ? def.dS : def.dT);
+          inp.value = g[key];
+          persistGoals();
+        });
+        w.appendChild(l); w.appendChild(inp);
+        return w;
+      }
+      if (def.score) row.appendChild(numField(def.scoreLabel, "score", def.sMax));
+      row.appendChild(numField(def.targetLabel, "target", def.tMax));
+      var rw = document.createElement("div"); rw.style.flex = "0 0 auto";
+      var rm = document.createElement("button"); rm.textContent = "Remove"; rm.style.cssText = "color:#a33;margin-bottom:10px;";
+      rm.addEventListener("click", function(){
+        var at = SEASON_GOALS.indexOf(g);   // look it up now: earlier rows may have been added or removed since this was drawn
+        if (at >= 0) SEASON_GOALS.splice(at, 1);
+        persistGoals(); fillGoalInputs(true);
+      });
+      rw.appendChild(rm); row.appendChild(rw);
+      box.appendChild(row);
+      holder.appendChild(box);
     });
-    rw.appendChild(rm); row.appendChild(rw);
-    box.appendChild(row);
-    holder.appendChild(box);
-  });
-  document.getElementById("goal-add-btn").classList.toggle("hidden", SEASON_GOALS.length >= 12);
+    if (SEASON_GOALS.length < 12){
+      var add = document.createElement("button"); add.className = "full"; add.id = "goal-add-btn"; add.textContent = "Add a custom goal";
+      add.addEventListener("click", addCustomGoal);
+      holder.appendChild(add);
+    }
+  }
+  // big-picture goals first (ready-made, then custom), then the shot-by-shot ones
+  GOAL_PRESETS.forEach(function(grp){ if (!grp.shots) presetGroup(grp); });
+  customGroup();
+  GOAL_PRESETS.forEach(function(grp){ if (grp.shots) presetGroup(grp); });
 }
 // Goals already save as each field changes; this button saves the whole list on demand and confirms it.
 document.getElementById("goal-save-btn").addEventListener("click", function(){
   document.getElementById("goals-status").textContent = "Saving…";
   persistGoals();
 });
-document.getElementById("goal-add-btn").addEventListener("click", function(){
+function addCustomGoal(){
   SEASON_GOALS.push({ id: "g" + Date.now().toString(36), type: "gamePct", score: 200, target: 50 });
   persistGoals(); fillGoalInputs(true);
-});
+}
 
 function plural(n, word){ return n + " " + word + ((n === 1 || /s$/.test(word)) ? "" : "s"); }
 function fmtNum(n){ return (Math.round(n * 10) / 10).toString(); }
@@ -1964,6 +2032,23 @@ function evalGoal(g, s){
   }
   return null;
 }
+// one goal with its badge, progress bar and detail line
+function goalRow(goal, s){
+  var g = evalGoal(goal, s);
+  if (!g) return null;
+  var cls = g.pending ? "pending" : (g.met ? "met" : "short");
+  var row = document.createElement("div"); row.className = "goal";
+  var top = document.createElement("div"); top.className = "goal-top";
+  var name = document.createElement("span"); name.className = "goal-name"; name.textContent = g.name;
+  var badge = document.createElement("span"); badge.className = "goal-badge " + cls; badge.textContent = g.pending ? "No data yet" : (g.met ? "✓ On track" : "Not yet");
+  top.appendChild(name); top.appendChild(badge);
+  var bar = document.createElement("div"); bar.className = "goal-bar";
+  var fill = document.createElement("div"); fill.className = "goal-fill " + cls; fill.style.width = Math.round(g.fill * 100) + "%";
+  bar.appendChild(fill);
+  var detail = document.createElement("div"); detail.className = "goal-detail"; detail.textContent = g.detail;
+  row.appendChild(top); row.appendChild(bar); row.appendChild(detail);
+  return row;
+}
 function renderSeason(items){
   var s = seasonStats(items);
   var has = s.games.length > 0;
@@ -1985,28 +2070,13 @@ function renderSeason(items){
 
   var list = document.getElementById("goals-list");
   list.innerHTML = "";
-  if (!SEASON_GOALS.length){
+  if (!scoringGoals().length){
     var none = document.createElement("p");
     none.style.cssText = "font-size:13px;color:#6b6b6b;margin:0;";
-    none.textContent = "No goals set. Add some under Menu, Profile & Goals.";
+    none.textContent = "No scoring goals set. Add some under Menu, Profile & Goals.";
     list.appendChild(none);
   }
-  orderedGoals().forEach(function(goal){
-    var g = evalGoal(goal, s);
-    if (!g) return;
-    var cls = g.pending ? "pending" : (g.met ? "met" : "short");
-    var row = document.createElement("div"); row.className = "goal";
-    var top = document.createElement("div"); top.className = "goal-top";
-    var name = document.createElement("span"); name.className = "goal-name"; name.textContent = g.name;
-    var badge = document.createElement("span"); badge.className = "goal-badge " + cls; badge.textContent = g.pending ? "No data yet" : (g.met ? "✓ On track" : "Not yet");
-    top.appendChild(name); top.appendChild(badge);
-    var bar = document.createElement("div"); bar.className = "goal-bar";
-    var fill = document.createElement("div"); fill.className = "goal-fill " + cls; fill.style.width = Math.round(g.fill * 100) + "%";
-    bar.appendChild(fill);
-    var detail = document.createElement("div"); detail.className = "goal-detail"; detail.textContent = g.detail;
-    row.appendChild(top); row.appendChild(bar); row.appendChild(detail);
-    list.appendChild(row);
-  });
+  scoringGoals().forEach(function(goal){ var row = goalRow(goal, s); if (row) list.appendChild(row); });
 }
 
 // ---------- shot stats (from series scored frame by frame) ----------
@@ -2026,14 +2096,33 @@ function renderShots(items){
     rows.push({ label: String(it.h.date || "").replace(/\/\d{4}$/, ""), agg: aggregateStats(games), n: games.length });
   });
   card.classList.toggle("hidden", !gamesTotal);
+  document.getElementById("shot-goals-card").classList.add("hidden");
   body.innerHTML = "";
   if (!gamesTotal) return;
+  // Shot-by-shot goals live on the Goals tab, with the same "how many games" note as the stats.
+  var coverage = !rows.length
+    ? "Measured on nights scored frame by frame in the app. None saved yet."
+    : "From " + plural(allGames.length, "game") + " scored frame by frame" + (allGames.length < gamesTotal ? " (of " + gamesTotal + " on this report; the rest were entered as scores only)." : ".");
+  var sgCard = document.getElementById("shot-goals-card"), sgList = document.getElementById("shot-goals-list");
+  sgCard.classList.toggle("hidden", practiceTab);
+  sgList.innerHTML = "";
+  document.getElementById("shot-goals-note").textContent = coverage;
+  if (!practiceTab){
+    var sg = shotGoals(), st = seasonStats(items);
+    if (!sg.length){
+      var none = document.createElement("p");
+      none.style.cssText = "font-size:13px;color:#6b6b6b;margin:6px 0 0;";
+      none.textContent = "No shot-by-shot goals set. Add some under Menu, Profile & Goals.";
+      sgList.appendChild(none);
+    }
+    sg.forEach(function(goal){ var row = goalRow(goal, st); if (row) sgList.appendChild(row); });
+  }
   if (!rows.length){
     note.textContent = "Strike %, spare % and the other shot stats appear here once a " + (practiceTab ? "session" : "night") + " is scored frame by frame in the app. Nights entered as scores only can't be broken down.";
     return;
   }
   var agg = aggregateStats(allGames);
-  note.textContent = "From " + plural(allGames.length, "game") + " scored frame by frame" + (allGames.length < gamesTotal ? " (of " + gamesTotal + " on this report; the rest were entered as scores only)." : ".");
+  note.textContent = coverage;
   function tile(label, value, sub){
     var w = document.createElement("div");
     var l = document.createElement("label"); l.textContent = label;
@@ -2080,6 +2169,9 @@ var CHART_C = { game: "#7c5cc4", night: "#2f6fed", run: "#d9480f", grid: "#e8e6d
 var GAME_COLORS = ["#2f6fed", "#d6332a", "#f08c00", "#c2409a"];   // blue, red, orange, magenta; green is kept for the goal line
 function gameColor(gi){ return GAME_COLORS[gi] || CHART_C.extra; }
 var chartView = "running";
+// Long seasons: show the most recent stretch by default, with the whole season one tap away.
+var CHART_RECENT = 10;
+var chartRange = "recent";
 function svgEl(tag, attrs, text){
   var e = document.createElementNS(SVGNS, tag);
   Object.keys(attrs || {}).forEach(function(k){ e.setAttribute(k, attrs[k]); });
@@ -2103,6 +2195,23 @@ function renderChart(items){
   card.classList.toggle("hidden", !data.length);
   if (!data.length) return;
   var practiceTab = historyTab === "practice";
+
+  // Range switch, offered only once there are more weeks than fit comfortably. The running
+  // average above is already worked out over every week, so trimming here only changes the view.
+  var rangeEl = document.getElementById("chart-range"), longSeason = data.length > CHART_RECENT;
+  rangeEl.classList.toggle("hidden", !longSeason);
+  rangeEl.innerHTML = "";
+  if (longSeason){
+    [["recent", "Last " + CHART_RECENT + " " + (practiceTab ? "sessions" : "weeks")], ["all", practiceTab ? "All sessions" : "Full season"]].forEach(function(r){
+      var b = document.createElement("button");
+      b.textContent = r[1];
+      b.className = chartRange === r[0] ? "selected" : "";
+      b.setAttribute("aria-pressed", chartRange === r[0] ? "true" : "false");
+      b.addEventListener("click", function(){ chartRange = r[0]; renderChart(items); });
+      rangeEl.appendChild(b);
+    });
+    if (chartRange === "recent") data = data.slice(-CHART_RECENT);
+  }
 
   var tabs = document.getElementById("chart-tabs");
   tabs.innerHTML = "";
@@ -2169,6 +2278,9 @@ function renderChart(items){
   svg.appendChild(cross);
   function path(key){ return data.map(function(d, i){ return (i ? "L" : "M") + x(i).toFixed(1) + " " + y(d[key]).toFixed(1); }).join(" "); }
   var labelPoints = n <= 10;
+  var dense = n > 14;   // many weeks: smaller dots so neighbours don't run together
+  function dotR(r){ return dense ? 2 : r; }
+  function dotStroke(w){ return dense ? 0.75 : w; }
   if (chartView === "scores"){
     // one line per game number: Game 1 across every week, Game 2 across every week, and so on
     var gameCount = 0;
@@ -2183,20 +2295,22 @@ function renderChart(items){
       });
       if (!pts.length) continue;
       svg.appendChild(svgEl("path", { d: dPath, fill: "none", stroke: gameColor(gi), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-      pts.forEach(function(p){ svg.appendChild(svgEl("circle", { cx: p[0], cy: p[1], r: 3.5, fill: gameColor(gi), stroke: "#fff", "stroke-width": 1.5 })); });
+      pts.forEach(function(p){ svg.appendChild(svgEl("circle", { cx: p[0], cy: p[1], r: dotR(3.5), fill: gameColor(gi), stroke: "#fff", "stroke-width": dotStroke(1.5) })); });
     }
   } else if (chartView === "running"){
     svg.appendChild(svgEl("path", { d: path("avg"), fill: "none", stroke: CHART_C.week, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-    data.forEach(function(d, i){ svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.avg), r: 3.5, fill: CHART_C.week, stroke: "#fff", "stroke-width": 1.5 })); });
+    data.forEach(function(d, i){ svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.avg), r: dotR(3.5), fill: CHART_C.week, stroke: "#fff", "stroke-width": dotStroke(1.5) })); });
     svg.appendChild(svgEl("path", { d: path("run"), fill: "none", stroke: CHART_C.night, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-    data.forEach(function(d, i){ svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.run), r: 4, fill: CHART_C.night, stroke: "#fff", "stroke-width": 2 })); });
+    data.forEach(function(d, i){ svg.appendChild(svgEl("circle", { cx: x(i), cy: y(d.run), r: dotR(4), fill: CHART_C.night, stroke: "#fff", "stroke-width": dotStroke(2) })); });
     function pointLabel(px, py, text, fill){
       svg.appendChild(svgEl("text", { x: px, y: py, "text-anchor": "middle", "font-size": 9, "font-weight": 600, fill: fill, stroke: "#fff", "stroke-width": 3, "stroke-linejoin": "round", "paint-order": "stroke" }, text));
     }
     if (labelPoints) data.forEach(function(d, i){
       // the higher point is labelled above it and the lower one below it, so the two never share a spot
       var runOnTop = d.run >= d.avg;
-      pointLabel(x(i), y(d.run) + (runOnTop ? -8 : 14), d.run.toFixed(1), "#1a1a1a");   // running average
+      // running average: with more than 7 weeks the five-character labels would touch, so label
+      // every other week, counting back from the latest so the newest one always shows
+      if (n <= 7 || (n - 1 - i) % 2 === 0) pointLabel(x(i), y(d.run) + (runOnTop ? -8 : 14), d.run.toFixed(1), "#1a1a1a");
       pointLabel(x(i), y(d.avg) + (runOnTop ? 14 : -8), d.total, CHART_C.ink);            // that week's series total
     });
   } else {
