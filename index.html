@@ -1683,7 +1683,8 @@ function cleanGoals(src){
   var list;
   if (Array.isArray(src)) list = src;
   else if (src && Array.isArray(src.list)) list = src.list;
-  else list = legacyGoalList(src);
+  else if (src && typeof src === "object") list = legacyGoalList(src);
+  else list = [];   // never saved any goals: start with none rather than someone else's targets
   var out = [];
   list.forEach(function(g, i){
     if (!g || !GOAL_TYPES[g.type] || out.length >= 12) return;
@@ -1702,7 +1703,13 @@ function cleanGoals(src){
 var SEASON_GOALS = cleanGoals(state.goals);
 function goalAverage(){
   for (var i = 0; i < SEASON_GOALS.length; i++){ if (SEASON_GOALS[i].type === "avg") return SEASON_GOALS[i].target; }
-  return 190;
+  return null;   // no average goal set
+}
+// lowest score named in the bowler's own goals of the given types, or null when there are none
+function goalFloor(types){
+  var lo = null;
+  SEASON_GOALS.forEach(function(g){ if (types.indexOf(g.type) >= 0 && isFinite(g.score) && (lo === null || g.score < lo)) lo = g.score; });
+  return lo;
 }
 var goalsWrite = Promise.resolve();
 function persistGoals(){
@@ -1946,7 +1953,7 @@ function renderChart(items){
   if (chartView === "scores"){
     title = "Game scores by " + (practiceTab ? "session" : "week");
     data.forEach(function(d){ vals = vals.concat(d.sc); });
-    if (!practiceTab) refs.push({ v: goalAverage(), text: "goal " + fmtNum(goalAverage()) });
+    if (!practiceTab && goalAverage() !== null) refs.push({ v: goalAverage(), text: "goal " + fmtNum(goalAverage()) });
     var maxGames = 0;
     data.forEach(function(d){ maxGames = Math.max(maxGames, d.games.length); });
     for (var lg0 = 0; lg0 < Math.min(maxGames, GAME_COLORS.length); lg0++) legend.push(["line", gameColor(lg0), "Game " + (lg0 + 1)]);
@@ -1965,7 +1972,7 @@ function renderChart(items){
     title = "Averages by " + (practiceTab ? "session" : "week");
     data.forEach(function(d){ vals.push(d.run, d.avg); });
     legend = [["line", CHART_C.night, "Running average"], ["line", CHART_C.run, (practiceTab ? "Session" : "Weekly") + " average"]];
-    if (!practiceTab) refs.push({ v: goalAverage(), text: "goal " + fmtNum(goalAverage()) });
+    if (!practiceTab && goalAverage() !== null) refs.push({ v: goalAverage(), text: "goal " + fmtNum(goalAverage()) });
   } else {
     title = "High-low spread by " + (practiceTab ? "session" : "week") + " (lower is steadier)";
     zero = true;
@@ -2103,7 +2110,10 @@ function cell(tag, text, cls){
   return c;
 }
 function renderDetailTable(el, items){
-  var G = { average: goalAverage() }, league = historyTab !== "practice";
+  // green = at or above the bowler's average goal; red = below the lowest game score in their goals.
+  // With no goals of that kind the numbers stay plain.
+  var G = { average: goalAverage(), floor: goalFloor(["gamePct", "gameCount"]), series: goalFloor(["seriesPct", "seriesCount"]) }, league = historyTab !== "practice";
+  function vsGoal(v, good, bad){ return (good !== null && v >= good) ? "good" : ((bad !== null && v < bad) ? "bad" : ""); }
   var maxGames = 0;
   var data = sortChrono(items).map(function(it, idx){
     var sc = seriesScores(it.h).filter(isNum);
@@ -2111,7 +2121,7 @@ function renderDetailTable(el, items){
     return { it: it, key: it.h.id || ("legacy-" + idx), sc: sc };
   }).filter(function(d){ return d.sc.length; });
   if (!data.length) return;
-  function gameCls(s){ return s >= G.average ? "good" : (s < 175 ? "bad" : ""); }
+  function gameCls(s){ return vsGoal(s, G.average, G.floor); }
 
   var colSum = [], colN = [], pins = 0, games = 0, spreadSum = 0, spreadN = 0;
   var bodyRows = [];
@@ -2126,8 +2136,8 @@ function renderDetailTable(el, items){
     for (var i = 0; i < maxGames; i++){
       tr.appendChild(isNum(d.sc[i]) ? cell("td", d.sc[i], gameCls(d.sc[i])) : cell("td", ""));
     }
-    tr.appendChild(cell("td", total, total >= 200 * d.sc.length ? "good" : (total < 175 * d.sc.length ? "bad" : "")));
-    tr.appendChild(cell("td", avg.toFixed(1), avg >= G.average ? "good" : (avg < 175 ? "bad" : "")));
+    tr.appendChild(cell("td", total, vsGoal(total, G.series === null ? null : G.series * d.sc.length / 3, G.floor === null ? null : G.floor * d.sc.length)));
+    tr.appendChild(cell("td", avg.toFixed(1), vsGoal(avg, G.average, G.floor)));
     if (d.sc.length > 1){
       var spread = Math.max.apply(null, d.sc) - Math.min.apply(null, d.sc);
       spreadSum += spread; spreadN++;
@@ -2152,7 +2162,7 @@ function renderDetailTable(el, items){
   for (var i = 0; i < maxGames; i++) avgRow.appendChild(cell("td", colN[i] ? (colSum[i] / colN[i]).toFixed(1) : ""));
   avgRow.appendChild(cell("td", pins, "strong"));
   var overall = pins / games;
-  avgRow.appendChild(cell("td", overall.toFixed(1), "strong" + (overall >= G.average ? " good" : "")));
+  avgRow.appendChild(cell("td", overall.toFixed(1), "strong" + (G.average !== null && overall >= G.average ? " good" : "")));
   avgRow.appendChild(cell("td", spreadN ? (spreadSum / spreadN).toFixed(1) : ""));
   avgRow.appendChild(cell("td", ""));
   if (league) avgRow.appendChild(cell("td", ""));
