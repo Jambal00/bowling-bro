@@ -421,6 +421,11 @@ button.preset-chip { color: #1a1a1a; }
       <h2>Season goals</h2>
       <div id="goals-list"></div>
     </div>
+    <div class="card hidden" id="shots-card">
+      <h2>Shot stats</h2>
+      <p id="shots-note" style="font-size:12px;color:#6b6b6b;margin:0 0 10px;line-height:1.4;"></p>
+      <div id="shots-body"></div>
+    </div>
     <div class="card hidden" id="chart-card">
       <h2 id="chart-title">Trend</h2>
       <div class="preset-row" id="chart-tabs"></div>
@@ -1095,7 +1100,7 @@ function computeGameStats(g){
   var scores = computeScoresFromFrames(g.frames);
   var stats = {
     finalScore: g.complete ? g.finalScore : lastKnownScore(scores),
-    strikes: 0, frameCount: 0,
+    strikes: 0, firstBalls: 0, frameCount: 0,
     spareOpportunities: 0, spares: 0, opens: 0,
     singlePinOpportunities: 0, singlePinMade: 0,
     splitOpportunities: 0, splitsLeft: 0
@@ -1105,32 +1110,30 @@ function computeGameStats(g){
     if (!nums.length) return;
     stats.frameCount++;
 
-    // Split% denominator = every fresh-rack first ball thrown in the game (10-12
-    // per complete game: frames 1-9 contribute one each, frame 10 contributes 1-3
-    // depending on strikes/spares). Frames 1-9 always get exactly one such check.
-    countSplitOpportunity(f, 0, stats);
-
-    if (fi<9){
-      if (nums[0]===10){ stats.strikes++; return; }
-      if (nums.length<2) return;
-      evalSpareFrame(nums, f, stats);
-    } else {
-      nums.forEach(function(n){ if (n===10) stats.strikes++; });
-      if (nums.length>=2){
-        if (nums[0]===10){
-          countSplitOpportunity(f, 1, stats); // ball 2 gets a fresh rack after a strike
-          if (nums.length>=3 && nums[1]===10){
-            countSplitOpportunity(f, 2, stats); // ball 3 fresh again after two strikes
-          }
-        } else if (nums[0]+nums[1]===10){
-          if (nums.length>=3){
-            countSplitOpportunity(f, 2, stats); // bonus ball after a spare is a fresh rack
-          }
-        }
+    // "First balls" = every ball thrown at a full rack: one per frame in frames 1-9, and one to
+    // three in the 10th (the fill balls after a strike or spare are fresh racks too). A complete
+    // game has 10-12 of them. Strike % and Split % are both measured against this count.
+    var fresh = [0];
+    if (fi === 9){
+      if (nums[0] === 10){
+        if (nums.length >= 2) fresh.push(1);
+        if (nums.length >= 3 && nums[1] === 10) fresh.push(2);
+      } else if (nums.length >= 3 && nums[0] + nums[1] === 10){
+        fresh.push(2);
       }
-      if (nums[0]===10) return;
-      if (nums.length<2) return;
-      evalSpareFrame(nums, f, stats);
+    }
+    fresh.forEach(function(bi){
+      stats.firstBalls++;
+      if (nums[bi] === 10) stats.strikes++;   // ten on a full rack; ten on a second ball is a spare
+      countSplitOpportunity(f, bi, stats);
+    });
+
+    // Spare chances = every second ball thrown at pins left standing.
+    if (nums[0] !== 10){
+      if (nums.length >= 2) evalSpareChance(nums[0], nums[1], f, 0, stats, true);
+    } else if (fi === 9 && nums.length >= 3 && nums[1] !== 10){
+      // 10th frame: strike, then a leave and a try at it. A miss here is not an open frame.
+      evalSpareChance(nums[1], nums[2], f, 1, stats, false);
     }
   });
   return stats;
@@ -1140,23 +1143,26 @@ function countSplitOpportunity(f, ballIdx, stats){
   var standing = (f._pinSets && f._pinSets[ballIdx]) || [];
   if (isSplitLeave(standing)) stats.splitsLeft++;
 }
-function evalSpareFrame(nums, f, stats){
+// first/second = pins knocked by the leave ball and the spare ball; leaveIdx = which ball made the leave
+function evalSpareChance(first, second, f, leaveIdx, stats, countsAsOpen){
   stats.spareOpportunities++;
-  var made = (nums[0]+nums[1]===10);
-  if (made) stats.spares++; else stats.opens++;
-  var standing = (f._pinSets && f._pinSets[0]) || [];
-  if (standing.length===1){
+  var made = (first + second === 10);
+  if (made) stats.spares++; else if (countsAsOpen) stats.opens++;
+  var pinSet = f._pinSets && f._pinSets[leaveIdx];
+  if (pinSet ? pinSet.length === 1 : first === 9){
     stats.singlePinOpportunities++;
     if (made) stats.singlePinMade++;
   }
 }
 function pct(n, d){ return d ? Math.round(100*n/d) : 0; }
+// percentage as text; a dash when there were no chances, so "0 of 0" never reads as 0%
+function pctText(n, d){ return d ? Math.round(100*n/d) + "%" : "—"; }
 function aggregateStats(games){
-  var agg = { strikes:0, frameCount:0, spareOpportunities:0, spares:0, opens:0, singlePinOpportunities:0, singlePinMade:0, splitOpportunities:0, splitsLeft:0, total:0 };
+  var agg = { strikes:0, firstBalls:0, frameCount:0, spareOpportunities:0, spares:0, opens:0, singlePinOpportunities:0, singlePinMade:0, splitOpportunities:0, splitsLeft:0, total:0 };
   games.forEach(function(g){
     var s = computeGameStats(g);
     agg.total += s.finalScore;
-    agg.strikes += s.strikes; agg.frameCount += s.frameCount;
+    agg.strikes += s.strikes; agg.firstBalls += s.firstBalls; agg.frameCount += s.frameCount;
     agg.spareOpportunities += s.spareOpportunities; agg.spares += s.spares; agg.opens += s.opens;
     agg.singlePinOpportunities += s.singlePinOpportunities; agg.singlePinMade += s.singlePinMade;
     agg.splitOpportunities += s.splitOpportunities; agg.splitsLeft += s.splitsLeft;
@@ -1165,10 +1171,10 @@ function aggregateStats(games){
 }
 function gameStatLines(s){
   return [
-    ["Strike %", pct(s.strikes, s.frameCount) + "%"],
-    ["Spare % (of " + s.spareOpportunities + " chances)", pct(s.spares, s.spareOpportunities) + "%"],
-    ["Single-pin % (of " + s.singlePinOpportunities + " leaves)", pct(s.singlePinMade, s.singlePinOpportunities) + "%"],
-    ["Split % (of " + s.splitOpportunities + " first balls)", pct(s.splitsLeft, s.splitOpportunities) + "%"],
+    ["Strike % (" + s.strikes + " of " + s.firstBalls + " first balls)", pctText(s.strikes, s.firstBalls)],
+    ["Spare % (" + s.spares + " of " + s.spareOpportunities + " chances)", pctText(s.spares, s.spareOpportunities)],
+    ["Single-pin % (" + s.singlePinMade + " of " + s.singlePinOpportunities + " leaves)", pctText(s.singlePinMade, s.singlePinOpportunities)],
+    ["Split % (" + s.splitsLeft + " of " + s.splitOpportunities + " first balls)", pctText(s.splitsLeft, s.splitOpportunities)],
     ["Open frames", String(s.opens)]
   ];
 }
@@ -1209,10 +1215,10 @@ function showSummary(){
   var agg = aggregateStats(state.games);
   document.getElementById("summary-total").textContent = agg.total;
   document.getElementById("summary-avg").textContent = state.games.length ? (agg.total/state.games.length).toFixed(1) : "0.0";
-  document.getElementById("summary-strike-pct").textContent = pct(agg.strikes, agg.frameCount) + "%";
-  document.getElementById("summary-spare-pct").textContent = pct(agg.spares, agg.spareOpportunities) + "%";
-  document.getElementById("summary-singlepin-pct").textContent = pct(agg.singlePinMade, agg.singlePinOpportunities) + "%";
-  document.getElementById("summary-split-pct").textContent = pct(agg.splitsLeft, agg.splitOpportunities) + "%";
+  document.getElementById("summary-strike-pct").textContent = pctText(agg.strikes, agg.firstBalls);
+  document.getElementById("summary-spare-pct").textContent = pctText(agg.spares, agg.spareOpportunities);
+  document.getElementById("summary-singlepin-pct").textContent = pctText(agg.singlePinMade, agg.singlePinOpportunities);
+  document.getElementById("summary-split-pct").textContent = pctText(agg.splitsLeft, agg.splitOpportunities);
   document.getElementById("summary-opens").textContent = agg.opens;
   showView("summary");
 }
@@ -1550,13 +1556,9 @@ function buildPrintReport(){
   var agg = aggregateStats(state.games);
   html += "<h2>Series Summary</h2>";
   html += "<p>Total: " + agg.total + " - Average: " + (state.games.length ? (agg.total/state.games.length).toFixed(1) : "0.0") + "</p>";
-  html += "<div class=\"pdf-game-stats\">" +
-    "<div><strong>Strike %:</strong> " + pct(agg.strikes, agg.frameCount) + "%</div>" +
-    "<div><strong>Spare % (of " + agg.spareOpportunities + " chances):</strong> " + pct(agg.spares, agg.spareOpportunities) + "%</div>" +
-    "<div><strong>Single-pin % (of " + agg.singlePinOpportunities + " leaves):</strong> " + pct(agg.singlePinMade, agg.singlePinOpportunities) + "%</div>" +
-    "<div><strong>Split % (of " + agg.splitOpportunities + " first balls):</strong> " + pct(agg.splitsLeft, agg.splitOpportunities) + "%</div>" +
-    "<div><strong>Open frames:</strong> " + agg.opens + "</div>" +
-    "</div>";
+  html += "<div class=\"pdf-game-stats\">" + gameStatLines(agg).map(function(line){
+    return "<div><strong>" + line[0] + ":</strong> " + line[1] + "</div>";
+  }).join("") + "</div>";
   document.getElementById("print-report").innerHTML = html;
 }
 document.getElementById("export-pdf-btn").addEventListener("click", function(){
@@ -1601,6 +1603,7 @@ function renderHistory(){
   }
   renderDetailTable(el, items);
   renderSeason(items);
+  renderShots(items);
   renderChart(items);
   var hasDetail = everything.some(function(it){ return hasFrameDetail(it.h); });
   document.getElementById("export-csv-btn").classList.toggle("hidden", !cloud.dl || !hasDetail);
@@ -1906,6 +1909,68 @@ function renderSeason(items){
     row.appendChild(top); row.appendChild(bar); row.appendChild(detail);
     list.appendChild(row);
   });
+}
+
+// ---------- shot stats (from series scored frame by frame) ----------
+// Recomputed from the saved frames each time, so every series uses the same formulas
+// no matter when it was saved.
+function renderShots(items){
+  var card = document.getElementById("shots-card"), body = document.getElementById("shots-body"), note = document.getElementById("shots-note");
+  var practiceTab = historyTab === "practice";
+  var rows = [], allGames = [], gamesTotal = 0;
+  sortChrono(items).forEach(function(it){
+    var sc = seriesScores(it.h).filter(isNum);
+    if (!sc.length) return;
+    gamesTotal += sc.length;
+    if (!hasFrameDetail(it.h)) return;
+    var games = it.h.games.filter(function(g){ return g && g.frames; });
+    allGames = allGames.concat(games);
+    rows.push({ label: String(it.h.date || "").replace(/\/\d{4}$/, ""), agg: aggregateStats(games), n: games.length });
+  });
+  card.classList.toggle("hidden", !gamesTotal);
+  body.innerHTML = "";
+  if (!gamesTotal) return;
+  if (!rows.length){
+    note.textContent = "Strike %, spare % and the other shot stats appear here once a " + (practiceTab ? "session" : "night") + " is scored frame by frame in the app. Nights entered as scores only can't be broken down.";
+    return;
+  }
+  var agg = aggregateStats(allGames);
+  note.textContent = "From " + plural(allGames.length, "game") + " scored frame by frame" + (allGames.length < gamesTotal ? " (of " + gamesTotal + " on this report; the rest were entered as scores only)." : ".");
+  function tile(label, value, sub){
+    var w = document.createElement("div");
+    var l = document.createElement("label"); l.textContent = label;
+    var v = document.createElement("div"); v.className = "stat-sm"; v.textContent = value;
+    var d = document.createElement("div"); d.style.cssText = "font-size:11px;color:#6b6b6b;"; d.textContent = sub;
+    w.appendChild(l); w.appendChild(v); w.appendChild(d);
+    return w;
+  }
+  function tileRow(a, b){
+    var r = document.createElement("div"); r.className = "row"; r.style.marginBottom = "10px";
+    r.appendChild(a); r.appendChild(b); body.appendChild(r);
+  }
+  tileRow(tile("Strike %", pctText(agg.strikes, agg.firstBalls), agg.strikes + " of " + agg.firstBalls + " first balls"),
+          tile("Spare %", pctText(agg.spares, agg.spareOpportunities), agg.spares + " of " + agg.spareOpportunities + " chances"));
+  tileRow(tile("Single-pin %", pctText(agg.singlePinMade, agg.singlePinOpportunities), agg.singlePinMade + " of " + agg.singlePinOpportunities + " leaves"),
+          tile("Split %", pctText(agg.splitsLeft, agg.splitOpportunities), agg.splitsLeft + " of " + agg.splitOpportunities + " first balls"));
+  tileRow(tile("Open frames", String(agg.opens), (agg.opens / allGames.length).toFixed(1) + " per game"), document.createElement("div"));
+
+  var table = document.createElement("table"); table.className = "detail-table";
+  var thead = document.createElement("thead"), hr = document.createElement("tr");
+  [practiceTab ? "Practice" : "League", "Strike %", "Spare %", "Single-pin %", "Split %", "Opens"].forEach(function(t){
+    var th = document.createElement("th"); th.textContent = t; hr.appendChild(th);
+  });
+  thead.appendChild(hr); table.appendChild(thead);
+  var tb = document.createElement("tbody");
+  rows.forEach(function(r){
+    var tr = document.createElement("tr"); tr.style.cursor = "default";
+    [r.label, pctText(r.agg.strikes, r.agg.firstBalls), pctText(r.agg.spares, r.agg.spareOpportunities),
+     pctText(r.agg.singlePinMade, r.agg.singlePinOpportunities), pctText(r.agg.splitsLeft, r.agg.splitOpportunities), String(r.agg.opens)
+    ].forEach(function(t){ var td = document.createElement("td"); td.textContent = t; tr.appendChild(td); });
+    tb.appendChild(tr);
+  });
+  table.appendChild(tb);
+  var wrap = document.createElement("div"); wrap.className = "detail-wrap"; wrap.appendChild(table);
+  body.appendChild(wrap);
 }
 
 // ---------- trend chart ----------
