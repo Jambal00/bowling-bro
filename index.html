@@ -221,7 +221,6 @@ button.preset-chip { color: #1a1a1a; }
         <button id="menu-game-btn">Back to scoring</button>
         <button id="header-setup-btn">Series setup</button>
         <button id="menu-league-btn">Your Stats</button>
-        <button id="menu-practice-btn">Practice report</button>
         <button id="header-profile-btn">Profile &amp; Goals</button>
         <button id="menu-install-btn">Add to Home Screen</button>
         <button id="menu-auth-btn">Sign in</button>
@@ -2635,7 +2634,6 @@ installSheet.addEventListener("click", function(e){ if (e.target === installShee
 refreshInstallBtn();
 document.getElementById("menu-game-btn").addEventListener("click", function(){ returnView = null; goToView("game"); });
 document.getElementById("menu-league-btn").addEventListener("click", function(){ historyTab = "league"; editKey = null; goToView("history"); });
-document.getElementById("menu-practice-btn").addEventListener("click", function(){ historyTab = "practice"; editKey = null; goToView("history"); });
 document.getElementById("history-tab-league").addEventListener("click", function(){ setHistoryTab("league"); });
 document.getElementById("history-tab-practice").addEventListener("click", function(){ setHistoryTab("practice"); });
 document.getElementById("view-history-link").addEventListener("click", function(){
