@@ -223,7 +223,7 @@ button.preset-chip { color: #1a1a1a; }
     <div class="card hidden" data-wiz-step="1">
       <label for="wiz-center">Home bowling center</label>
       <input type="text" id="wiz-center" maxlength="80" placeholder="Where you usually bowl" />
-      <label for="wiz-ball-input">Balls in your bag</label>
+      <label for="wiz-ball-input">Bowling balls you own</label>
       <div class="arsenal-list" id="wiz-arsenal-list"></div>
       <div class="row">
         <div><input type="text" id="wiz-ball-input" maxlength="60" placeholder="e.g. Storm Hy-Road" /></div>
@@ -231,11 +231,11 @@ button.preset-chip { color: #1a1a1a; }
       </div>
       <div id="wiz-ball-roles" class="hidden">
         <div class="row">
-          <div><label for="wiz-strike">Strike ball</label><select id="wiz-strike"></select></div>
-          <div><label for="wiz-spare">Spare ball</label><select id="wiz-spare"></select></div>
+          <div><label for="wiz-strike">Usual strike ball</label><select id="wiz-strike"></select></div>
+          <div><label for="wiz-spare">Usual spare ball</label><select id="wiz-spare"></select></div>
         </div>
       </div>
-      <p style="font-size:12px;color:#6b6b6b;margin:0;line-height:1.4;">You can change these any night on the setup screen.</p>
+      <p style="font-size:12px;color:#6b6b6b;margin:0;line-height:1.4;">Add your whole collection. Each night you pick which ones you brought on the setup screen.</p>
     </div>
     <div class="card hidden" data-wiz-step="2">
       <label for="wiz-avg">Season average you're aiming for</label>
@@ -296,6 +296,7 @@ button.preset-chip { color: #1a1a1a; }
 
     <div class="card">
       <h2>Arsenal for tonight</h2>
+      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Tap the balls you brought tonight. <span id="arsenal-count"></span></p>
       <div class="arsenal-list" id="arsenal-list"></div>
       <div class="row">
         <div><input type="text" id="arsenal-add-input" placeholder="Add a ball" /></div>
@@ -549,6 +550,15 @@ button.preset-chip { color: #1a1a1a; }
     <button class="primary full" id="profile-save-btn">Save profile</button>
     <p id="profile-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0;min-height:15px;"></p>
     <div class="card">
+      <h2>Your bowling balls</h2>
+      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Your whole collection. Each night you pick which ones you brought on the setup screen.</p>
+      <div class="arsenal-list" id="collection-list"></div>
+      <div class="row">
+        <div><input type="text" id="collection-add-input" maxlength="60" placeholder="Add a ball" /></div>
+        <div style="flex:0 0 auto;"><button id="collection-add-btn">Add</button></div>
+      </div>
+    </div>
+    <div class="card">
       <h2>Season goals</h2>
       <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Fill in the goals you want and leave the rest blank. They show under Your Stats, on the Goals tab.</p>
       <div id="goal-editor"></div>
@@ -623,19 +633,44 @@ var arsenalListEl = document.getElementById("arsenal-list");
 var strikeSelect = document.getElementById("setup-strike-ball");
 var spareSelect = document.getElementById("setup-spare-ball");
 
+// Every bowler has a full collection of balls (state.collection) and, each night, the few they
+// brought (state.arsenal). Older saves only had the nightly list, so it seeds the collection.
+function ballCollection(){
+  if (!Array.isArray(state.arsenal)) state.arsenal = [];
+  if (!Array.isArray(state.collection)) state.collection = state.arsenal.slice();
+  state.arsenal.forEach(function(name){ if (state.collection.indexOf(name) < 0) state.collection.push(name); });
+  return state.collection;
+}
+// keep tonight's list in collection order and make sure the strike and spare ball are among them
+function tidyTonight(){
+  var all = ballCollection();
+  state.arsenal = all.filter(function(name){ return state.arsenal.indexOf(name) >= 0; });
+  if (state.arsenal.indexOf(state.strikeBall) < 0) state.strikeBall = state.arsenal[0] || "";
+  if (state.arsenal.indexOf(state.spareBall) < 0) state.spareBall = state.arsenal[0] || "";
+}
 function renderArsenalUI(){
+  var all = ballCollection();
   arsenalListEl.innerHTML = "";
-  state.arsenal.forEach(function(name, idx){
-    var chip = document.createElement("span");
-    chip.className = "arsenal-chip";
-    var txt = document.createElement("span"); txt.textContent = name;
-    var rm = document.createElement("button"); rm.textContent = "x";
-    rm.addEventListener("click", function(){
-      state.arsenal.splice(idx,1); saveState(); renderArsenalUI(); renderBallSelects();
+  if (!all.length){
+    var none = document.createElement("span");
+    none.style.cssText = "font-size:13px;color:#6b6b6b;";
+    none.textContent = "No balls yet. Add one below.";
+    arsenalListEl.appendChild(none);
+  }
+  all.forEach(function(name){
+    var on = state.arsenal.indexOf(name) >= 0;
+    var chip = document.createElement("button");
+    chip.className = "preset-chip" + (on ? " selected" : "");
+    chip.setAttribute("aria-pressed", on ? "true" : "false");
+    chip.textContent = (on ? "✓ " : "") + name;
+    chip.addEventListener("click", function(){
+      if (on) state.arsenal.splice(state.arsenal.indexOf(name), 1); else state.arsenal.push(name);
+      tidyTonight(); saveState(); renderArsenalUI();
     });
-    chip.appendChild(txt); chip.appendChild(rm);
     arsenalListEl.appendChild(chip);
   });
+  var count = document.getElementById("arsenal-count");
+  if (count) count.textContent = all.length ? state.arsenal.length + " of " + all.length + " in tonight's bag" : "";
   renderBallSelects();
 }
 function renderBallSelects(){
@@ -654,8 +689,12 @@ document.getElementById("arsenal-add-btn").addEventListener("click", function(){
   var inp = document.getElementById("arsenal-add-input");
   var v = inp.value.trim();
   if (!v) return;
-  state.arsenal.push(v); inp.value = "";
-  saveState(); renderArsenalUI();
+  // a ball added here joins the collection and tonight's bag
+  var all = ballCollection();
+  if (all.indexOf(v) < 0 && all.length < 40) all.push(v);
+  if (all.indexOf(v) >= 0 && state.arsenal.indexOf(v) < 0) state.arsenal.push(v);
+  inp.value = "";
+  tidyTonight(); saveState(); renderArsenalUI();
 });
 document.getElementById("setup-center").addEventListener("input", function(e){ state.center = e.target.value; saveState(); });
 document.getElementById("setup-lanes").addEventListener("input", function(e){ state.lanes = e.target.value; saveState(); });
@@ -1751,6 +1790,7 @@ document.getElementById("header-profile-btn").addEventListener("click", function
   document.getElementById("profile-status").textContent = "";
   document.getElementById("goals-status").textContent = "";
   fillProfileInputs();
+  renderCollectionUI();
   fillGoalInputs(true);
   showView("profile");
 });
@@ -1759,7 +1799,7 @@ var profileWrite = Promise.resolve();
 // The bowler's gear (home center, bag, strike and spare ball) is saved alongside the profile so it
 // follows them to a new phone instead of living on one device.
 function gearNow(){
-  return { center: state.center || "", arsenal: (state.arsenal || []).slice(), strikeBall: state.strikeBall || "", spareBall: state.spareBall || "" };
+  return { center: state.center || "", collection: ballCollection().slice(), arsenal: (state.arsenal || []).slice(), strikeBall: state.strikeBall || "", spareBall: state.spareBall || "" };
 }
 function profileDocBody(){
   var body = JSON.parse(JSON.stringify(profile));
@@ -1770,14 +1810,19 @@ function profileDocBody(){
 var lastGearJson = null;
 function applyCloudGear(data){
   var g = data && data.gear;
-  if (g && Array.isArray(g.arsenal)) lastGearJson = JSON.stringify({ center: g.center || "", arsenal: g.arsenal, strikeBall: g.strikeBall || "", spareBall: g.spareBall || "" });
+  if (!g || !Array.isArray(g.arsenal)) return;
+  var clean = function(list){ return (Array.isArray(list) ? list : []).filter(function(x){ return typeof x === "string" && x; }).slice(0, 40); };
+  var cloudAll = clean(g.collection), cloudTonight = clean(g.arsenal);
+  cloudTonight.forEach(function(name){ if (cloudAll.indexOf(name) < 0) cloudAll.push(name); });   // saves from before collections existed
+  lastGearJson = JSON.stringify({ center: g.center || "", collection: cloudAll, arsenal: cloudTonight, strikeBall: g.strikeBall || "", spareBall: g.spareBall || "" });
   // adopt the saved gear only on a device that has none of its own, so a night in progress is never disturbed
-  if (!g || !Array.isArray(g.arsenal) || !g.arsenal.length || (state.arsenal && state.arsenal.length)) return;
-  state.arsenal = g.arsenal.filter(function(x){ return typeof x === "string" && x; }).slice(0, 30);
-  state.strikeBall = state.arsenal.indexOf(g.strikeBall) >= 0 ? g.strikeBall : state.arsenal[0];
-  state.spareBall = state.arsenal.indexOf(g.spareBall) >= 0 ? g.spareBall : state.arsenal[0];
+  if (!cloudAll.length || ballCollection().length) return;
+  state.collection = cloudAll;
+  state.arsenal = cloudTonight.length ? cloudTonight : cloudAll.slice();
+  state.strikeBall = g.strikeBall || ""; state.spareBall = g.spareBall || "";
+  tidyTonight();
   if (!state.center && typeof g.center === "string") state.center = g.center;
-  initSetupFields();
+  initSetupFields(); renderCollectionUI();
 }
 // called from saveState: push the gear to the account whenever it has changed
 function syncGear(){
@@ -1789,10 +1834,45 @@ function syncGear(){
   profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(null, function(){});
 }
 
+// The full collection, edited on Profile & Goals.
+function renderCollectionUI(){
+  var all = ballCollection(), list = document.getElementById("collection-list");
+  list.innerHTML = "";
+  if (!all.length){
+    var none = document.createElement("span");
+    none.style.cssText = "font-size:13px;color:#6b6b6b;";
+    none.textContent = "No balls yet. Add your first one below.";
+    list.appendChild(none);
+  }
+  all.forEach(function(name){
+    var chip = document.createElement("span"); chip.className = "arsenal-chip";
+    var txt = document.createElement("span"); txt.textContent = name;
+    var rm = document.createElement("button"); rm.textContent = "x"; rm.setAttribute("aria-label", "Remove " + name);
+    rm.addEventListener("click", function(){
+      // removing a ball from the collection also takes it out of tonight's bag
+      state.collection.splice(state.collection.indexOf(name), 1);
+      if (state.arsenal.indexOf(name) >= 0) state.arsenal.splice(state.arsenal.indexOf(name), 1);
+      tidyTonight(); saveState(); renderCollectionUI(); renderArsenalUI();
+    });
+    chip.appendChild(txt); chip.appendChild(rm); list.appendChild(chip);
+  });
+}
+function collectionAdd(){
+  var inp = document.getElementById("collection-add-input"), v = inp.value.trim(), all = ballCollection();
+  if (v && all.indexOf(v) < 0 && all.length < 40){
+    all.push(v);
+    if (!state.arsenal.length) state.arsenal.push(v);   // a first ball is also tonight's ball
+  }
+  inp.value = "";
+  tidyTonight(); saveState(); renderCollectionUI(); renderArsenalUI();
+}
+document.getElementById("collection-add-btn").addEventListener("click", collectionAdd);
+document.getElementById("collection-add-input").addEventListener("keydown", function(e){ if (e.key === "Enter"){ e.preventDefault(); collectionAdd(); } });
+
 // ---------- first-time setup wizard ----------
 var WIZ_STEPS = [
   { title: "Welcome to Bowling Bro'", blurb: "Three quick steps and you're ready to bowl. Everything here can be changed later." },
-  { title: "Your bowling", blurb: "Where you bowl and what's in your bag, so each night starts ready to go." },
+  { title: "Your bowling", blurb: "Where you bowl and the balls you own, so each night starts ready to go." },
   { title: "One goal to start", blurb: "Most bowlers start with an average to aim for." }
 ];
 // these were the app's built-in defaults before each bowler had their own; never treat them as a new bowler's gear
@@ -1800,12 +1880,12 @@ var LEGACY_ARSENAL = ["Storm Bionic", "Storm Phase II Pearl", "Storm Hy-Road 40"
 var wiz = null, wizStep = 0;
 function openWizard(isNewBowler){
   if (isNewBowler && JSON.stringify(state.arsenal || []) === JSON.stringify(LEGACY_ARSENAL)){
-    state.arsenal = []; state.strikeBall = ""; state.spareBall = "";
+    state.arsenal = []; state.collection = []; state.strikeBall = ""; state.spareBall = "";
     if (state.center === "Big Al's") state.center = "";
     initSetupFields();
   }
   var avgGoal = presetGoal("avg");
-  wiz = { arsenal: (state.arsenal || []).slice(), strike: state.strikeBall || "", spare: state.spareBall || "" };
+  wiz = { arsenal: ballCollection().slice(), strike: state.strikeBall || "", spare: state.spareBall || "" };
   document.getElementById("wiz-name").value = profile.name || "";
   document.getElementById("wiz-hand").value = profile.hand || "right";
   document.getElementById("wiz-center").value = state.center || profile.homeCenter || "";
@@ -1854,7 +1934,7 @@ function renderWizardBag(){
 }
 function wizardAddBall(){
   var inp = document.getElementById("wiz-ball-input"), name = inp.value.trim();
-  if (name && wiz.arsenal.indexOf(name) < 0 && wiz.arsenal.length < 30) wiz.arsenal.push(name);
+  if (name && wiz.arsenal.indexOf(name) < 0 && wiz.arsenal.length < 40) wiz.arsenal.push(name);
   inp.value = "";
   renderWizardBag();
 }
@@ -1867,7 +1947,7 @@ function closeWizard(){
     profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(null, function(){});
   }
   saveState();
-  initSetupFields(); fillProfileInputs(); renderHistory();
+  initSetupFields(); fillProfileInputs(); renderCollectionUI(); renderHistory();
   document.getElementById("wizard").classList.add("hidden");
 }
 function finishWizard(){
@@ -1876,8 +1956,12 @@ function finishWizard(){
   var center = document.getElementById("wiz-center").value.trim().slice(0, 80);
   if (center){ state.center = center; profile.homeCenter = center; }
   state.profile = profile;
-  state.arsenal = wiz.arsenal.slice();
+  // the wizard edits the whole collection; tonight's bag keeps its picks, or starts as everything
+  var hadTonight = (state.arsenal || []).filter(function(name){ return wiz.arsenal.indexOf(name) >= 0; });
+  state.collection = wiz.arsenal.slice();
+  state.arsenal = hadTonight.length ? hadTonight : wiz.arsenal.slice();
   state.strikeBall = wiz.strike; state.spareBall = wiz.spare;
+  tidyTonight();
   var raw = document.getElementById("wiz-avg").value, n = raw === "" ? NaN : Number(raw), g = presetGoal("avg");
   if (isFinite(n) && n > 0){
     n = Math.min(n, 300);
