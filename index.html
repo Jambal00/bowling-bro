@@ -160,6 +160,7 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
 .check-line.warn { background: #fff1d6; color: #7a4700; }
 .line-pick button { display: flex; width: 100%; justify-content: space-between; align-items: center; padding: 12px 14px; margin-bottom: 8px; font-size: 16px; }
 .line-pick button span:last-child { font-weight: 700; }
+#photo-status.photo-error { background: #fdecea; color: #8a1f17; border-radius: 8px; padding: 9px 11px; font-size: 13px; }
 .read-wait { text-align: center; padding: 22px 0 10px; }
 .read-wait .spin { width: 34px; height: 34px; border: 4px solid #dfe7fb; border-top-color: #2f6fed; border-radius: 50%; margin: 0 auto 12px; animation: bbspin 0.9s linear infinite; }
 @keyframes bbspin { to { transform: rotate(360deg); } }
@@ -1986,6 +1987,7 @@ function savePhotoNight(){
     }
     return;
   }
+  statusEl.classList.remove("photo-error");
   if (state.practice){ statusEl.textContent = "Test mode is on, so these games are not being saved."; return; }
   n.saved = true; saveState();
   var doc = photoNightDoc(), what = plural(doc.games.length, "game") + " saved to your " + (doc.type === "practice" ? "practice log" : "season history") + ".";
@@ -2028,6 +2030,7 @@ document.getElementById("photo-file").addEventListener("change", function(e){
   e.target.value = "";   // so picking the same photo again still counts as a change
   if (!file) return;
   document.getElementById("photo-status").textContent = "";
+  document.getElementById("photo-status").classList.remove("photo-error");
   if (cropUrl) URL.revokeObjectURL(cropUrl);
   cropUrl = URL.createObjectURL(file);
   cropImg.onload = function(){ crop = { x: 0, y: 0, w: 1, h: 1 }; placeCropBox(); photoStep("crop"); };
@@ -2086,12 +2089,15 @@ function readScoreboard(b64){
   if (!sb || !sbUser) return Promise.reject({ code: "signin" });
   return sb.functions.invoke("read-scoreboard", { body: { image: b64, mediaType: "image/jpeg" } }).then(function(r){
     if (!r.error) return r.data;
-    var ctx = r.error.context;
-    if (ctx && ctx.status === 404) throw { code: "not_set_up" };
-    if (ctx && typeof ctx.json === "function"){
-      return ctx.json().then(function(b){ throw { code: (b && b.error) || "read_failed", cap: b && b.cap }; }, function(){ throw { code: "read_failed" }; });
+    var ctx = r.error.context, status = ctx && ctx.status;
+    if (status === 404) throw { code: "not_set_up", detail: "404" };
+    if (ctx && typeof ctx.text === "function"){
+      return ctx.text().then(function(t){
+        var b = null; try { b = JSON.parse(t); } catch (e){}
+        throw { code: (b && b.error) || "read_failed", cap: b && b.cap, detail: status + " " + String((b && (b.message || b.msg || b.error)) || t || "").slice(0, 80) };
+      }, function(){ throw { code: "read_failed", detail: String(status) }; });
     }
-    throw { code: "network" };
+    throw { code: "network", detail: String(r.error.message || r.error).slice(0, 80) };
   });
 }
 var READ_ERRORS = {
@@ -2115,8 +2121,10 @@ document.getElementById("crop-go").addEventListener("click", function(){
     else if (mine.length === 1) openConfirm(lineToSheet(mine[0]), null, mine[0]);
     else showLinePicker();
   }).then(null, function(err){
-    var code = err && err.code;
-    document.getElementById("photo-status").textContent = READ_ERRORS[code] || "Couldn't read that photo just now. Check your connection and try again.";
+    var code = err && err.code, el = document.getElementById("photo-status");
+    el.textContent = (READ_ERRORS[code] || "Couldn't read that photo just now. Check your connection and try again.") +
+      (err && err.detail ? " (Details: " + err.detail + ")" : (err && err.message ? " (Details: " + String(err.message).slice(0, 80) + ")" : ""));
+    el.classList.add("photo-error");
     photoStep("home");
   });
 });
