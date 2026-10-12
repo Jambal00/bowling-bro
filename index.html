@@ -33,6 +33,10 @@ body {
 }
 .card h2 { font-size: 14px; margin: 0 0 10px; color: #1a1a1a; }
 label { font-size: 12px; color: #6b6b6b; display: block; margin-bottom: 4px; }
+/* date pickers: iPhone Safari gives these a fixed built-in width that ignores the card, so
+   reset its styling and size it to fit, centered */
+input.date-field { -webkit-appearance: none; appearance: none; display: block; width: 190px; max-width: 100%; min-width: 0; margin-left: auto; margin-right: auto; font-size: 15px; padding: 9px 10px; border-radius: 8px; border: 1px solid #d8d5c8; background: #fbfbf7; color: #1a1a1a; text-align: center; min-height: 40px; }
+input.date-field::-webkit-date-and-time-value { text-align: center; margin: 0; }
 input[type=text], input[type=number], select, textarea {
   width: 100%; font-size: 15px; padding: 9px 10px; border-radius: 8px;
   border: 1px solid #d8d5c8; background: #fbfbf7; color: #1a1a1a; margin-bottom: 10px;
@@ -508,8 +512,8 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
     <div class="card">
       <h2 id="night-title">Tonight's scores</h2>
       <p id="night-sub" style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;"></p>
-      <label for="night-date">Date bowled</label>
-      <input type="date" id="night-date" style="width:100%;font-size:15px;padding:9px 10px;border-radius:8px;border:1px solid #d8d5c8;background:#fbfbf7;color:#1a1a1a;margin-bottom:10px;" />
+      <label for="night-date" style="text-align:center;">Date bowled</label>
+      <input type="date" id="night-date" class="date-field" style="margin-bottom:10px;" />
       <div id="night-games"></div>
       <div class="row" style="align-items:flex-end;margin-top:4px;">
         <div><label for="night-add-input" id="night-add-label">Game 1 score</label><input type="number" id="night-add-input" inputmode="numeric" min="0" max="300" placeholder="0 to 300" style="margin-bottom:0;" /></div>
@@ -534,8 +538,8 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
       <div class="card">
         <h2 id="photo-title">Tonight's games</h2>
         <p id="photo-sub" style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;"></p>
-        <label for="photo-date">Date bowled</label>
-        <input type="date" id="photo-date" style="width:100%;font-size:15px;padding:9px 10px;border-radius:8px;border:1px solid #d8d5c8;background:#fbfbf7;color:#1a1a1a;margin-bottom:6px;" />
+        <label for="photo-date" style="text-align:center;">Date bowled</label>
+        <input type="date" id="photo-date" class="date-field" style="margin-bottom:6px;" />
         <div id="photo-games"></div>
         <div style="margin-top:12px;">
           <label class="btn-label primary" for="photo-file" id="photo-file-label">Add Game 1 from a photo</label>
