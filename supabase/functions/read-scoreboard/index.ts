@@ -29,7 +29,8 @@ Read every bowler line you can see. For each line report:
 - total: the running score printed under that frame, or null if it is blank or unreadable.
 - final: the game's final score as printed, or null.
 Report only what is printed. Do not work out or correct any numbers, even if they do not seem to add up.
-If this is not a bowling scoreboard or nothing can be read, set readable to false and say why in problem.`;
+If this is not a bowling scoreboard or nothing can be read, set readable to false and say why in problem.
+Give your answer by calling the report_scoreboard tool once. Do not reply with text.`;
 
 const TOOL = {
   name: "report_scoreboard",
@@ -119,7 +120,8 @@ Deno.serve(async (req) => {
         model: MODEL,
         max_tokens: 2500,
         tools: [TOOL],
-        tool_choice: { type: "tool", name: TOOL.name },
+        // newer models don't accept a forced tool call, so the tool is offered and the prompt asks for it
+        tool_choice: { type: "auto" },
         messages: [{
           role: "user",
           content: [
@@ -142,9 +144,19 @@ Deno.serve(async (req) => {
       user_id: user.id, model: MODEL,
       input_tokens: out.usage?.input_tokens ?? null, output_tokens: out.usage?.output_tokens ?? null,
     });
-    const use = (out.content || []).find((c: { type: string }) => c.type === "tool_use");
-    if (!use) return json({ error: "read_failed", message: "no answer (" + (out.stop_reason || "unknown") + ")" }, 502);
-    return json(use.input);
+    const content = out.content || [];
+    const use = content.find((c: { type: string }) => c.type === "tool_use");
+    if (use) return json(use.input);
+    // fallback: the answer came back as text; take the JSON object out of it
+    const text = content.filter((c: { type: string }) => c.type === "text").map((c: { text: string }) => c.text).join("\n");
+    const start = text.indexOf("{"), end = text.lastIndexOf("}");
+    if (start !== -1 && end > start) {
+      try {
+        const parsed = JSON.parse(text.slice(start, end + 1));
+        if (parsed && Array.isArray(parsed.lines)) return json(parsed);
+      } catch (_e) { /* fall through */ }
+    }
+    return json({ error: "read_failed", message: "no answer (" + (out.stop_reason || "unknown") + ") " + text.slice(0, 100) }, 502);
   } catch (e) {
     console.error(e);
     return json({ error: "server", message: String((e as Error)?.message || e).slice(0, 160) }, 500);
