@@ -122,6 +122,47 @@ button.preset-chip { color: #1a1a1a; }
 .radio-row { display: flex; gap: 28px; margin: 2px 0 12px; }
 .radio-row label { display: flex; align-items: center; gap: 8px; font-size: 15px; color: #1a1a1a; margin: 0; cursor: pointer; }
 .radio-row input { width: 20px; height: 20px; margin: 0; accent-color: #2f6fed; }
+.radio-stack { flex-direction: column; gap: 12px; }
+/* photo scoring */
+.file-pick { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+label.btn-label { display: block; text-align: center; padding: 12px; border-radius: 10px; font-size: 15px; cursor: pointer; margin: 0; }
+label.btn-label.primary { background: #2f6fed; color: #fff; font-weight: 600; }
+label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid #2f6fed; font-weight: 600; }
+.photo-game { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #eeece4; font-size: 15px; }
+.photo-game .pg-score { font-weight: 700; font-size: 18px; }
+.photo-game .pg-meta { font-size: 12px; color: #6b6b6b; }
+.photo-game button { font-size: 13px; padding: 6px 10px; margin-left: 6px; }
+#crop-stage { position: relative; touch-action: none; user-select: none; -webkit-user-select: none; margin: 4px 0 12px; background: #222; border-radius: 8px; overflow: hidden; }
+#crop-img { display: block; width: 100%; height: auto; pointer-events: none; }
+#crop-box { position: absolute; border: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(0,0,0,.55); cursor: move; }
+#crop-box .ch { position: absolute; width: 26px; height: 26px; background: transparent; }
+#crop-box .ch::after { content: ""; position: absolute; width: 14px; height: 14px; background: #fff; border: 2px solid #2f6fed; border-radius: 3px; left: 6px; top: 6px; }
+#crop-box .ch.tl { left: -14px; top: -14px; cursor: nwse-resize; } #crop-box .ch.tr { right: -14px; top: -14px; cursor: nesw-resize; }
+#crop-box .ch.bl { left: -14px; bottom: -14px; cursor: nesw-resize; } #crop-box .ch.br { right: -14px; bottom: -14px; cursor: nwse-resize; }
+.sheet-grid { display: grid; grid-template-columns: repeat(5, 1fr); border: 1px solid #1a1a1a; border-radius: 6px; overflow: hidden; margin-bottom: 8px; }
+.sheet-frame { border-right: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; min-width: 0; }
+.sheet-frame:nth-child(5n) { border-right: none; }
+.sheet-frame:nth-child(n+6) { border-bottom: none; }
+.sheet-frame .sf-num { display: block; width: 100%; border: none; border-bottom: 1px solid #d8d5c8; background: #f2f1ea; font-size: 11px; padding: 3px 0; color: #444; border-radius: 0; }
+.sheet-frame .sf-num.split-on { background: #fde3e1; color: #b3261e; font-weight: 700; }
+.sheet-frame .sf-balls { display: flex; justify-content: flex-end; }
+.sheet-frame .sf-balls input { width: 40%; min-width: 0; height: 30px; padding: 0; margin: 0; text-align: center; font-size: 16px; font-weight: 600; border: none; border-left: 1px solid #d8d5c8; border-bottom: 1px solid #d8d5c8; border-radius: 0; background: #fff; text-transform: uppercase; }
+.sheet-frame.tenth .sf-balls input { width: 33.34%; }
+.sheet-frame .sf-balls input.split-ball { color: #b3261e; box-shadow: inset 0 0 0 2px #e05a50; border-radius: 50%; }
+.sheet-frame .sf-balls input:disabled { background: #f7f6f0; }
+.sheet-frame .sf-balls input.bad { background: #fde3e1; }
+.sheet-frame .sf-total { text-align: center; font-size: 15px; font-weight: 700; padding: 5px 0 1px; min-height: 22px; }
+.sheet-frame .sf-shown { text-align: center; font-size: 10px; color: #8f8c80; padding-bottom: 3px; min-height: 14px; }
+.sheet-frame.off .sf-total { color: #b86e00; }
+.sheet-frame.off { background: #fff6e5; }
+.check-line { font-size: 14px; padding: 9px 11px; border-radius: 8px; margin: 4px 0 10px; line-height: 1.4; }
+.check-line.ok { background: #e6f4ea; color: #1d5e33; }
+.check-line.warn { background: #fff1d6; color: #7a4700; }
+.line-pick button { display: flex; width: 100%; justify-content: space-between; align-items: center; padding: 12px 14px; margin-bottom: 8px; font-size: 16px; }
+.line-pick button span:last-child { font-weight: 700; }
+.read-wait { text-align: center; padding: 22px 0 10px; }
+.read-wait .spin { width: 34px; height: 34px; border: 4px solid #dfe7fb; border-top-color: #2f6fed; border-radius: 50%; margin: 0 auto 12px; animation: bbspin 0.9s linear infinite; }
+@keyframes bbspin { to { transform: rotate(360deg); } }
 .share-parts label { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #1a1a1a; margin: 0; padding: 5px 0; }
 .share-parts input { width: 18px; height: 18px; margin: 0; }
 .chart-range { display: inline-flex; border: 1px solid #d8d5c8; border-radius: 999px; overflow: hidden; margin: 0 0 8px; }
@@ -320,8 +361,9 @@ button.preset-chip { color: #1a1a1a; }
       </div>
       <div id="setup-mode-wrap">
         <label id="setup-mode-label">How are you scoring tonight?</label>
-        <div class="radio-row" role="radiogroup" aria-labelledby="setup-mode-label" style="margin-bottom:6px;">
+        <div class="radio-row radio-stack" role="radiogroup" aria-labelledby="setup-mode-label" style="margin-bottom:6px;">
           <label><input type="radio" name="setup-score-mode" id="setup-mode-frames" value="frames" checked /> Frame by frame</label>
+          <label><input type="radio" name="setup-score-mode" id="setup-mode-photo" value="photo" /> Photo of the scoreboard</label>
           <label><input type="radio" name="setup-score-mode" id="setup-mode-scores" value="scores" /> Game scores only</label>
         </div>
         <p id="setup-mode-note" style="font-size:12px;color:#6b6b6b;margin:0 0 12px;line-height:1.4;"></p>
@@ -483,6 +525,69 @@ button.preset-chip { color: #1a1a1a; }
     </div>
     <button class="primary full" id="night-done-btn">Done for tonight</button>
     <p style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0 0;line-height:1.4;">Each score is saved as you add it. You can close the app between games.</p>
+  </div>
+
+  <!-- PHOTO VIEW -->
+  <div id="view-photo" class="hidden">
+    <div id="photo-home">
+      <div class="card">
+        <h2 id="photo-title">Tonight's games</h2>
+        <p id="photo-sub" style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;"></p>
+        <label for="photo-date">Date bowled</label>
+        <input type="date" id="photo-date" style="width:100%;font-size:15px;padding:9px 10px;border-radius:8px;border:1px solid #d8d5c8;background:#fbfbf7;color:#1a1a1a;margin-bottom:6px;" />
+        <div id="photo-games"></div>
+        <div style="margin-top:12px;">
+          <label class="btn-label primary" for="photo-file" id="photo-file-label">Add Game 1 from a photo</label>
+          <input type="file" id="photo-file" class="file-pick" accept="image/*" />
+        </div>
+        <p style="font-size:12px;color:#6b6b6b;margin:8px 0 0;line-height:1.4;">Choose a picture from your photos, or take one. Next you'll crop it down to your line, which helps it read correctly.</p>
+        <p id="photo-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;line-height:1.4;"></p>
+        <p style="margin:2px 0 0;font-size:12px;"><a href="#" id="photo-manual-link">No photo? Type the frames in yourself</a></p>
+      </div>
+      <div class="card">
+        <div class="row">
+          <div><label>Series total</label><div id="photo-total" class="stat-lg"></div></div>
+          <div><label>Average</label><div id="photo-avg" class="stat-lg"></div></div>
+          <div><label>Games</label><div id="photo-count" class="stat-lg"></div></div>
+        </div>
+      </div>
+      <button class="primary full" id="photo-done-btn">Done for tonight</button>
+      <p style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0 0;line-height:1.4;">Each game is saved as you add it. You can close the app between games.</p>
+    </div>
+
+    <div id="photo-crop" class="card hidden">
+      <h2>Crop to your line</h2>
+      <p style="font-size:13px;color:#444;margin:-4px 0 8px;line-height:1.4;">Drag the corners so the box takes in your name and all ten frames. Leave out other lanes and the background where you can.</p>
+      <div id="crop-stage"><img id="crop-img" alt="Your scoreboard photo" /><div id="crop-box"><span class="ch tl" data-h="tl"></span><span class="ch tr" data-h="tr"></span><span class="ch bl" data-h="bl"></span><span class="ch br" data-h="br"></span></div></div>
+      <div class="row">
+        <div><button class="full" id="crop-cancel">Cancel</button></div>
+        <div><button class="primary full" id="crop-go">Read this photo</button></div>
+      </div>
+      <p style="margin:6px 0 0;font-size:12px;text-align:center;"><a href="#" id="crop-reset">Use the whole photo</a></p>
+    </div>
+
+    <div id="photo-wait" class="card hidden">
+      <div class="read-wait"><div class="spin"></div><div style="font-size:15px;font-weight:600;">Reading the scoreboard…</div><div style="font-size:12px;color:#6b6b6b;margin-top:4px;">This usually takes a few seconds.</div></div>
+    </div>
+
+    <div id="photo-pick" class="card hidden">
+      <h2>Which line is yours?</h2>
+      <p style="font-size:13px;color:#444;margin:-4px 0 10px;">We found more than one bowler. Tap yours and we'll remember it.</p>
+      <div class="line-pick" id="photo-lines"></div>
+      <button class="full" id="pick-cancel">Cancel</button>
+    </div>
+
+    <div id="photo-confirm" class="card hidden">
+      <h2 id="confirm-title">Check Game 1</h2>
+      <p id="confirm-sub" style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;"></p>
+      <div id="confirm-grid"></div>
+      <div id="confirm-check" class="check-line"></div>
+      <p style="font-size:12px;color:#6b6b6b;margin:0 0 12px;line-height:1.4;">Type over any box that's wrong: X strike, / spare, - miss, or a number. Tap a frame number to mark a split (it turns red).</p>
+      <div class="row">
+        <div><button class="full" id="confirm-cancel">Discard</button></div>
+        <div><button class="primary full" id="confirm-save">Save game</button></div>
+      </div>
+    </div>
   </div>
 
   <!-- SUMMARY VIEW -->
@@ -678,14 +783,14 @@ var history = [];
 var returnView = null;
 
 // ---------- view switching ----------
-var views = ["setup","game","scores","summary","history","profile"];
+var views = ["setup","game","scores","photo","summary","history","profile"];
 function showView(name){
   views.forEach(function(v){ document.getElementById("view-"+v).classList.toggle("hidden", v!==name); });
   document.body.classList.toggle("in-game", name==="game");
   document.getElementById("header-setup-btn").classList.toggle("hidden", name==="setup");
   document.getElementById("header-profile-btn").classList.toggle("hidden", name==="profile");
   if (name!=="game"){
-    var labels = {setup:"Setup", scores:"Game Scores", summary:"Series Summary", history:"Season History", profile:"Profile & Goals"};
+    var labels = {setup:"Setup", scores:"Game Scores", photo:"Photo Scoring", summary:"Series Summary", history:"Season History", profile:"Profile & Goals"};
     document.getElementById("game-label").textContent = labels[name] || "";
   }
 }
@@ -783,6 +888,7 @@ document.getElementById("start-series-btn").addEventListener("click", function()
     saveState();
     var target = returnView; returnView = null;
     if (target === "scores"){ showNight(); }
+    else if (target === "photo"){ showPhoto(); }
     else if (target === "game"){ showView("game"); renderBallUsedOptions(); refreshGameScreen(); }
     else if (target === "summary"){ showSummary(); }
     else { showView(target); }
@@ -792,12 +898,23 @@ document.getElementById("start-series-btn").addEventListener("click", function()
     // game scores only: no frames, just a list of final scores for the night
     state.setupDone = true;
     state.games = [];
+    state.photoNight = null;
     state.night = { id: "s" + Date.now().toString(36), date: todayIso(), scores: [] };
     saveState();
     showNight();
     return;
   }
+  if (scoreMode() === "photo"){
+    // photo scoring: each game is read from a picture of the lane scoreboard
+    state.setupDone = true;
+    state.games = []; state.night = null;
+    state.photoNight = { id: "s" + Date.now().toString(36), date: todayIso(), games: [] };
+    saveState();
+    showPhoto();
+    return;
+  }
   state.night = null;
+  state.photoNight = null;
   state.setupDone = true;
   state.savedSeriesId = null;
   document.getElementById("save-status").textContent = "";
@@ -1331,8 +1448,10 @@ function computeGameStats(g){
 }
 function countSplitOpportunity(f, ballIdx, stats){
   stats.splitOpportunities++;
-  var standing = (f._pinSets && f._pinSets[ballIdx]) || [];
-  if (isSplitLeave(standing)) stats.splitsLeft++;
+  // tapped games know the pins left standing; games read from a photo carry the scoreboard's
+  // split marker (the first-ball count shown in red) instead
+  var standing = f._pinSets && f._pinSets[ballIdx];
+  if (standing ? isSplitLeave(standing) : (f.splitBalls && f.splitBalls.indexOf(ballIdx) !== -1)) stats.splitsLeft++;
 }
 // first/second = pins knocked by the leave ball and the spare ball; leaveIdx = which ball made the leave
 function evalSpareChance(first, second, f, leaveIdx, stats, countsAsOpen){
@@ -1657,7 +1776,7 @@ function buildSeriesDoc(){
 // ---------- game-scores-only nights ----------
 // A bowler can skip frame-by-frame tracking for a night and just enter each game's final score.
 // The night is saved after every score, so the season report keeps up as the night goes on.
-function scoreMode(){ return state.scoreMode === "scores" ? "scores" : "frames"; }
+function scoreMode(){ return state.scoreMode === "scores" || state.scoreMode === "photo" ? state.scoreMode : "frames"; }
 function nightActive(){ return !!(state.setupDone && state.night && Array.isArray(state.night.scores)); }
 function todayIso(){ var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
 function nightDoc(){
@@ -1778,13 +1897,450 @@ document.getElementById("night-done-btn").addEventListener("click", function(){
   historyTab = wasPractice ? "practice" : "league"; reportTab = "history";
   renderHistory(); showView("history");
 });
-["setup-mode-frames", "setup-mode-scores"].forEach(function(id){ document.getElementById(id).addEventListener("change", scoreModeChanged); });
+["setup-mode-frames", "setup-mode-scores", "setup-mode-photo"].forEach(function(id){ document.getElementById(id).addEventListener("change", scoreModeChanged); });
 function scoreModeChanged(e){
   if (!e.target.checked) return;
-  state.scoreMode = e.target.value === "scores" ? "scores" : "frames";
+  state.scoreMode = e.target.value === "scores" || e.target.value === "photo" ? e.target.value : "frames";
   saveState();
   updateSetupPrimaryButton();
 }
+// ---------- photo scoring ----------
+// A third way to score a night: after each game the bowler picks (or takes) a photo of the lane
+// scoreboard, crops it to their line, and a server function reads the frames. The bowler checks
+// every box against an add-up test before the game is saved with full frame detail.
+var READ_MAX_EDGE = 1568;   // longest side sent to the reader, in pixels (its standard image size)
+function photoActive(){ return !!(state.setupDone && state.photoNight && Array.isArray(state.photoNight.games)); }
+function photoStep(name){
+  ["home", "crop", "wait", "pick", "confirm"].forEach(function(k){
+    document.getElementById("photo-" + k).classList.toggle("hidden", k !== name);
+  });
+  window.scrollTo(0, 0);
+}
+function showPhoto(){
+  renderPhoto();
+  photoStep("home");
+  showView("photo");
+}
+function renderPhoto(){
+  var n = state.photoNight, practice = sessionType() === "practice";
+  document.getElementById("photo-title").textContent = practice ? "Practice games" : "Tonight's games";
+  document.getElementById("photo-sub").textContent = [practice ? "Practice session" : "League night", state.center, state.lanes ? "Lanes " + state.lanes : ""].filter(Boolean).join(" · ");
+  var dateEl = document.getElementById("photo-date");
+  dateEl.max = todayIso(); dateEl.value = n.date;
+  var list = document.getElementById("photo-games"); list.innerHTML = "";
+  n.games.forEach(function(g, idx){
+    var s = computeGameStats(g);
+    var row = document.createElement("div"); row.className = "photo-game";
+    var left = document.createElement("div");
+    left.innerHTML = "<div>Game " + (idx + 1) + " &nbsp;<span class=\"pg-score\">" + g.finalScore + "</span></div>";
+    var meta = document.createElement("div"); meta.className = "pg-meta";
+    meta.textContent = plural(s.strikes, "strike") + " · " + s.spares + " of " + s.spareOpportunities + " spares" + (s.opens ? " · " + plural(s.opens, "open") : " · clean");
+    left.appendChild(meta);
+    var right = document.createElement("div"); right.style.flex = "0 0 auto";
+    var ed = document.createElement("button"); ed.textContent = "Edit";
+    ed.addEventListener("click", function(){ openConfirm(gameToSheet(g), idx, null); });
+    var rm = document.createElement("button"); rm.textContent = "Remove"; rm.style.color = "#a33";
+    rm.addEventListener("click", function(){
+      if (!confirm("Remove Game " + (idx + 1) + " (" + g.finalScore + ")?")) return;
+      n.games.splice(idx, 1); renderPhoto(); savePhotoNight();
+    });
+    right.appendChild(ed); right.appendChild(rm);
+    row.appendChild(left); row.appendChild(right);
+    list.appendChild(row);
+  });
+  document.getElementById("photo-file-label").textContent = "Add Game " + (n.games.length + 1) + " from a photo";
+  var total = 0; n.games.forEach(function(g){ total += g.finalScore; });
+  document.getElementById("photo-total").textContent = n.games.length ? total : "—";
+  document.getElementById("photo-avg").textContent = n.games.length ? (total / n.games.length).toFixed(1) : "—";
+  document.getElementById("photo-count").textContent = n.games.length;
+}
+function photoNightDoc(){
+  var n = state.photoNight, parts = n.date.split("-"), agg = aggregateStats(n.games);
+  var when = n.date === todayIso() ? new Date() : new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 0, 0);
+  return {
+    schema: 1, id: n.id, type: sessionType(), source: "photo",
+    savedAt: when.toISOString(),
+    date: Number(parts[1]) + "/" + Number(parts[2]) + "/" + parts[0],
+    center: state.center, lanes: state.lanes,
+    arsenal: [], strikeBall: "", spareBall: "",
+    scores: n.games.map(function(g){ return g.finalScore; }),
+    total: agg.total,
+    average: n.games.length ? (agg.total / n.games.length).toFixed(1) : "0.0",
+    stats: agg,
+    games: JSON.parse(JSON.stringify(n.games)).map(function(g, gi){ g.stats = computeGameStats(n.games[gi]); return g; })
+  };
+}
+var photoWrite = Promise.resolve();
+function savePhotoNight(){
+  var statusEl = document.getElementById("photo-status"), n = state.photoNight;
+  saveState();
+  if (!n.games.length){
+    statusEl.textContent = "";
+    if (n.saved){
+      var goneId = n.id;
+      n.saved = false;
+      state.seriesHistory = state.seriesHistory.filter(function(h){ return h.id !== goneId; });
+      saveState();
+      if (cloud.col) photoWrite = photoWrite.then(function(){ return cloud.col.doc(goneId).delete(); }).then(null, function(){});
+      renderHistory();
+    }
+    return;
+  }
+  if (state.practice){ statusEl.textContent = "Test mode is on, so these games are not being saved."; return; }
+  n.saved = true; saveState();
+  var doc = photoNightDoc(), what = plural(doc.games.length, "game") + " saved to your " + (doc.type === "practice" ? "practice log" : "season history") + ".";
+  if (!cloud.col){ saveSeriesLocal(doc); statusEl.textContent = what + " (On this device only.)"; renderHistory(); return; }
+  statusEl.textContent = "Saving…";
+  photoWrite = photoWrite.then(function(){ return cloud.col.doc(doc.id).set(doc); }).then(function(){
+    statusEl.textContent = what;
+  }, function(){
+    saveSeriesLocal(doc);
+    statusEl.textContent = "Couldn't reach your account, so this is saved on this device for now. It will try again with your next game.";
+  });
+}
+document.getElementById("photo-date").addEventListener("change", function(e){
+  var v = e.target.value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v) || v > todayIso()){ e.target.value = state.photoNight.date; return; }
+  state.photoNight.date = v;
+  savePhotoNight();
+});
+document.getElementById("photo-done-btn").addEventListener("click", function(){
+  var wasPractice = sessionType() === "practice";
+  state.photoNight = null; state.lanes = "";
+  state.sessionType = "league";
+  applySessionType();
+  document.getElementById("setup-lanes").value = "";
+  returnView = null;
+  saveState();
+  historyTab = wasPractice ? "practice" : "league"; reportTab = "history";
+  renderHistory(); showView("history");
+});
+
+// --- picking and cropping the photo ---
+var cropImg = document.getElementById("crop-img"), cropBox = document.getElementById("crop-box"), cropStage = document.getElementById("crop-stage");
+var crop = { x: 0, y: 0, w: 1, h: 1 }, cropUrl = null, cropDrag = null, CROP_MIN = 0.08;
+function placeCropBox(){
+  cropBox.style.left = (crop.x * 100) + "%"; cropBox.style.top = (crop.y * 100) + "%";
+  cropBox.style.width = (crop.w * 100) + "%"; cropBox.style.height = (crop.h * 100) + "%";
+}
+document.getElementById("photo-file").addEventListener("change", function(e){
+  var file = e.target.files && e.target.files[0];
+  e.target.value = "";   // so picking the same photo again still counts as a change
+  if (!file) return;
+  document.getElementById("photo-status").textContent = "";
+  if (cropUrl) URL.revokeObjectURL(cropUrl);
+  cropUrl = URL.createObjectURL(file);
+  cropImg.onload = function(){ crop = { x: 0, y: 0, w: 1, h: 1 }; placeCropBox(); photoStep("crop"); };
+  cropImg.onerror = function(){ document.getElementById("photo-status").textContent = "That picture couldn't be opened here. Try a different photo or a screenshot of it."; };
+  cropImg.src = cropUrl;
+});
+function cropPoint(e){
+  var r = cropStage.getBoundingClientRect();
+  return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+}
+function clampNum(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+cropStage.addEventListener("pointerdown", function(e){
+  var handle = e.target.getAttribute && e.target.getAttribute("data-h");
+  var mode = handle || (cropBox.contains(e.target) ? "move" : null);
+  if (!mode) return;
+  e.preventDefault();
+  cropDrag = { mode: mode, p: cropPoint(e), c: { x: crop.x, y: crop.y, w: crop.w, h: crop.h }, id: e.pointerId };
+  try { cropStage.setPointerCapture(e.pointerId); } catch (err){}
+});
+cropStage.addEventListener("pointermove", function(e){
+  if (!cropDrag || e.pointerId !== cropDrag.id) return;
+  e.preventDefault();
+  var p = cropPoint(e), dx = p.x - cropDrag.p.x, dy = p.y - cropDrag.p.y, c = cropDrag.c, m = cropDrag.mode;
+  if (m === "move"){
+    crop.x = clampNum(c.x + dx, 0, 1 - c.w); crop.y = clampNum(c.y + dy, 0, 1 - c.h);
+  } else {
+    if (m === "tl" || m === "bl"){ crop.x = clampNum(c.x + dx, 0, c.x + c.w - CROP_MIN); crop.w = c.x + c.w - crop.x; }
+    if (m === "tr" || m === "br"){ crop.w = clampNum(c.w + dx, CROP_MIN, 1 - c.x); }
+    if (m === "tl" || m === "tr"){ crop.y = clampNum(c.y + dy, 0, c.y + c.h - CROP_MIN); crop.h = c.y + c.h - crop.y; }
+    if (m === "bl" || m === "br"){ crop.h = clampNum(c.h + dy, CROP_MIN, 1 - c.y); }
+  }
+  placeCropBox();
+});
+function endCropDrag(){ cropDrag = null; }
+cropStage.addEventListener("pointerup", endCropDrag);
+cropStage.addEventListener("pointercancel", endCropDrag);
+document.getElementById("crop-reset").addEventListener("click", function(e){ e.preventDefault(); crop = { x: 0, y: 0, w: 1, h: 1 }; placeCropBox(); });
+document.getElementById("crop-cancel").addEventListener("click", function(){ photoStep("home"); });
+// the cropped part of the photo as a JPEG, sized for the reader: big photos are shrunk to
+// READ_MAX_EDGE on the long side, and a tight crop of a small photo is enlarged a little
+function croppedJpeg(){
+  var nw = cropImg.naturalWidth, nh = cropImg.naturalHeight;
+  var sx = crop.x * nw, sy = crop.y * nh, sw = crop.w * nw, sh = crop.h * nh, long = Math.max(sw, sh);
+  var scale = Math.min(READ_MAX_EDGE / long, Math.max(1, Math.min(2, 1000 / long)));
+  var cv = document.createElement("canvas");
+  cv.width = Math.max(1, Math.round(sw * scale)); cv.height = Math.max(1, Math.round(sh * scale));
+  var ctx = cv.getContext("2d");
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(cropImg, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+  return cv.toDataURL("image/jpeg", 0.85).split(",")[1];
+}
+
+// --- reading the photo ---
+function readScoreboard(b64){
+  if (window.__bbFakeRead) return window.__bbFakeRead(b64);
+  if (!sb || !sbUser) return Promise.reject({ code: "signin" });
+  return sb.functions.invoke("read-scoreboard", { body: { image: b64, mediaType: "image/jpeg" } }).then(function(r){
+    if (!r.error) return r.data;
+    var ctx = r.error.context;
+    if (ctx && ctx.status === 404) throw { code: "not_set_up" };
+    if (ctx && typeof ctx.json === "function"){
+      return ctx.json().then(function(b){ throw { code: (b && b.error) || "read_failed", cap: b && b.cap }; }, function(){ throw { code: "read_failed" }; });
+    }
+    throw { code: "network" };
+  });
+}
+var READ_ERRORS = {
+  signin: "Sign in to read photos (menu, then Sign in). You can still type the frames in yourself.",
+  daily_limit: "That's the most photos one bowler can read in a day. Try again tomorrow, or type the frames in yourself.",
+  not_set_up: "Photo reading isn't switched on yet. You can type the frames in yourself for now.",
+  unreadable: "Couldn't make out a scoreboard in that photo. Try cropping in closer on your line, or type the frames in yourself.",
+  no_lines: "Couldn't find any frames in that photo. Try cropping in closer on your line, or type the frames in yourself."
+};
+var photoLines = [];
+document.getElementById("crop-go").addEventListener("click", function(){
+  var b64;
+  try { b64 = croppedJpeg(); } catch (err){ document.getElementById("photo-status").textContent = "That photo couldn't be prepared. Try a different one."; photoStep("home"); return; }
+  photoStep("wait");
+  readScoreboard(b64).then(function(res){
+    if (!res || res.readable === false) throw { code: "unreadable" };
+    photoLines = (res.lines || []).filter(function(l){ return l && Array.isArray(l.frames) && l.frames.length; });
+    if (!photoLines.length) throw { code: "no_lines" };
+    var mine = photoLines.filter(function(l){ return state.photoName && cleanName(l.name) === cleanName(state.photoName); });
+    if (photoLines.length === 1) openConfirm(lineToSheet(photoLines[0]), null, photoLines[0]);
+    else if (mine.length === 1) openConfirm(lineToSheet(mine[0]), null, mine[0]);
+    else showLinePicker();
+  }).then(null, function(err){
+    var code = err && err.code;
+    document.getElementById("photo-status").textContent = READ_ERRORS[code] || "Couldn't read that photo just now. Check your connection and try again.";
+    photoStep("home");
+  });
+});
+function cleanName(s){ return String(s || "").trim().toUpperCase().replace(/\s+/g, " "); }
+function showLinePicker(){
+  var box = document.getElementById("photo-lines"); box.innerHTML = "";
+  photoLines.forEach(function(l){
+    var b = document.createElement("button");
+    var nm = document.createElement("span"); nm.textContent = l.name || "(no name)";
+    var sc = document.createElement("span"); sc.textContent = (l.final !== null && l.final !== undefined) ? l.final : "";
+    b.appendChild(nm); b.appendChild(sc);
+    b.addEventListener("click", function(){ state.photoName = l.name || ""; saveState(); openConfirm(lineToSheet(l), null, l); });
+    box.appendChild(b);
+  });
+  photoStep("pick");
+}
+document.getElementById("pick-cancel").addEventListener("click", function(){ photoStep("home"); });
+
+// --- the check-and-fix scoresheet ---
+// A sheet is { marks: 10 arrays of single-character marks, splits: 10 booleans (the first ball
+// was shown as a split), shown: the running totals printed on the scoreboard, or nulls }
+function normMark(ch){
+  ch = String(ch || "").trim().toUpperCase().slice(-1);
+  if (ch === "0" || ch === "G" || ch === "—" || ch === "–") return "-";
+  return /^[1-9X\/\-F]$/.test(ch) ? ch : "";
+}
+function lineToSheet(l){
+  var sheet = { marks: [], splits: [], shown: [] };
+  for (var i = 0; i < 10; i++){
+    var f = l.frames[i] || {};
+    var m = (f.marks || []).map(normMark).filter(Boolean).slice(0, i === 9 ? 3 : 2);
+    if (i < 9 && m[0] === "X") m = ["X"];
+    sheet.marks.push(m);
+    sheet.splits.push(!!f.first_ball_red);
+    sheet.shown.push(typeof f.total === "number" ? f.total : null);
+  }
+  if (typeof l.final === "number" && sheet.shown[9] === null) sheet.shown[9] = l.final;
+  return sheet;
+}
+function gameToSheet(g){
+  var sheet = { marks: [], splits: [], shown: [] };
+  g.frames.forEach(function(f, i){
+    sheet.marks.push(ballsToMarks(frameNumeric(f)));
+    sheet.splits.push(!!(f.splitBalls && f.splitBalls.indexOf(0) !== -1));
+    sheet.shown.push(null);
+  });
+  return sheet;
+}
+function ballsToMarks(nums){
+  var up = 10, out = [];
+  nums.forEach(function(v){
+    if (up === 10 && v === 10) out.push("X");
+    else if (v === up) out.push("/");
+    else out.push(v === 0 ? "-" : String(v));
+    up -= v; if (up === 0) up = 10;
+  });
+  return out;
+}
+// marks for one frame -> pin counts, or a reason it isn't a complete, possible frame
+function marksToBalls(fi, marks){
+  var up = 10, nums = [];
+  for (var k = 0; k < marks.length; k++){
+    var m = marks[k], v;
+    if (!m) break;
+    if (m === "X"){ if (up !== 10) return { bad: k }; v = 10; }
+    else if (m === "/"){ if (up === 10) return { bad: k }; v = up; }
+    else if (m === "-" || m === "F"){ v = 0; }
+    else { v = Number(m); if (v >= up) return { bad: k }; }
+    nums.push(v); up -= v; if (up === 0) up = 10;
+  }
+  var need;
+  if (fi < 9) need = nums[0] === 10 ? 1 : 2;
+  else need = (nums.length >= 2 && (nums[0] === 10 || nums[0] + nums[1] === 10)) ? 3 : 2;
+  if (nums.length < need) return { missing: nums.length, nums: nums };
+  return { nums: nums.slice(0, need) };
+}
+var sheet = null, sheetEditIdx = null;
+function openConfirm(s, editIdx, line){
+  sheet = s; sheetEditIdx = editIdx;
+  var n = state.photoNight, gameNo = editIdx === null ? n.games.length + 1 : editIdx + 1;
+  document.getElementById("confirm-title").textContent = "Check Game " + gameNo;
+  var sub = document.getElementById("confirm-sub"); sub.innerHTML = "";
+  if (line){
+    sub.appendChild(document.createTextNode("Read from your photo" + (line.name ? ", line " + line.name : "") + ". Check each box against the scoreboard."));
+    if (photoLines.length > 1){
+      var a = document.createElement("a"); a.href = "#"; a.textContent = " Not your line?";
+      a.addEventListener("click", function(e){ e.preventDefault(); showLinePicker(); });
+      sub.appendChild(a);
+    }
+    if (line.name){ state.photoName = line.name; saveState(); }
+  } else {
+    sub.textContent = editIdx === null ? "Type each box as it reads on the scoreboard." : "Fix any box, then save.";
+  }
+  document.getElementById("confirm-save").textContent = editIdx === null ? "Save game" : "Save changes";
+  buildSheetGrid();
+  updateSheet();
+  photoStep("confirm");
+}
+function buildSheetGrid(){
+  var grid = document.getElementById("confirm-grid"); grid.innerHTML = "";
+  grid.className = "sheet-grid";
+  for (var i = 0; i < 10; i++){
+    var fr = document.createElement("div"); fr.className = "sheet-frame" + (i === 9 ? " tenth" : ""); fr.id = "sf-" + i;
+    var num = document.createElement("button"); num.type = "button"; num.className = "sf-num"; num.textContent = i + 1;
+    num.setAttribute("aria-label", "Frame " + (i + 1) + ": tap to mark a split");
+    num.addEventListener("click", (function(fi){ return function(){ sheet.splits[fi] = !sheet.splits[fi]; updateSheet(); }; })(i));
+    var balls = document.createElement("div"); balls.className = "sf-balls";
+    for (var k = 0; k < (i === 9 ? 3 : 2); k++){
+      var inp = document.createElement("input");
+      inp.type = "text"; inp.setAttribute("inputmode", "text"); inp.setAttribute("autocapitalize", "characters");
+      inp.setAttribute("autocomplete", "off"); inp.setAttribute("aria-label", "Frame " + (i + 1) + " ball " + (k + 1));
+      inp.id = "sb-" + i + "-" + k; inp.value = sheet.marks[i][k] || "";
+      inp.addEventListener("input", (function(fi, bi){ return function(e){
+        var v = normMark(e.target.value);
+        sheet.marks[fi][bi] = v; e.target.value = v;
+        if (fi < 9 && bi === 0 && v === "X") sheet.marks[fi].length = 1;
+        sheet.marks[fi] = sheet.marks[fi].slice(0, fi === 9 ? 3 : 2);
+        updateSheet();
+        if (v) focusNextBox(fi, bi);
+      }; })(i, k));
+      inp.addEventListener("focus", function(e){ e.target.select(); });
+      balls.appendChild(inp);
+    }
+    var tot = document.createElement("div"); tot.className = "sf-total";
+    var shown = document.createElement("div"); shown.className = "sf-shown";
+    fr.appendChild(num); fr.appendChild(balls); fr.appendChild(tot); fr.appendChild(shown);
+    grid.appendChild(fr);
+  }
+}
+function focusNextBox(fi, bi){
+  for (var i = fi, k = bi + 1; i < 10; i++, k = 0){
+    for (; k < (i === 9 ? 3 : 2); k++){
+      var el = document.getElementById("sb-" + i + "-" + k);
+      if (el && !el.disabled){ el.focus(); return; }
+    }
+  }
+  document.activeElement && document.activeElement.blur && document.activeElement.blur();
+}
+// re-check the sheet after every change: which boxes are open, the running totals, and whether
+// it adds up to what the scoreboard showed
+function sheetResult(){
+  var frames = [], firstBad = null, firstMissing = null;
+  for (var i = 0; i < 10; i++){
+    var r = marksToBalls(i, sheet.marks[i]);
+    if (r.bad !== undefined && firstBad === null) firstBad = i;
+    if (r.missing !== undefined && firstMissing === null) firstMissing = i;
+    frames.push(r);
+  }
+  return { frames: frames, firstBad: firstBad, firstMissing: firstMissing };
+}
+function updateSheet(){
+  var res = sheetResult();
+  var numeric = res.frames.map(function(r){ return r.nums || []; });
+  var totals = computeScoresNumeric(numeric);
+  var firstOff = null;
+  for (var i = 0; i < 10; i++){
+    var r = res.frames[i], marks = sheet.marks[i];
+    var nums = r.nums || [];
+    // which boxes can take a mark: the 2nd box is closed after a strike in frames 1-9, and the
+    // 10th frame's 3rd box only opens after a strike or spare
+    var open = i < 9 ? (marks[0] === "X" ? 1 : 2) : ((nums.length >= 2 && (nums[0] === 10 || nums[0] + nums[1] === 10)) ? 3 : 2);
+    for (var k = 0; k < (i === 9 ? 3 : 2); k++){
+      var el = document.getElementById("sb-" + i + "-" + k);
+      el.disabled = k >= open;
+      if (k >= open && el.value){ el.value = ""; sheet.marks[i][k] = ""; }
+      if (document.activeElement !== el) el.value = sheet.marks[i][k] || "";
+      el.classList.toggle("bad", r.bad === k);
+      el.classList.toggle("split-ball", k === 0 && sheet.splits[i] && marks[0] !== "X");
+    }
+    document.querySelector("#sf-" + i + " .sf-num").classList.toggle("split-on", !!sheet.splits[i]);
+    var frEl = document.getElementById("sf-" + i);
+    frEl.querySelector(".sf-total").textContent = totals[i] === null ? "" : totals[i];
+    var shown = sheet.shown[i];
+    var off = shown !== null && totals[i] !== null && totals[i] !== shown;
+    if (off && firstOff === null) firstOff = i;
+    frEl.classList.toggle("off", off && i === firstOff);
+    // only the first total that disagrees gets the scoreboard's number beside it; the rest follow from it
+    frEl.querySelector(".sf-shown").textContent = (off && i === firstOff) ? "screen " + shown : "";
+  }
+  var check = document.getElementById("confirm-check"), save = document.getElementById("confirm-save");
+  var final = totals[9], screenFinal = sheet.shown[9];
+  sheet.ok = res.firstBad === null && res.firstMissing === null && final !== null;
+  if (res.firstBad !== null){
+    check.className = "check-line warn"; check.textContent = "Frame " + (res.firstBad + 1) + " has a box that can't happen (shaded red). Fix it to see the total.";
+  } else if (!sheet.ok){
+    var f = res.firstMissing === null ? 9 : res.firstMissing;
+    check.className = "check-line warn"; check.textContent = "Frame " + (f + 1) + " still needs " + (f === 9 ? "its boxes" : "a box") + " filled in.";
+  } else if (screenFinal !== null && final === screenFinal && firstOff === null){
+    check.className = "check-line ok"; check.textContent = "✓ Adds up to " + final + ", the same as the scoreboard.";
+  } else if (screenFinal !== null || firstOff !== null){
+    check.className = "check-line warn";
+    check.textContent = "Adds up to " + final + (screenFinal !== null ? ", but the scoreboard showed " + screenFinal : "") + "." +
+      (firstOff !== null ? " Frame " + (firstOff + 1) + " is the first total that doesn't match (shaded). The wrong box is usually in that frame or the one or two after it." : "");
+  } else {
+    check.className = "check-line ok"; check.textContent = "Adds up to " + final + ".";
+  }
+  save.disabled = !sheet.ok;
+  var mismatch = sheet.ok && (firstOff !== null || (screenFinal !== null && final !== screenFinal));
+  save.textContent = mismatch ? "Save anyway" : (sheetEditIdx === null ? "Save game" : "Save changes");
+}
+document.getElementById("confirm-cancel").addEventListener("click", function(){ sheet = null; photoStep("home"); });
+document.getElementById("confirm-save").addEventListener("click", function(){
+  if (!sheet || !sheet.ok) return;
+  var res = sheetResult(), g = newGame();
+  res.frames.forEach(function(r, i){
+    var f = g.frames[i];
+    f.balls = r.nums.map(function(v){ return { knocked: v, ballUsed: "" }; });
+    if (sheet.splits[i] && r.nums[0] !== 10) f.splitBalls = [0];
+  });
+  g.complete = true;
+  g.finalScore = lastKnownScore(computeScoresFromFrames(g.frames));
+  g.source = "photo";
+  var n = state.photoNight;
+  if (sheetEditIdx === null) n.games.push(g); else n.games[sheetEditIdx] = g;
+  sheet = null;
+  renderPhoto(); photoStep("home"); savePhotoNight();
+});
+document.getElementById("photo-manual-link").addEventListener("click", function(e){
+  e.preventDefault();
+  var blank = { marks: [], splits: [], shown: [] };
+  for (var i = 0; i < 10; i++){ blank.marks.push([]); blank.splits.push(false); blank.shown.push(null); }
+  photoLines = [];
+  openConfirm(blank, null, null);
+});
 function saveSeriesLocal(doc){
   var replaced = false;
   state.seriesHistory = state.seriesHistory.map(function(h){
@@ -1822,6 +2378,7 @@ function resetSeries(){
   state.sessionType = "league";   // every new night starts on League; Practice is chosen each time
   applySessionType();
   state.night = null;
+  state.photoNight = null;
   state.savedSeriesId = null;
   document.getElementById("save-status").textContent = "";
   state.games = [];
@@ -1844,19 +2401,22 @@ document.getElementById("reset-series-btn").addEventListener("click", function()
 function updateSetupPrimaryButton(){
   var btn = document.getElementById("start-series-btn");
   if (returnView){
-    btn.textContent = "Save & back to " + (returnView === "scores" ? "your scores" : returnView);
+    btn.textContent = "Save & back to " + (returnView === "scores" ? "your scores" : returnView === "photo" ? "your games" : returnView);
   } else {
-    btn.textContent = scoreMode() === "scores" ? "Enter game scores" : "Start Game 1";
+    btn.textContent = { scores: "Enter game scores", photo: "Add games from photos", frames: "Start Game 1" }[scoreMode()];
   }
   // the bag, default balls and starting line only matter when scoring frame by frame
-  document.getElementById("setup-frames-only").classList.toggle("hidden", scoreMode() === "scores");
-  document.getElementById("setup-mode-note").textContent = scoreMode() === "scores"
-    ? "You'll type in each game's final score as the night goes on. Strike %, spare % and the other shot stats aren't tracked for this night."
-    : "Tap the pins after every ball. Gives you strike %, spare % and the other shot stats.";
+  document.getElementById("setup-frames-only").classList.toggle("hidden", scoreMode() !== "frames");
+  document.getElementById("setup-mode-note").textContent = {
+    scores: "You'll type in each game's final score as the night goes on. Strike %, spare % and the other shot stats aren't tracked for this night.",
+    photo: "After each game, snap or pick a photo of the lane scoreboard. Gives you strike %, spare %, opens and splits. Not which pins were left or which ball you threw.",
+    frames: "Tap the pins after every ball. Gives you strike %, spare % and the other shot stats."
+  }[scoreMode()];
   // the choice is made at the start of a night; it can't change part-way through
   document.getElementById("setup-mode-wrap").classList.toggle("hidden", !!returnView);
   document.getElementById("setup-mode-frames").checked = scoreMode() === "frames";
   document.getElementById("setup-mode-scores").checked = scoreMode() === "scores";
+  document.getElementById("setup-mode-photo").checked = scoreMode() === "photo";
 }
 document.getElementById("header-setup-btn").addEventListener("click", function(){
   var activeViewName = views.filter(function(v){ return !document.getElementById("view-"+v).classList.contains("hidden"); })[0];
@@ -1864,7 +2424,8 @@ document.getElementById("header-setup-btn").addEventListener("click", function()
   // only offer "Save & back" when a series is actually under way; from the reports or
   // profile, setup opens ready to start a new series
   returnView = ((activeViewName === "game" || activeViewName === "summary") && state.games.length) ? activeViewName
-    : ((activeViewName === "scores" && nightActive()) ? "scores" : null);
+    : ((activeViewName === "scores" && nightActive()) ? "scores"
+    : ((activeViewName === "photo" && photoActive()) ? "photo" : null));
   initSetupFields();
   showView("setup");
 });
@@ -2006,7 +2567,8 @@ function fillProfileInputs(){
   });
 }
 function goToView(name){
-  if (name === "game" && nightActive()){ showNight(); }
+  if ((name === "game" || name === "scores") && nightActive()){ showNight(); }
+  else if ((name === "game" || name === "photo") && photoActive()){ showPhoto(); }
   else if (name === "game" && state.games.length){ showView("game"); renderBallUsedOptions(); refreshGameScreen(); }
   else if (name === "summary" && state.games.length){ showSummary(); }
   else if (name === "history"){ renderHistory(); showView("history"); }
@@ -2621,8 +3183,8 @@ function renderShots(items){
   if (!gamesTotal) return;
   // Shot-by-shot goals live on the Goals tab, with the same "how many games" note as the stats.
   var coverage = !rows.length
-    ? "Measured on nights scored frame by frame in the app. None saved yet."
-    : "From " + plural(allGames.length, "game") + " scored frame by frame" + (allGames.length < gamesTotal ? " (of " + gamesTotal + " on this report; the rest were entered as scores only)." : ".");
+    ? "Measured on nights scored frame by frame or from scoreboard photos. None saved yet."
+    : "From " + plural(allGames.length, "game") + " with frame detail" + (allGames.length < gamesTotal ? " (of " + gamesTotal + " on this report; the rest were entered as scores only)." : ".");
   var sgCard = document.getElementById("shot-goals-card"), sgList = document.getElementById("shot-goals-list");
   sgCard.classList.toggle("hidden", practiceTab);
   sgList.innerHTML = "";
@@ -2638,7 +3200,7 @@ function renderShots(items){
     sg.forEach(function(goal){ var row = goalRow(goal, st); if (row) sgList.appendChild(row); });
   }
   if (!rows.length){
-    note.textContent = "Strike %, spare % and the other shot stats appear here once a " + (practiceTab ? "session" : "night") + " is scored frame by frame in the app. Nights entered as scores only can't be broken down.";
+    note.textContent = "Strike %, spare % and the other shot stats appear here once a " + (practiceTab ? "session" : "night") + " is scored frame by frame or from scoreboard photos. Nights entered as scores only can't be broken down.";
     return;
   }
   var agg = aggregateStats(allGames);
@@ -2798,10 +3360,10 @@ function buildStatsSheet(opts){
 
     if (opts.shots){
       heading("Shot stats");
-      if (!st.shots){ y += 16; text(P, y, "No games scored frame by frame yet.", 14, 400, MUTE); y += 8; }
+      if (!st.shots){ y += 16; text(P, y, "No games with frame detail yet.", 14, 400, MUTE); y += 8; }
       else {
         var a = st.shots;
-        y += 14; text(P, y, "From " + plural(st.shotGames, "game") + " scored frame by frame" + (st.shotGames < st.games.length ? " (of " + st.games.length + ")" : "") + ".", 12, 400, MUTE); y += 4;
+        y += 14; text(P, y, "From " + plural(st.shotGames, "game") + " with frame detail" + (st.shotGames < st.games.length ? " (of " + st.games.length + ")" : "") + ".", 12, 400, MUTE); y += 4;
         tiles([["Strike %", pctText(a.strikes, a.firstBalls), a.strikes + " of " + a.firstBalls + " first balls"],
                ["Spare %", pctText(a.spares, a.spareOpportunities), a.spares + " of " + a.spareOpportunities + " chances"],
                ["Single-pin %", pctText(a.singlePinMade, a.singlePinOpportunities), a.singlePinMade + " of " + a.singlePinOpportunities + " leaves"],
@@ -3515,7 +4077,7 @@ menuBtn.addEventListener("click", function(e){
   var opening = menuPanel.classList.contains("hidden");
   if (!opening){ closeMenu(); return; }
   var onGame = !document.getElementById("view-game").classList.contains("hidden");
-  document.getElementById("menu-game-btn").classList.toggle("hidden", onGame || !(state.setupDone && (state.games.length || nightActive())) || !document.getElementById("view-scores").classList.contains("hidden"));
+  document.getElementById("menu-game-btn").classList.toggle("hidden", onGame || !(state.setupDone && (state.games.length || nightActive() || photoActive())) || !document.getElementById("view-scores").classList.contains("hidden") || !document.getElementById("view-photo").classList.contains("hidden"));
   menuPanel.classList.remove("hidden");
   menuBtn.setAttribute("aria-expanded", "true");
 });
@@ -3570,6 +4132,7 @@ document.getElementById("view-history-link").addEventListener("click", function(
 });
 document.getElementById("history-back-btn").addEventListener("click", function(){
   if (nightActive()){ showNight(); return; }
+  if (photoActive()){ showPhoto(); return; }
   showView(state.setupDone && state.games.length && !allGamesFreshlyReset() ? "game" : "setup");
 });
 function allGamesFreshlyReset(){ return state.games.length===0; }
@@ -3590,6 +4153,8 @@ applyPracticeMode();
 initCloud();
 if (nightActive()){
   showNight();
+} else if (photoActive()){
+  showPhoto();
 } else if (state.setupDone && state.games.length){
   curGameIdx = state.games.length-1;
   var g = state.games[curGameIdx];
