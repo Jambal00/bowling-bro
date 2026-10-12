@@ -130,8 +130,12 @@ Deno.serve(async (req) => {
       }),
     });
     if (!r.ok) {
-      console.error("anthropic", r.status, await r.text());
-      return json({ error: "read_failed" }, 502);
+      const text = await r.text();
+      console.error("anthropic", r.status, text);
+      // pass Claude's own error message back (it never contains the key) so the app can show it
+      let message = text.slice(0, 160);
+      try { message = JSON.parse(text).error.message || message; } catch (_e) { /* keep raw text */ }
+      return json({ error: "read_failed", message: "Claude " + r.status + ": " + message }, 502);
     }
     const out = await r.json();
     await db.from("bb_photo_reads").insert({
@@ -139,10 +143,10 @@ Deno.serve(async (req) => {
       input_tokens: out.usage?.input_tokens ?? null, output_tokens: out.usage?.output_tokens ?? null,
     });
     const use = (out.content || []).find((c: { type: string }) => c.type === "tool_use");
-    if (!use) return json({ error: "read_failed" }, 502);
+    if (!use) return json({ error: "read_failed", message: "no answer (" + (out.stop_reason || "unknown") + ")" }, 502);
     return json(use.input);
   } catch (e) {
     console.error(e);
-    return json({ error: "server" }, 500);
+    return json({ error: "server", message: String((e as Error)?.message || e).slice(0, 160) }, 500);
   }
 });
