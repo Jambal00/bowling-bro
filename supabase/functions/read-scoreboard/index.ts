@@ -7,7 +7,7 @@
 //   ANTHROPIC_API_KEY  required
 //   READ_MODEL         optional, defaults to claude-sonnet-5-5
 //   DAILY_READ_CAP     optional, photos per bowler per 24 hours, defaults to 25
-// SUPABASE_URL and SUPABASE_ANON_KEY are provided by Supabase automatically.
+// SUPABASE_URL and SUPABASE_PUBLISHABLE_KEYS are provided by Supabase automatically.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const CORS = {
@@ -67,6 +67,17 @@ const TOOL = {
   },
 };
 
+// the project's publishable key (the newer replacement for the anon key), with the legacy anon
+// key as a fallback for older projects
+function publishableKey(): string {
+  try {
+    const keys = JSON.parse(Deno.env.get("SUPABASE_PUBLISHABLE_KEYS") || "{}");
+    const k = keys.default || Object.values(keys)[0];
+    if (typeof k === "string" && k) return k;
+  } catch (_e) { /* fall through */ }
+  return Deno.env.get("SUPABASE_ANON_KEY") || "";
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 }
@@ -78,7 +89,7 @@ Deno.serve(async (req) => {
     // only signed-in bowlers can read photos; the bowler's own token is used for the usage log,
     // so row-level security keeps each bowler to their own rows
     const auth = req.headers.get("Authorization") || "";
-    const db = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY")!, {
+    const db = createClient(Deno.env.get("SUPABASE_URL")!, publishableKey(), {
       global: { headers: { Authorization: auth } },
     });
     const { data: { user } } = await db.auth.getUser(auth.replace(/^Bearer\s+/i, ""));
