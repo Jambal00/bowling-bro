@@ -25,7 +25,10 @@ body {
   display: flex; justify-content: space-between; align-items: baseline;
   margin-bottom: 12px;
 }
-.header .place { font-size: 13px; color: #6b6b6b; }
+.header .place { font-size: 13px; color: #6b6b6b; display: flex; align-items: center; gap: 7px; min-width: 0; }
+.header .place #place-label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.header .place.brand { font-size: 15px; font-weight: 700; color: #1a1a1a; }
+.header .place-icon { width: 22px; height: 22px; border-radius: 6px; flex: 0 0 auto; }
 .header .game-label { font-size: 13px; font-weight: 600; color: #2f6fed; }
 .card {
   background: #fff; border: 1px solid #e2e0d5; border-radius: 14px;
@@ -336,7 +339,7 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
 <div class="app">
 
   <div class="header">
-    <span class="place" id="place-label">Bowling Bro'</span>
+    <span class="place"><img src="icons/icon-192.png" alt="" class="place-icon" width="22" height="22" /><span id="place-label">Bowling Bro'</span></span>
     <div style="display:flex;align-items:center;gap:10px;position:relative;">
       <span class="game-label" id="game-label"></span>
       <button id="menu-btn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" style="padding:8px 10px;line-height:0;">
@@ -788,12 +791,21 @@ var history = [];
 var returnView = null;
 
 // ---------- view switching ----------
+// The corner shows the app's name, except while a session is being scored, when it shows
+// where you're bowling (and your lanes, if entered).
+function setPlaceLabel(viewName){
+  var scoring = viewName === "game" || viewName === "scores" || viewName === "photo";
+  var text = scoring && state.center ? state.center + (state.lanes ? " · Lanes " + state.lanes : "") : "Bowling Bro'";
+  document.getElementById("place-label").textContent = text;
+  document.getElementById("place-label").parentNode.classList.toggle("brand", text === "Bowling Bro'");
+}
 var views = ["setup","game","scores","photo","summary","history","profile"];
 function showView(name){
   views.forEach(function(v){ document.getElementById("view-"+v).classList.toggle("hidden", v!==name); });
   document.body.classList.toggle("in-game", name==="game");
   document.getElementById("header-setup-btn").classList.toggle("hidden", name==="setup");
   document.getElementById("header-profile-btn").classList.toggle("hidden", name==="profile");
+  setPlaceLabel(name);
   if (name!=="game"){
     var labels = {setup:"Setup", scores:"Game Scores", photo:"Photo Scoring", summary:"Series Summary", history:"Season History", profile:"Profile & Goals"};
     document.getElementById("game-label").textContent = labels[name] || "";
@@ -1349,7 +1361,7 @@ document.getElementById("edit-frame-btn").addEventListener("click", function(){
   refreshGameScreen();
 });
 function refreshGameScreen(){
-  document.getElementById("place-label").textContent = (state.center || "Bowling Bro'") + (state.lanes ? (" · Lanes " + state.lanes) : "");
+  setPlaceLabel("game");
   document.getElementById("game-label").textContent = (sessionType() === "practice" ? "Practice · " : "") + "Game " + (curGameIdx+1);
   renderScoresheet();
   var g = curGame();
@@ -4151,7 +4163,6 @@ function allGamesFreshlyReset(){ return state.games.length===0; }
 
 // ---------- init ----------
 function initSetupFields(){
-  document.getElementById("place-label").textContent = state.center || "Bowling Bro'";
   document.getElementById("setup-center").value = state.center;
   document.getElementById("setup-lanes").value = state.lanes;
   document.getElementById("setup-feet").value = state.startFeet;
