@@ -1329,11 +1329,7 @@ function frameMarksForIndex(frames, idx){
     return [markLabel(nums[0]), markLabel(nums[1])];
   } else {
     var out = ["","",""];
-    for (var k=0;k<nums.length;k++){
-      if (nums[k]===10){ out[k]="X"; }
-      else if (k>0 && nums[k-1]!==10 && (nums[k]+nums[k-1]===10)){ out[k]="/"; }
-      else { out[k]=markLabel(nums[k]); }
-    }
+    ballsToMarks(nums).forEach(function(m, k){ out[k] = m; });
     return out;
   }
 }
@@ -2213,27 +2209,36 @@ function gameToSheet(g){
   });
   return sheet;
 }
+// One frame's balls as scoresheet marks. A rack is fresh at the start of the frame and after a
+// strike or a second ball, so 10th-frame fill balls are marked against the right rack:
+// 7 3 7 is "7 / 7", X 3 7 is "X 3 /", and a gutter then ten is a spare, "- /".
 function ballsToMarks(nums){
-  var up = 10, out = [];
+  var fresh = true, first = 0, out = [];
   nums.forEach(function(v){
-    if (up === 10 && v === 10) out.push("X");
-    else if (v === up) out.push("/");
-    else out.push(v === 0 ? "-" : String(v));
-    up -= v; if (up === 0) up = 10;
+    if (fresh){
+      if (v === 10){ out.push("X"); return; }
+      out.push(v === 0 ? "-" : String(v)); first = v; fresh = false;
+    } else {
+      out.push(first + v === 10 ? "/" : (v === 0 ? "-" : String(v))); fresh = true;
+    }
   });
   return out;
 }
 // marks for one frame -> pin counts, or a reason it isn't a complete, possible frame
 function marksToBalls(fi, marks){
-  var up = 10, nums = [];
+  // fresh = this ball is thrown at a full rack (a gutter on the first ball still leaves the
+  // second ball as the spare try, so "- /" is a spare and "- X" can't happen)
+  var fresh = true, up = 10, nums = [];
   for (var k = 0; k < marks.length; k++){
     var m = marks[k], v;
     if (!m) break;
-    if (m === "X"){ if (up !== 10) return { bad: k }; v = 10; }
-    else if (m === "/"){ if (up === 10) return { bad: k }; v = up; }
+    if (m === "X"){ if (!fresh) return { bad: k }; v = 10; }
+    else if (m === "/"){ if (fresh) return { bad: k }; v = up; }
     else if (m === "-" || m === "F"){ v = 0; }
     else { v = Number(m); if (v >= up) return { bad: k }; }
-    nums.push(v); up -= v; if (up === 0) up = 10;
+    nums.push(v);
+    if (fresh && v !== 10){ fresh = false; up = 10 - v; }
+    else { fresh = true; up = 10; }
   }
   var need;
   if (fi < 9) need = nums[0] === 10 ? 1 : 2;
