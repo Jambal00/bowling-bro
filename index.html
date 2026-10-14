@@ -366,7 +366,7 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
       </button>
       <div id="menu-panel" class="menu-panel hidden">
         <button id="menu-game-btn">Back to scoring</button>
-        <button id="header-setup-btn">Series setup</button>
+        <button id="header-setup-btn">Session Setup</button>
         <button id="menu-league-btn">Your Stats</button>
         <button id="header-profile-btn">Profile &amp; Goals</button>
         <button id="menu-install-btn">Add to Home Screen</button>
@@ -827,9 +827,10 @@ function showView(name){
   document.body.classList.toggle("in-game", name==="game");
   document.getElementById("header-setup-btn").classList.toggle("hidden", name==="setup");
   document.getElementById("header-profile-btn").classList.toggle("hidden", name==="profile");
+  document.getElementById("menu-league-btn").classList.toggle("hidden", name==="history");
   setPlaceLabel(name);
   if (name!=="game"){
-    var labels = {setup:"Setup", scores:"Game Scores", photo:"Photo Scoring", summary:"Series Summary", history:"Season History", profile:"Profile & Goals"};
+    var labels = {setup:"Session Setup", scores:"Game Scores", photo:"Photo Scoring", summary:"Series Summary", history:"Your Stats", profile:"Profile & Goals"};
     document.getElementById("game-label").textContent = labels[name] || "";
   }
 }
