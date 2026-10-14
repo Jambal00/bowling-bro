@@ -3669,7 +3669,6 @@ function buildSessionSheet(h, opts){
   });
   y += 8 + Math.ceil(sc.length / cols) * (gh + 10);
   var season = seasonAvgThrough(h), tl = [[practice ? "Total" : "Series", String(total)], ["Average", sc.length ? (total / sc.length).toFixed(1) : "—"]];
-  if (!practice && isNum(h.rank)) tl.push(["Rank", ordinal(h.rank)]);
   if (season !== null) tl.push([practice ? "Practice avg" : "Season avg", season.toFixed(1)]);
   var tw = IW / tl.length;
   y += 6;
@@ -3752,11 +3751,10 @@ function buildSessionSheet(h, opts){
     + '<rect width="' + W + '" height="' + H + '" fill="#ffffff"/>' + out.join("") + '</svg>';
   return { svg: svg, width: W, height: H };
 }
-function ordinal(n){ var s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
-// a night still being entered picks up the rank and note added to its saved copy in History
+// a night still being entered picks up the note added to its saved copy in History
 function withSavedExtras(doc){
   var saved = allSeries().filter(function(it){ return doc.id && it.h.id === doc.id; })[0];
-  if (saved){ if (isNum(saved.h.rank)) doc.rank = saved.h.rank; if (saved.h.note) doc.note = saved.h.note; }
+  if (saved && saved.h.note) doc.note = saved.h.note;
   return doc;
 }
 function renderSessionShare(){
