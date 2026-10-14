@@ -2931,6 +2931,11 @@ function goalAverage(){
   for (var i = 0; i < SEASON_GOALS.length; i++){ if (SEASON_GOALS[i].type === "avg") return SEASON_GOALS[i].target; }
   return null;   // no average goal set
 }
+// the bowler's "average high-low spread at or below" goal, for the Consistency chart
+function goalSpread(){
+  for (var i = 0; i < SEASON_GOALS.length; i++){ if (SEASON_GOALS[i].type === "spread" && isNum(SEASON_GOALS[i].target)) return SEASON_GOALS[i].target; }
+  return null;
+}
 // lowest score named in the bowler's own goals of the given types, or null when there are none
 function goalFloor(types){
   var lo = null;
@@ -3971,6 +3976,7 @@ function renderChart(items){
       var sum = 0; multi.forEach(function(d){ sum += d.hi - d.lo; });
       refs.push({ v: sum / multi.length, text: "avg " + (sum / multi.length).toFixed(1) });
     }
+    if (!practiceTab && goalSpread() !== null) refs.push({ v: goalSpread(), text: "goal " + fmtNum(goalSpread()), color: CHART_C.goal });
   }
   document.getElementById("chart-title").textContent = title;
   refs.forEach(function(r){ vals.push(r.v); });
@@ -3991,9 +3997,16 @@ function renderChart(items){
   data.forEach(function(d, i){
     if (i % every === 0) svg.appendChild(svgEl("text", { x: x(i), y: H - 8, "text-anchor": "middle", "font-size": 9, fill: CHART_C.ink }, d.label));
   });
-  refs.forEach(function(r){
+  // the labels sit in the right margin; when two lines are close (the average spread near the
+  // spread goal), push the labels apart so they don't print on top of each other
+  var labelY = refs.map(function(r){ return y(r.v) + 3; });
+  if (labelY.length === 2 && Math.abs(labelY[0] - labelY[1]) < 11){
+    var mid = (labelY[0] + labelY[1]) / 2, upper = labelY[0] <= labelY[1] ? 0 : 1;
+    labelY[upper] = mid - 5.5; labelY[1 - upper] = mid + 5.5;
+  }
+  refs.forEach(function(r, ri){
     svg.appendChild(svgEl("line", { x1: L, x2: W - R, y1: y(r.v), y2: y(r.v), stroke: r.color || "#1a1a1a", "stroke-width": r.color ? 1.5 : 1, "stroke-dasharray": r.color ? "4 3" : "2 3", opacity: r.color ? 1 : 0.55 }));
-    svg.appendChild(svgEl("text", { x: W - R + 4, y: y(r.v) + 3, "text-anchor": "start", "font-size": 9, "font-weight": r.color ? 600 : 400, fill: r.color || "#1a1a1a" }, r.text));
+    svg.appendChild(svgEl("text", { x: W - R + 4, y: labelY[ri], "text-anchor": "start", "font-size": 9, "font-weight": r.color ? 600 : 400, fill: r.color || "#1a1a1a" }, r.text));
   });
   var cross = svgEl("line", { x1: 0, x2: 0, y1: T, y2: T + ph, stroke: "#1a1a1a", "stroke-width": 1, opacity: 0 });
   svg.appendChild(cross);
