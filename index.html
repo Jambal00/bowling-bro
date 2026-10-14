@@ -328,6 +328,25 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
     <p id="share-status" style="font-size:12px;color:#444;text-align:center;margin:8px 0 0;min-height:16px;line-height:1.4;"></p>
   </div>
 </div>
+<div id="session-share" class="hidden" style="position:fixed;inset:0;background:#f2f1ea;z-index:55;overflow:auto;">
+  <div style="max-width:420px;margin:0 auto;padding:18px 14px 30px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h1 style="font-size:22px;margin:0;">Share this session</h1>
+      <button id="ss-close-btn">Close</button>
+    </div>
+    <div class="card">
+      <div id="ss-what" style="font-size:14px;font-weight:600;margin-bottom:4px;"></div>
+      <div id="ss-parts" class="share-parts"></div>
+      <p id="ss-note" style="font-size:12px;color:#6b6b6b;margin:6px 0 0;line-height:1.4;"></p>
+    </div>
+    <div class="card" style="padding:8px;">
+      <div id="ss-preview" style="border:1px solid #e2e0d5;border-radius:8px;overflow:hidden;background:#fff;line-height:0;"></div>
+    </div>
+    <button class="primary full" id="ss-send-btn">Share as an image</button>
+    <button class="full" id="ss-pdf-btn" style="margin-top:8px;">Save as PDF</button>
+    <p id="ss-status" style="font-size:12px;color:#444;text-align:center;margin:8px 0 0;min-height:16px;line-height:1.4;"></p>
+  </div>
+</div>
 <div id="install-sheet" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:60;display:flex;align-items:flex-end;justify-content:center;">
   <div role="dialog" aria-modal="true" aria-labelledby="install-title" style="background:#fff;width:100%;max-width:420px;border-radius:16px 16px 0 0;padding:18px 18px 22px;">
     <h2 id="install-title" style="font-size:17px;margin:0 0 8px;">Add Bowling Bro' to your Home Screen</h2>
@@ -532,6 +551,7 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
       </div>
     </div>
     <button class="primary full" id="night-done-btn">Done for tonight</button>
+    <button class="full hidden" id="night-share-btn" style="margin-top:8px;">Share this session</button>
     <p style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0 0;line-height:1.4;">Each score is saved as you add it. You can close the app between games.</p>
   </div>
 
@@ -560,6 +580,7 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
         </div>
       </div>
       <button class="primary full" id="photo-done-btn">Done for tonight</button>
+      <button class="full hidden" id="photo-share-btn" style="margin-top:8px;">Share this session</button>
       <p style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0 0;line-height:1.4;">Each game is saved as you add it. You can close the app between games.</p>
     </div>
 
@@ -625,6 +646,7 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
     </div>
     <button class="primary full" id="save-history-btn">Save to season history</button>
     <p id="save-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0 0;min-height:15px;"></p>
+    <button class="full" id="summary-share-btn" style="margin-top:8px;">Share this session</button>
     <button class="full" id="export-pdf-btn" style="margin-top:8px;">Export series as PDF</button>
     <div style="text-align:center;margin-top:10px;">
       <button class="small-link" id="new-series-btn">Start a new series</button>
@@ -1877,6 +1899,7 @@ function renderNight(){
 function renderNightTotals(){
   var sc = state.night.scores, total = 0;
   sc.forEach(function(x){ total += x; });
+  document.getElementById("night-share-btn").classList.toggle("hidden", !sc.length);
   document.getElementById("night-total").textContent = sc.length ? total : "—";
   document.getElementById("night-avg").textContent = sc.length ? (total / sc.length).toFixed(1) : "—";
   document.getElementById("night-count").textContent = sc.length;
@@ -1970,6 +1993,7 @@ function renderPhoto(){
   document.getElementById("photo-total").textContent = n.games.length ? total : "—";
   document.getElementById("photo-avg").textContent = n.games.length ? (total / n.games.length).toFixed(1) : "—";
   document.getElementById("photo-count").textContent = n.games.length;
+  document.getElementById("photo-share-btn").classList.toggle("hidden", !n.games.length);
 }
 function photoNightDoc(){
   var n = state.photoNight, parts = n.date.split("-"), agg = aggregateStats(n.games);
@@ -3507,17 +3531,16 @@ document.getElementById("share-stats-btn").addEventListener("click", function(){
   document.getElementById("share-sheet").scrollTop = 0;
 });
 document.getElementById("share-close-btn").addEventListener("click", function(){ document.getElementById("share-sheet").classList.add("hidden"); });
-document.getElementById("share-send-btn").addEventListener("click", function(){
-  var statusEl = document.getElementById("share-status");
-  if (!currentSheet) return;
+// Hands a finished picture to the phone's share menu, or saves it where there is no share menu.
+// Shared by the stats summary and the single-session share.
+function shareSheetImage(sheet, fileName, title, statusEl){
   statusEl.textContent = "Preparing the image…";
-  var fileName = "bowling-bro-stats.png";
-  sheetToPng(currentSheet).then(function(blob){
+  sheetToPng(sheet).then(function(blob){
     var file = null;
     try { file = new File([blob], fileName, { type: "image/png" }); } catch(e){}
     if (file && navigator.canShare && navigator.canShare({ files: [file] })){
       // the phone's own share menu: Messages, Mail, AirDrop and so on
-      return navigator.share({ files: [file], title: "Bowling stats" }).then(function(){ statusEl.textContent = "Shared."; },
+      return navigator.share({ files: [file], title: title }).then(function(){ statusEl.textContent = "Shared."; },
         function(e){ statusEl.textContent = (e && e.name === "AbortError") ? "" : "Couldn't open the share menu. Try Save as PDF."; });
     }
     // no share menu here (most desktop browsers): save the picture instead
@@ -3526,17 +3549,257 @@ document.getElementById("share-send-btn").addEventListener("click", function(){
     setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
     statusEl.textContent = "Image saved to your downloads. Attach it to a text or email.";
   }, function(){ statusEl.textContent = "Couldn't make the image on this device. Try Save as PDF."; });
-});
-document.getElementById("share-pdf-btn").addEventListener("click", function(){
-  if (!currentSheet) return;
+}
+function printSheet(sheet, alt){
   var holder = document.getElementById("print-report");
   holder.className = "sheet";
   holder.innerHTML = "";
-  var img = document.createElement("img"); img.className = "sheet-img"; img.alt = "Stats summary";
+  var img = document.createElement("img"); img.className = "sheet-img"; img.alt = alt;
   img.onload = function(){ window.print(); };
-  img.src = sheetDataUrl(currentSheet);
+  img.src = sheetDataUrl(sheet);
   holder.appendChild(img);
+}
+document.getElementById("share-send-btn").addEventListener("click", function(){
+  if (!currentSheet) return;
+  shareSheetImage(currentSheet, "bowling-bro-stats.png", "Bowling stats", document.getElementById("share-status"));
 });
+document.getElementById("share-pdf-btn").addEventListener("click", function(){
+  if (!currentSheet) return;
+  printSheet(currentSheet, "Stats summary");
+});
+
+// ---------- share one session ----------
+// One picture of a single night or practice session, whichever way it was scored. Every session
+// shows its games, series and average; games with frame detail (photo or frame by frame) add the
+// scoresheets and shot stats; frame-by-frame sessions add the line, balls and leaves.
+var sessionShare = { h: null, opts: { sheets: true, shots: true, line: true, note: true }, sheet: null };
+function sessionKind(h){
+  if (!hasFrameDetail(h)) return "scores";
+  return h.source === "photo" ? "photo" : "frames";
+}
+function sessionGames(h){
+  return hasFrameDetail(h) ? h.games.filter(function(g){ return g && g.frames; }) : [];
+}
+function sessionParts(h){
+  var kind = sessionKind(h), parts = [];
+  if (kind !== "scores"){ parts.push(["sheets", "Scoresheets"]); parts.push(["shots", "Shot stats"]); }
+  if (kind === "frames") parts.push(["line", "Line, balls and leaves"]);
+  if (h.note) parts.push(["note", "Note"]);
+  return parts;
+}
+// pins are stored 0-9 (0 = headpin); show them as bowlers name them
+function leaveName(pinSet){
+  var pins = pinSet.map(function(i){ return i + 1; }).sort(function(a, b){ return a - b; });
+  return pins.length === 1 ? pins[0] + " pin" : pins.join("-");
+}
+// every leave after a first ball at a full rack, with whether the spare was made
+function sessionLeaves(games){
+  var tally = {};
+  function add(set, made){
+    if (!set || !set.length) return;
+    var k = leaveName(set);
+    tally[k] = tally[k] || { name: k, left: 0, made: 0 };
+    tally[k].left++; if (made) tally[k].made++;
+  }
+  games.forEach(function(g){
+    g.frames.forEach(function(f, fi){
+      var nums = frameNumeric(f), sets = f._pinSets || [];
+      if (!nums.length) return;
+      if (nums[0] !== 10){ if (nums.length >= 2) add(sets[0], nums[0] + nums[1] === 10); }
+      else if (fi === 9 && nums.length >= 3 && nums[1] !== 10) add(sets[1], nums[1] + nums[2] === 10);
+    });
+  });
+  return Object.keys(tally).map(function(k){ return tally[k]; })
+    .sort(function(a, b){ return b.left - a.left || (a.made / a.left) - (b.made / b.left); });
+}
+function sessionNotesTally(games){
+  var t = {};
+  games.forEach(function(g){ g.frames.forEach(function(f){ (f.presetNotes || []).forEach(function(n){ t[n] = (t[n] || 0) + 1; }); }); });
+  return Object.keys(t).sort(function(a, b){ return t[b] - t[a]; }).map(function(n){ return n + " ×" + t[n]; });
+}
+// the season average for this session's type, counting every session up to and including this one
+function seasonAvgThrough(h){
+  var type = seriesType(h), pins = 0, games = 0, mine = false;
+  allSeries().forEach(function(it){
+    if (seriesType(it.h) !== type) return;
+    if (h.id && it.h.id === h.id){ mine = true; it = { h: h }; }
+    else if ((it.h.savedAt || "") > (h.savedAt || "")) return;
+    (seriesScores(it.h) || []).filter(isNum).forEach(function(s){ pins += s; games++; });
+  });
+  if (!mine) (seriesScores(h) || []).filter(isNum).forEach(function(s){ pins += s; games++; });
+  return games ? pins / games : null;
+}
+function buildSessionSheet(h, opts){
+  var W = 800, P = 40, IW = W - 2 * P, y = 0, out = [];
+  var INK = "#1a1a1a", MUTE = "#6b6b6b", RULE = "#e2e0d5", BLUE = "#2f6fed", RED = "#d6332a", GOLD = "#f2a900";
+  function esc(t){ return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function text(x, yy, t, size, weight, fill, anchor){
+    out.push('<text x="' + x + '" y="' + yy + '" font-size="' + size + '" font-weight="' + (weight || 400) + '" fill="' + (fill || INK) + '" text-anchor="' + (anchor || "start") + '">' + esc(t) + '</text>');
+  }
+  function rect(x, yy, w, hh, fill, rx, stroke){ out.push('<rect x="' + x + '" y="' + yy + '" width="' + Math.max(0, w) + '" height="' + hh + '" rx="' + (rx || 0) + '" fill="' + fill + '"' + (stroke ? ' stroke="' + stroke + '"' : '') + '/>'); }
+  function line(x1, y1, x2, y2, stroke, w){ out.push('<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + stroke + '" stroke-width="' + (w || 1) + '"/>'); }
+  function heading(t){ y += 32; text(P, y, t.toUpperCase(), 13, 700, MUTE); y += 8; line(P, y, W - P, y, RULE); y += 6; }
+  function wrap(t, max){
+    var words = String(t).split(/\s+/), lines = [], cur = "";
+    words.forEach(function(w){ if ((cur + " " + w).trim().length > max && cur){ lines.push(cur); cur = w; } else cur = (cur + " " + w).trim(); });
+    if (cur) lines.push(cur);
+    return lines;
+  }
+  var practice = seriesType(h) === "practice", kind = sessionKind(h), games = sessionGames(h);
+  var sc = (seriesScores(h) || []).filter(isNum), total = 0;
+  sc.forEach(function(s){ total += s; });
+
+  // ----- header -----
+  rect(0, 0, W, 96, BLUE);
+  text(P, 42, profile.name || (practice ? "Practice session" : "League night"), 28, 700, "#fff");
+  text(P, 70, [profile.name ? (practice ? "Practice session" : "League night") : "", h.center, h.lanes ? "Lanes " + h.lanes : ""].filter(Boolean).join(" · ") || "Bowling Bro'", 15, 400, "#dbe6ff");
+  text(W - P, 42, "Bowling Bro'", 15, 700, "#fff", "end");
+  text(W - P, 70, h.date || "", 13, 400, "#dbe6ff", "end");
+  y = 96;
+
+  // ----- the games -----
+  heading(plural(sc.length, "game"));
+  var cols = Math.min(Math.max(sc.length, 3), 6), cw = IW / cols, gh = 78, high = sc.length ? Math.max.apply(null, sc) : null;
+  sc.forEach(function(s, i){
+    var x = P + (i % cols) * cw, yy = y + 8 + Math.floor(i / cols) * (gh + 10), isHigh = sc.length > 1 && s === high;
+    rect(x, yy, cw - 10, gh, "#f6f5ef", 10, isHigh ? GOLD : null);
+    text(x + 14, yy + 24, "Game " + (i + 1), 13, 400, MUTE);
+    text(x + 14, yy + 60, s, 32, 700);
+    if (isHigh) text(x + cw - 24, yy + 24, "High", 12, 700, "#a87400", "end");
+  });
+  y += 8 + Math.ceil(sc.length / cols) * (gh + 10);
+  var season = seasonAvgThrough(h), tl = [[practice ? "Total" : "Series", String(total)], ["Average", sc.length ? (total / sc.length).toFixed(1) : "—"]];
+  if (!practice && isNum(h.rank)) tl.push(["Rank", ordinal(h.rank)]);
+  if (season !== null) tl.push([practice ? "Practice avg" : "Season avg", season.toFixed(1)]);
+  var tw = IW / tl.length;
+  y += 6;
+  tl.forEach(function(t, i){ text(P + i * tw, y + 18, t[0], 13, 400, MUTE); text(P + i * tw, y + 50, t[1], 30, 700, i === 0 ? BLUE : INK); });
+  y += 62;
+
+  // ----- scoresheets (games with frame detail) -----
+  if (kind !== "scores" && opts.sheets){
+    heading(kind === "photo" ? "Scoresheets · read from the scoreboard" : "Scoresheets");
+    var fw = IW / 10;
+    games.forEach(function(g, gi){
+      var scores = computeScoresFromFrames(g.frames);
+      y += 22; text(P, y, "Game " + (gi + 1), 14, 700); text(W - P, y, g.finalScore !== undefined ? g.finalScore : lastKnownScore(scores), 14, 700, INK, "end");
+      // frame numbers sit in a row above the boxes, the way a scoresheet prints them
+      y += 18;
+      for (var fn = 0; fn < 10; fn++) text(P + fn * fw + fw / 2, y, fn + 1, 11, 400, MUTE, "middle");
+      y += 5;
+      for (var fi = 0; fi < 10; fi++){
+        var x = P + fi * fw, f = g.frames[fi];
+        rect(x, y, fw, 56, "#fff", 0, "#cfccc0");
+        var marks = f ? frameMarksForIndex(g.frames, fi) : [];
+        var split = f && ((f._pinSets && f._pinSets[0]) ? isSplitLeave(f._pinSets[0]) : (f.splitBalls && f.splitBalls.indexOf(0) !== -1));
+        var slots = fi < 9 ? 2 : 3, sw = (fw - 8) / slots;
+        marks.forEach(function(m, mi){
+          if (!m) return;
+          var mx = x + fw - 4 - (slots - mi - 0.5) * sw;
+          if (mi === 0 && split && m !== "X") out.push('<circle cx="' + mx.toFixed(1) + '" cy="' + (y + 17) + '" r="9" fill="none" stroke="' + RED + '" stroke-width="1.6"/>');
+          text(mx.toFixed(1), y + 22, m, 15, 700, m === "X" ? BLUE : INK, "middle");
+        });
+        if (scores[fi] !== null && scores[fi] !== undefined) text(x + fw / 2, y + 48, scores[fi], 15, 400, INK, "middle");
+      }
+      y += 56;
+    });
+    if (games.some(function(g){ return g.frames.some(function(f){ return (f._pinSets && f._pinSets[0] && isSplitLeave(f._pinSets[0])) || (f.splitBalls && f.splitBalls.length); }); })){
+      y += 18; out.push('<circle cx="' + (P + 7) + '" cy="' + (y - 4) + '" r="6" fill="none" stroke="' + RED + '" stroke-width="1.6"/>'); text(P + 20, y, "Split", 12, 400, MUTE);
+    }
+  }
+
+  // ----- shot stats -----
+  if (kind !== "scores" && opts.shots){
+    var a = aggregateStats(games);
+    heading("Shot stats");
+    var st = [["Strike %", pctText(a.strikes, a.firstBalls), a.strikes + " of " + a.firstBalls],
+              ["Spare %", pctText(a.spares, a.spareOpportunities), a.spares + " of " + a.spareOpportunities],
+              ["Single-pin %", pctText(a.singlePinMade, a.singlePinOpportunities), a.singlePinMade + " of " + a.singlePinOpportunities],
+              ["Splits", String(a.splitsLeft), "left"],
+              ["Opens", String(a.opens), games.length > 1 ? (a.opens / games.length).toFixed(1) + " per game" : ""]];
+    var sw2 = IW / st.length;
+    st.forEach(function(t, i){ var x = P + i * sw2; text(x, y + 20, t[0], 13, 400, MUTE); text(x, y + 50, t[1], 26, 700); if (t[2]) text(x, y + 68, t[2], 12, 400, MUTE); });
+    y += 74;
+  }
+
+  // ----- line, balls and leaves (frame by frame) -----
+  if (kind === "frames" && opts.line){
+    heading("Line, balls and leaves");
+    var rows = [];
+    if (h.strikeBall || h.spareBall) rows.push(["Balls", [h.strikeBall ? "Strike: " + h.strikeBall : "", h.spareBall ? "Spare: " + h.spareBall : ""].filter(Boolean).join("   ·   ")]);
+    if (isNum(h.startFeet) || isNum(h.startArrow)) rows.push(["Starting line", (isNum(h.startFeet) ? h.startFeet + " feet" : "") + (isNum(h.startArrow) ? ", arrow " + h.startArrow : "")]);
+    var lv = sessionLeaves(games).slice(0, 4);
+    if (lv.length) rows.push(["Most left", lv.map(function(l){ return l.name + ": made " + l.made + " of " + l.left; }).join("   ·   ")]);
+    var nt = sessionNotesTally(games).slice(0, 4);
+    if (nt.length) rows.push(["Shot notes", nt.join("   ·   ")]);
+    if (!rows.length){ y += 22; text(P, y, "No line or ball recorded for this session.", 14, 400, MUTE); }
+    rows.forEach(function(r){
+      var ls = wrap(r[1], 68);
+      y += 24; text(P, y, r[0], 13, 700, MUTE);
+      ls.forEach(function(l, li){ if (li) y += 20; text(P + 140, y, l, 15, 400); });
+    });
+  }
+
+  // ----- note -----
+  if (h.note && opts.note){
+    heading("Note");
+    wrap(h.note, 80).forEach(function(l){ y += 22; text(P, y, l, 15, 400); });
+  }
+
+  y += 40; text(P, y, "Made with Bowling Bro'", 11, 400, MUTE); y += 24;
+  var H = Math.ceil(y);
+  var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif">'
+    + '<rect width="' + W + '" height="' + H + '" fill="#ffffff"/>' + out.join("") + '</svg>';
+  return { svg: svg, width: W, height: H };
+}
+function ordinal(n){ var s = ["th", "st", "nd", "rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); }
+// a night still being entered picks up the rank and note added to its saved copy in History
+function withSavedExtras(doc){
+  var saved = allSeries().filter(function(it){ return doc.id && it.h.id === doc.id; })[0];
+  if (saved){ if (isNum(saved.h.rank)) doc.rank = saved.h.rank; if (saved.h.note) doc.note = saved.h.note; }
+  return doc;
+}
+function renderSessionShare(){
+  var h = sessionShare.h, kind = sessionKind(h), practice = seriesType(h) === "practice";
+  document.getElementById("ss-what").textContent = (practice ? "Practice session" : "League night") + (h.date ? ", " + h.date : "");
+  var parts = document.getElementById("ss-parts"); parts.innerHTML = "";
+  sessionParts(h).forEach(function(pt){
+    var l = document.createElement("label"), cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = !!sessionShare.opts[pt[0]];
+    cb.addEventListener("change", function(){ sessionShare.opts[pt[0]] = cb.checked; renderSessionShare(); });
+    l.appendChild(cb); l.appendChild(document.createTextNode(pt[1]));
+    parts.appendChild(l);
+  });
+  document.getElementById("ss-note").textContent = kind === "scores"
+    ? "Scored as game scores only, so this shares each game, the series and your average. Score by photo or frame by frame to add shot stats."
+    : (kind === "photo" ? "Read from scoreboard photos, so it has shot stats but not the pins left or the ball you threw." : "");
+  sessionShare.sheet = buildSessionSheet(h, sessionShare.opts);
+  var prev = document.getElementById("ss-preview"); prev.innerHTML = "";
+  var img = document.createElement("img");
+  img.alt = "Preview of this session"; img.style.cssText = "width:100%;height:auto;display:block;";
+  img.src = sheetDataUrl(sessionShare.sheet);
+  prev.appendChild(img);
+  document.getElementById("ss-status").textContent = "";
+}
+function openSessionShare(h){
+  if (!h || !(seriesScores(h) || []).filter(isNum).length) return;
+  sessionShare.h = h;
+  renderSessionShare();
+  var el = document.getElementById("session-share");
+  el.classList.remove("hidden"); el.scrollTop = 0;
+}
+document.getElementById("ss-close-btn").addEventListener("click", function(){ document.getElementById("session-share").classList.add("hidden"); });
+document.getElementById("ss-send-btn").addEventListener("click", function(){
+  if (!sessionShare.sheet) return;
+  var d = String(sessionShare.h.date || "").replace(/\//g, "-");
+  shareSheetImage(sessionShare.sheet, "bowling-bro-" + (d || "session") + ".png", "Bowling session", document.getElementById("ss-status"));
+});
+document.getElementById("ss-pdf-btn").addEventListener("click", function(){
+  if (sessionShare.sheet) printSheet(sessionShare.sheet, "Session summary");
+});
+document.getElementById("night-share-btn").addEventListener("click", function(){ if (nightActive()) openSessionShare(withSavedExtras(nightDoc())); });
+document.getElementById("photo-share-btn").addEventListener("click", function(){ if (photoActive()) openSessionShare(withSavedExtras(photoNightDoc())); });
+document.getElementById("summary-share-btn").addEventListener("click", function(){ if (state.games.length) openSessionShare(withSavedExtras(buildSeriesDoc())); });
 
 // ---------- trend chart ----------
 // One y-axis per view: Average, Scores, Consistency.
@@ -3999,6 +4262,10 @@ function renderDetailTable(el, items){
   });
   [saveBtn, delBtn].forEach(function(b){ var w = document.createElement("div"); w.appendChild(b); btns.appendChild(w); });
   box.appendChild(btns);
+  var shareBtn = document.createElement("button"); shareBtn.className = "full"; shareBtn.style.marginTop = "8px";
+  shareBtn.textContent = "Share this session";
+  shareBtn.addEventListener("click", function(){ openSessionShare(editing.it.h); });
+  box.appendChild(shareBtn);
   el.appendChild(box);
 }
 function updateSeriesMeta(it, draft){
