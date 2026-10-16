@@ -231,6 +231,21 @@ a.place { text-decoration: none; cursor: pointer; }
 #home-bg .home-bottom { position: absolute; left: 0; bottom: 0; width: 100%; height: auto; display: block; }
 body.on-home #menu-btn, body.on-home #game-label { display: none; }
 body.on-home .header .place.brand { color: var(--home-ink); }
+/* Full-colour themes on every screen but Home: the page takes the theme colour, cards stay white,
+   and buttons that sit on the page use the theme's Home button colours */
+body:not(.on-home) .header .place, body:not(.on-home) .header .place.brand, body:not(.on-home) #place-label, body:not(.on-home) #game-label { color: var(--page-ink); }
+body:not(.on-home) #menu-btn { color: var(--page-ink); background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.35); }
+/* inside white cards and sheets: the theme's Home Bowl-button colours; on the coloured page: --nav (differs only where the two would vanish, e.g. navy on Score Sheet) */
+body:not(.on-home) button.primary, body:not(.on-home) .btn-label.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+body:not(.on-home) .app button.primary:not(.card *) { background: var(--nav); border-color: var(--nav); color: var(--nav-ink); }
+body:not(.on-home) .preset-chip.selected, body:not(.on-home) .chart-range button.selected { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+body:not(.on-home) #view-history > .row { background: rgba(255,255,255,0.14); border-radius: 12px; padding: 4px; gap: 4px !important; }
+body:not(.on-home) #view-history > .row button { background: transparent; border-color: transparent; color: var(--page-ink); font-weight: 600; }
+body:not(.on-home) #view-history > .row button.primary { background: var(--nav); color: var(--nav-ink); }
+body:not(.on-home) .report-tabs { border-bottom-color: rgba(255,255,255,0.28); }
+body:not(.on-home) .report-tabs button { color: var(--page-ink); opacity: 0.72; }
+body:not(.on-home) .report-tabs button.selected { color: var(--page-ink); opacity: 1; border-bottom-color: var(--nav); }
+body:not(.on-home) #view-setup > div > label, body:not(.on-home) #goals-summary, body:not(.on-home) #view-scores > p, body:not(.on-home) #photo-home > p, body:not(.on-home) #new-series-btn { color: var(--page-ink) !important; opacity: 0.9; }
 /* Home is one screen: hold it still (no drag, no bounce) */
 @media (min-height: 600px) { html.on-home, html.on-home body { height: 100%; overflow: hidden; overscroll-behavior: none; } }
 #view-home { display: flex; flex-direction: column; gap: 12px; min-height: calc(100vh - 96px); min-height: calc(100dvh - 96px); }
@@ -254,14 +269,14 @@ body.on-home .header .place.brand { color: var(--home-ink); }
 .theme-grid button[aria-checked="true"] .sw { box-shadow: 0 0 0 3px #2f6fed; }
 .theme-grid button[aria-checked="true"] { font-weight: 700; }
 body { --card-shadow: 0 3px 10px rgba(0,0,0,0.10); --greet-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; --greet-weight: 800; --greet-size: 30px; }
-body.home-theme-lanes { --home-bg: repeating-linear-gradient(90deg, #ecd0a4 0 17px, #d9b27c 17px 18px, #e6c493 18px 35px, #d9b27c 35px 36px); --home-ink: #2b1d0e; --card: rgba(255,255,255,0.94); --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 1px solid rgba(80,50,20,0.18); --accent: #2f6fed; --accent-ink: #ffffff; --icon: #2f6fed; }
-body.home-theme-lebowski { --home-bg: repeating-linear-gradient(45deg, rgba(201,162,74,0.20) 0 2px, transparent 2px 26px), repeating-linear-gradient(-45deg, rgba(201,162,74,0.20) 0 2px, transparent 2px 26px), #6e1f22; --home-ink: #f6e7c4; --greet-font: "Abril Fatface", Georgia, serif; --greet-weight: 400; --greet-size: 36px; --card: rgba(251,244,228,0.96); --card-ink: #2a1410; --card-sub: #6b4a3a; --card-border: 2px solid #c9a24a; --accent: #c9a24a; --accent-ink: #2a1410; --icon: #6e1f22; }
-body.home-theme-seventies { --home-bg: #f3e3c3; --home-ink: #3d2210; --greet-font: Shrikhand, Georgia, serif; --greet-weight: 400; --greet-size: 34px; --card: #fff8ea; --card-ink: #3d2210; --card-sub: #6b3d1a; --card-border: 3px solid #5a3417; --accent: #d9641e; --accent-ink: #fff8ea; --icon: #c2541a; }
-body.home-theme-cosmic { --home-bg: radial-gradient(circle at 50% 28%, #3d0f70 0%, #14002c 70%); --home-ink: #ffffff; --greet-font: Audiowide, Arial, sans-serif; --greet-weight: 400; --greet-size: 28px; --card: rgba(24,0,48,0.82); --card-ink: #ffffff; --card-sub: #d7b8ff; --card-border: 1px solid #b44dff; --card-shadow: 0 0 14px rgba(180,77,255,0.45); --accent: #39ff88; --accent-ink: #14002c; --icon: #ff4fd8; }
-body.home-theme-shirt { --home-bg: #f2e6cf; --home-ink: #141414; --greet-font: Pacifico, cursive; --greet-weight: 400; --greet-size: 32px; --greet-max: 58%; --card: #ffffff; --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 2px solid #141414; --accent: #141414; --accent-ink: #f2e6cf; --icon: #b3202a; }
-body.home-theme-flame { --home-bg: #141414; --home-ink: #ffffff; --greet-font: Bungee, Impact, sans-serif; --greet-weight: 400; --greet-size: 28px; --card: #ffffff; --card-ink: #141414; --card-sub: #555555; --card-border: 2px solid #ff7a1a; --accent: #ff7a1a; --accent-ink: #141414; --icon: #e2450f; }
-body.home-theme-aloha { --home-bg: #0f6e6e; --home-ink: #fffaf0; --greet-font: Lobster, Georgia, serif; --greet-weight: 400; --greet-size: 36px; --card: rgba(255,250,240,0.96); --card-ink: #0d3b3b; --card-sub: #3f6b66; --card-border: 2px solid #f6c445; --accent: #f26b5b; --accent-ink: #fffaf0; --icon: #0f6e6e; }
-body.home-theme-sheet { --home-bg: repeating-linear-gradient(180deg, transparent 0 27px, rgba(47,111,237,0.16) 27px 28px), #fbf8ef; --home-ink: #22303f; --greet-font: Caveat, cursive; --greet-weight: 700; --greet-size: 44px; --card: #ffffff; --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 1.5px solid #22303f; --accent: #22303f; --accent-ink: #fbf8ef; --icon: #2f6fed; }
+body.home-theme-lanes { --page: #e3c08c; --page-ink: #2b1d0e; --nav: #2f6fed; --nav-ink: #ffffff; --home-bg: repeating-linear-gradient(90deg, #ecd0a4 0 17px, #d9b27c 17px 18px, #e6c493 18px 35px, #d9b27c 35px 36px); --home-ink: #2b1d0e; --card: rgba(255,255,255,0.94); --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 1px solid rgba(80,50,20,0.18); --accent: #2f6fed; --accent-ink: #ffffff; --icon: #2f6fed; }
+body.home-theme-lebowski { --page: #6e1f22; --page-ink: #f6e7c4; --nav: #c9a24a; --nav-ink: #2a1410; --home-bg: repeating-linear-gradient(45deg, rgba(201,162,74,0.20) 0 2px, transparent 2px 26px), repeating-linear-gradient(-45deg, rgba(201,162,74,0.20) 0 2px, transparent 2px 26px), #6e1f22; --home-ink: #f6e7c4; --greet-font: "Abril Fatface", Georgia, serif; --greet-weight: 400; --greet-size: 36px; --card: rgba(251,244,228,0.96); --card-ink: #2a1410; --card-sub: #6b4a3a; --card-border: 2px solid #c9a24a; --accent: #c9a24a; --accent-ink: #2a1410; --icon: #6e1f22; }
+body.home-theme-seventies { --page: #8a3b14; --page-ink: #fff8ea; --nav: #d9641e; --nav-ink: #fff8ea; --home-bg: #f3e3c3; --home-ink: #3d2210; --greet-font: Shrikhand, Georgia, serif; --greet-weight: 400; --greet-size: 34px; --card: #fff8ea; --card-ink: #3d2210; --card-sub: #6b3d1a; --card-border: 3px solid #5a3417; --accent: #d9641e; --accent-ink: #fff8ea; --icon: #c2541a; }
+body.home-theme-cosmic { --page: #27074c; --page-ink: #ffffff; --nav: #39ff88; --nav-ink: #14002c; --home-bg: radial-gradient(circle at 50% 28%, #3d0f70 0%, #14002c 70%); --home-ink: #ffffff; --greet-font: Audiowide, Arial, sans-serif; --greet-weight: 400; --greet-size: 28px; --card: rgba(24,0,48,0.82); --card-ink: #ffffff; --card-sub: #d7b8ff; --card-border: 1px solid #b44dff; --card-shadow: 0 0 14px rgba(180,77,255,0.45); --accent: #39ff88; --accent-ink: #14002c; --icon: #ff4fd8; }
+body.home-theme-shirt { --page: #b3202a; --page-ink: #fff8ea; --nav: #141414; --nav-ink: #f2e6cf; --home-bg: #f2e6cf; --home-ink: #141414; --greet-font: Pacifico, cursive; --greet-weight: 400; --greet-size: 32px; --greet-max: 58%; --card: #ffffff; --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 2px solid #141414; --accent: #141414; --accent-ink: #f2e6cf; --icon: #b3202a; }
+body.home-theme-flame { --page: #141414; --page-ink: #ffffff; --nav: #ff7a1a; --nav-ink: #141414; --home-bg: #141414; --home-ink: #ffffff; --greet-font: Bungee, Impact, sans-serif; --greet-weight: 400; --greet-size: 28px; --card: #ffffff; --card-ink: #141414; --card-sub: #555555; --card-border: 2px solid #ff7a1a; --accent: #ff7a1a; --accent-ink: #141414; --icon: #e2450f; }
+body.home-theme-aloha { --page: #0f6e6e; --page-ink: #fffaf0; --nav: #f26b5b; --nav-ink: #fffaf0; --home-bg: #0f6e6e; --home-ink: #fffaf0; --greet-font: Lobster, Georgia, serif; --greet-weight: 400; --greet-size: 36px; --card: rgba(255,250,240,0.96); --card-ink: #0d3b3b; --card-sub: #3f6b66; --card-border: 2px solid #f6c445; --accent: #f26b5b; --accent-ink: #fffaf0; --icon: #0f6e6e; }
+body.home-theme-sheet { --page: #22303f; --page-ink: #fbf8ef; --nav: #fbf8ef; --nav-ink: #22303f; --home-bg: repeating-linear-gradient(180deg, transparent 0 27px, rgba(47,111,237,0.16) 27px 28px), #fbf8ef; --home-ink: #22303f; --greet-font: Caveat, cursive; --greet-weight: 700; --greet-size: 44px; --card: #ffffff; --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 1.5px solid #22303f; --accent: #22303f; --accent-ink: #fbf8ef; --icon: #2f6fed; }
 @media print {
   @page { size: landscape; margin: 10mm; }
   body * { visibility: hidden; }
@@ -956,7 +971,7 @@ function showView(name){
   if (onHome) window.scrollTo(0, 0);
   document.getElementById("home-bg").classList.toggle("hidden", !onHome);
   if (onHome){ loadHomeFonts(); renderHome(); }
-  setTopColor(onHome);
+  applyHomeTheme(); setTopColor(onHome);
   document.getElementById("menu-league-btn").classList.toggle("hidden", name==="history");
   setPlaceLabel(name);
   if (name!=="game"){
@@ -3983,20 +3998,20 @@ document.getElementById("summary-share-btn").addEventListener("click", function(
 // The landing screen: a greeting, Bowl and Your Stats as the two big buttons, then Your Goals,
 // Your Arsenal and Profile. Its background is the bowler's theme, picked on Profile.
 var THEMES = [
-  { id: "lanes", top: "#e6c493", name: "Classic Lanes", swatch: "repeating-linear-gradient(90deg, #ecd0a4 0 6px, #d9b27c 6px 7px)" },
-  { id: "lebowski", top: "#6e1f22", name: "Lebowski", swatch: "radial-gradient(circle, #f1e2bf 0 6%, #c9a24a 6% 16%, #1e2a4a 16% 30%, transparent 31%), repeating-linear-gradient(45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), repeating-linear-gradient(-45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), #6e1f22" },
-  { id: "seventies", top: "#f3e3c3", name: "70s Lanes", swatch: "linear-gradient(180deg, #f3e3c3 0 50%, #e7a92c 50% 62%, #d9641e 62% 75%, #8a3b14 75% 88%, #5a3417 88%)" },
-  { id: "cosmic", top: "#27074c", name: "Cosmic Bowl", swatch: "radial-gradient(circle at 65% 62%, #ff4fd8 0 3px, transparent 4px), conic-gradient(from 0deg at 65% 62%, transparent 0 8%, rgba(255,79,216,0.8) 8% 10%, transparent 10% 33%, rgba(255,79,216,0.8) 33% 35%, transparent 35% 58%, rgba(255,79,216,0.8) 58% 60%, transparent 60% 83%, rgba(255,79,216,0.8) 83% 85%, transparent 85%), radial-gradient(circle, #3d0f70, #14002c)" },
-  { id: "shirt", top: "#f2e6cf", name: "Two-Tone Shirt", swatch: "linear-gradient(90deg, #f2e6cf 0 58%, #141414 58% 63%, #b3202a 63%)" },
-  { id: "flame", top: "#141414", name: "Flame Shirt", swatch: "linear-gradient(180deg, #141414 0 55%, #ff7a1a 55% 70%, #ffd23f 70% 78%, #c2210c 78%)" },
-  { id: "aloha", top: "#0f6e6e", name: "Aloha Shirt", swatch: "radial-gradient(circle at 30% 30%, #f26b5b 0 10%, transparent 11%), radial-gradient(circle at 70% 70%, #f6c445 0 9%, transparent 10%), radial-gradient(ellipse at 70% 25%, #1f8f7a 0 14%, transparent 15%), #0f6e6e" },
-  { id: "sheet", top: "#fbf8ef", name: "Score Sheet", swatch: "repeating-linear-gradient(180deg, transparent 0 7px, rgba(47,111,237,0.3) 7px 8px), linear-gradient(90deg, transparent 0 12%, rgba(214,51,42,0.6) 12% 14%, transparent 14%), #fbf8ef" }
+  { id: "lanes", page: "#e3c08c", top: "#e6c493", name: "Classic Lanes", swatch: "repeating-linear-gradient(90deg, #ecd0a4 0 6px, #d9b27c 6px 7px)" },
+  { id: "lebowski", page: "#6e1f22", top: "#6e1f22", name: "Lebowski", swatch: "radial-gradient(circle, #f1e2bf 0 6%, #c9a24a 6% 16%, #1e2a4a 16% 30%, transparent 31%), repeating-linear-gradient(45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), repeating-linear-gradient(-45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), #6e1f22" },
+  { id: "seventies", page: "#8a3b14", top: "#f3e3c3", name: "70s Lanes", swatch: "linear-gradient(180deg, #f3e3c3 0 50%, #e7a92c 50% 62%, #d9641e 62% 75%, #8a3b14 75% 88%, #5a3417 88%)" },
+  { id: "cosmic", page: "#27074c", top: "#27074c", name: "Cosmic Bowl", swatch: "radial-gradient(circle at 65% 62%, #ff4fd8 0 3px, transparent 4px), conic-gradient(from 0deg at 65% 62%, transparent 0 8%, rgba(255,79,216,0.8) 8% 10%, transparent 10% 33%, rgba(255,79,216,0.8) 33% 35%, transparent 35% 58%, rgba(255,79,216,0.8) 58% 60%, transparent 60% 83%, rgba(255,79,216,0.8) 83% 85%, transparent 85%), radial-gradient(circle, #3d0f70, #14002c)" },
+  { id: "shirt", page: "#b3202a", top: "#f2e6cf", name: "Two-Tone Shirt", swatch: "linear-gradient(90deg, #f2e6cf 0 58%, #141414 58% 63%, #b3202a 63%)" },
+  { id: "flame", page: "#141414", top: "#141414", name: "Flame Shirt", swatch: "linear-gradient(180deg, #141414 0 55%, #ff7a1a 55% 70%, #ffd23f 70% 78%, #c2210c 78%)" },
+  { id: "aloha", page: "#0f6e6e", top: "#0f6e6e", name: "Aloha Shirt", swatch: "radial-gradient(circle at 30% 30%, #f26b5b 0 10%, transparent 11%), radial-gradient(circle at 70% 70%, #f6c445 0 9%, transparent 10%), radial-gradient(ellipse at 70% 25%, #1f8f7a 0 14%, transparent 15%), #0f6e6e" },
+  { id: "sheet", page: "#22303f", top: "#fbf8ef", name: "Score Sheet", swatch: "repeating-linear-gradient(180deg, transparent 0 7px, rgba(47,111,237,0.3) 7px 8px), linear-gradient(90deg, transparent 0 12%, rgba(214,51,42,0.6) 12% 14%, transparent 14%), #fbf8ef" }
 ];
 // The phone fills the strip behind its clock and battery with one solid colour (theme-color and the page background).
-// On Home that is the theme's colour along its top edge; elsewhere the app's usual cream.
+// On Home that is the theme's colour along its top edge; on every other screen, the theme's page colour.
 function setTopColor(onHome){
-  var c = "#f2f1ea";
-  if (onHome){ var id = themeId(); THEMES.forEach(function(t){ if (t.id === id) c = t.top; }); }
+  var c = "#f2f1ea", id = themeId();
+  THEMES.forEach(function(t){ if (t.id === id) c = onHome ? t.top : t.page; });
   var m = document.querySelector('meta[name="theme-color"]');
   if (m) m.setAttribute("content", c);
   document.documentElement.style.backgroundColor = c;
@@ -4068,7 +4083,7 @@ function loadHomeFonts(){
 function applyHomeTheme(){
   var id = themeId();
   THEME_IDS.forEach(function(t){ document.body.classList.toggle("home-theme-" + t, t === id); });
-  if (document.body.classList.contains("on-home")) setTopColor(true);
+  setTopColor(document.body.classList.contains("on-home"));
   if (homeArtTheme !== id){ document.getElementById("home-stage").innerHTML = HOME_ART[id] || ""; homeArtTheme = id; }
   var nm = document.getElementById("hb-sheet-name");
   if (nm) nm.textContent = (profile.name || "").trim().split(/\s+/)[0] || "";
