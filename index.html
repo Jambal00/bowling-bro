@@ -2027,7 +2027,10 @@ function cleanLeagues(src, prof){
     if (!id || seen[id]) return;
     seen[id] = true;
     function s(k, n){ return typeof l[k] === "string" ? l[k].trim().slice(0, n || 80) : ""; }
-    out.push({ id: id, name: s("name") || "My league", season: s("season", 40), center: s("center"), team: s("team"), status: l.status === "finished" ? "finished" : "active" });
+    var wk = parseInt(l.weeks, 10);
+    var lg = { id: id, name: s("name") || "My league", season: s("season", 40), center: s("center"), team: s("team"), status: l.status === "finished" ? "finished" : "active" };
+    if (wk >= 1 && wk <= 60) lg.weeks = wk;   // weeks in the season, set when the league is set up
+    out.push(lg);
   });
   // everyone has at least one league: the one their profile always described
   if (!out.length) out.push({ id: "lg-1", name: (prof && prof.league) || "My league", season: "", center: (prof && prof.homeCenter) || "", team: (prof && prof.team) || "", status: "active" });
@@ -3134,7 +3137,7 @@ function renderLeaguesCard(){
     var t = document.createElement("div"), b = document.createElement("b"), sm = document.createElement("small");
     b.textContent = l.name;
     var n = leagueNights(l.id).length;
-    sm.textContent = [l.season, l.center, l.team ? "Team: " + l.team : ""].filter(Boolean).join(" · ") || "No details yet";
+    sm.textContent = [l.season, l.weeks ? plural(l.weeks, "week") : "", l.center, l.team ? "Team: " + l.team : ""].filter(Boolean).join(" · ") || "No details yet";
     var sm2 = document.createElement("small"); sm2.textContent = n ? plural(n, "night") + " bowled" : "No nights yet";
     t.appendChild(b); t.appendChild(sm); t.appendChild(sm2); r.appendChild(t);
     var ed = document.createElement("button"); ed.type = "button"; ed.className = "ed"; ed.textContent = leagueEdit === l.id ? "Close" : "Edit";
@@ -3168,6 +3171,8 @@ function leagueForm(l){
   }
   var name = field("name", "League name", "e.g. Thursday Night Men's"), season = field("season", "Season", "e.g. 2026–27");
   var center = field("center", "Bowling center"), team = field("team", "Team");
+  var weeks = field("weeks", "Weeks in the season", "e.g. 30");
+  weeks.type = "number"; weeks.min = "1"; weeks.max = "60"; weeks.setAttribute("inputmode", "numeric"); weeks.value = src.weeks || "";
   var fin = null;
   if (!isNew){
     var ck = document.createElement("label"); ck.className = "chk";
@@ -3184,7 +3189,10 @@ function leagueForm(l){
     if (!nm){ msg.textContent = "Give the league a name."; name.focus(); return; }
     var target = l;
     if (isNew){ target = { id: "lg-" + Date.now().toString(36), status: "active" }; profile.leagues.push(target); }
+    var wk = parseInt(weeks.value, 10);
+    if (weeks.value.trim() && !(wk >= 1 && wk <= 60)){ msg.textContent = "Weeks in the season should be a number from 1 to 60."; weeks.focus(); return; }
     target.name = nm; target.season = season.value.trim(); target.center = center.value.trim(); target.team = team.value.trim();
+    if (wk >= 1 && wk <= 60) target.weeks = wk; else delete target.weeks;
     if (fin) target.status = fin.checked ? "finished" : "active";
     leagueEdit = null;
     saveProfileNow(isNew ? "League added." : "League saved.");
