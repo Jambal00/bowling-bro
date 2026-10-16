@@ -4608,7 +4608,10 @@ function renderDetailTable(el, items){
   avgRow.appendChild(cell("td", overall.toFixed(1), "strong" + (G.average !== null && overall >= G.average ? " good" : "")));
   avgRow.appendChild(cell("td", spreadN ? (spreadSum / spreadN).toFixed(1) : "", spreadN && goalSpread() !== null ? spreadClass(spreadSum / spreadN) : ""));
   avgRow.appendChild(cell("td", ""));
-  if (league) avgRow.appendChild(cell("td", ""));
+  // rank is the league's standing by season average, so the season row shows the latest one entered
+  var latestRank = null;
+  data.forEach(function(d){ if (isNum(d.it.h.rank)) latestRank = d.it.h.rank; });
+  if (league) avgRow.appendChild(cell("td", latestRank === null ? "" : latestRank, "strong"));
   avgRow.appendChild(cell("td", ""));
   var headRow = document.createElement("tr");
   headRow.appendChild(cell("th", league ? "League" : "Practice"));
@@ -4626,7 +4629,7 @@ function renderDetailTable(el, items){
 
   var hint = document.createElement("p");
   hint.style.cssText = "font-size:11px;color:#999;margin:8px 0 0;";
-  hint.textContent = "Swipe sideways for more columns. Tap a row to add " + (league ? "your rank or a note" : "a note") + ", or to delete it.";
+  hint.textContent = "Swipe sideways for more columns. Tap a row to add " + (league ? "your season rank or a note" : "a note") + ", or to delete it.";
   el.appendChild(hint);
   }
 
@@ -4649,7 +4652,7 @@ function renderDetailTable(el, items){
     box.appendChild(gl);
   }
   if (league){
-    var rl = document.createElement("label"); rl.textContent = "League rank that week"; rl.setAttribute("for", "edit-rank");
+    var rl = document.createElement("label"); rl.textContent = "Season Rank"; rl.setAttribute("for", "edit-rank");
     var ri = document.createElement("input"); ri.type = "number"; ri.id = "edit-rank"; ri.min = "1"; ri.setAttribute("inputmode", "numeric"); ri.value = editDraft.rank;
     ri.addEventListener("input", function(){ editDraft.rank = ri.value; });
     box.appendChild(rl); box.appendChild(ri);
