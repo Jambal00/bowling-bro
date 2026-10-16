@@ -311,6 +311,8 @@ body:not(.on-home) #view-history-link, body:not(.on-home) #wizard-rerun-btn, bod
 body.home-theme-lebowski #home-greet-wrap { align-self: flex-start; background: #1d2848; border: 2px solid #c9a24a; outline: 1px solid #ecdcb8; outline-offset: -6px; border-radius: 10px; padding: 8px 16px 10px; box-shadow: 0 6px 16px rgba(20,8,4,0.35); max-width: 100%; box-sizing: border-box; }
 body.home-theme-lebowski #home-greet-wrap.with-sub { margin-top: -42px; }
 body.home-theme-lebowski #home-subgreet { text-align: center; }
+/* the rug alone sits a quarter inch lower (Pete, Oct 16): the top spacer gives up 53px, which lands the group 40px down */
+body.home-theme-lebowski #view-home > div:first-child { margin-bottom: 53px; }
 body.home-theme-lebowski.on-home .header .place.brand { background: #1d2848; border: 2px solid #c9a24a; border-radius: 10px; padding: 3px 10px 3px 3px; margin: -5px 0 -5px -5px; color: #f6e7c4; box-shadow: 0 4px 10px rgba(20,8,4,0.3); }
 .home-greet { margin: 0; font-family: var(--greet-font); font-weight: var(--greet-weight); font-size: var(--greet-size); line-height: 48px; color: var(--home-ink); max-width: var(--greet-max, none); }
 #view-home .home-btn { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 104px; padding: 16px 18px; border-radius: 18px; text-align: left; font: inherit; cursor: pointer; box-sizing: border-box; }
