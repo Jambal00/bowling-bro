@@ -221,6 +221,45 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
 .goal-detail { font-size: 12px; color: #6b6b6b; }
 .celebrate { animation: pop 0.4s ease; }
 #print-report { display: none; }
+
+/* ---------- Home screen and its themes ---------- */
+.app { position: relative; z-index: 1; }
+a.place { text-decoration: none; cursor: pointer; }
+#home-bg { position: fixed; inset: 0; z-index: 0; background: var(--home-bg); }
+#home-bg .home-stage { position: absolute; top: 0; bottom: 0; left: 50%; width: 100%; max-width: 480px; transform: translateX(-50%); overflow: hidden; }
+#home-bg .home-top { position: absolute; left: 0; top: 0; width: 100%; height: auto; display: block; }
+#home-bg .home-bottom { position: absolute; left: 0; bottom: 0; width: 100%; height: auto; display: block; }
+body.on-home #menu-btn, body.on-home #game-label { display: none; }
+body.on-home .header .place.brand { color: var(--home-ink); }
+#view-home { display: flex; flex-direction: column; gap: 12px; min-height: calc(100vh - 96px); min-height: calc(100dvh - 96px); }
+.home-greet { margin: 0; font-family: var(--greet-font); font-weight: var(--greet-weight); font-size: var(--greet-size); line-height: 1.15; color: var(--home-ink); max-width: var(--greet-max, none); }
+#view-home .home-btn { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 104px; padding: 16px 18px; border-radius: 18px; text-align: left; font: inherit; cursor: pointer; box-sizing: border-box; }
+#view-home .home-bowl { background: var(--accent); color: var(--accent-ink); border: 0; box-shadow: 0 6px 18px rgba(0,0,0,0.18); }
+#view-home .home-card { background: var(--card); color: var(--card-ink); border: var(--card-border); box-shadow: var(--card-shadow); }
+#view-home .home-text { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+#view-home .home-title { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; }
+#view-home .home-sub { font-size: 14px; line-height: 1.3; opacity: 0.92; }
+#view-home .home-card .home-sub { color: var(--card-sub); opacity: 1; font-size: 13px; }
+#view-home .home-icon { color: var(--icon); flex: 0 0 auto; }
+#view-home .home-squares { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+#view-home .home-sq { height: 104px; min-height: 0; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 6px; padding: 12px; border-radius: 16px; overflow: hidden; }
+#view-home .home-sq span { font-size: 14px; font-weight: 700; line-height: 1.2; }
+#home-resume { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 12px 14px; border-radius: 14px; background: #fdf1d2; border: 2px solid #f2a900; color: #1a1a1a; text-align: left; font: inherit; width: 100%; cursor: pointer; box-sizing: border-box; }
+#home-resume.hidden { display: none; }
+.theme-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 10px; }
+.theme-grid button { display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: 0; padding: 0; border-radius: 0; cursor: pointer; font-size: 11px; color: #1a1a1a; line-height: 1.2; text-align: center; min-height: 44px; }
+.theme-grid .sw { width: 100%; aspect-ratio: 3 / 4; border-radius: 10px; box-shadow: 0 0 0 1px #d8d5c8; display: block; }
+.theme-grid button[aria-checked="true"] .sw { box-shadow: 0 0 0 3px #2f6fed; }
+.theme-grid button[aria-checked="true"] { font-weight: 700; }
+body { --card-shadow: 0 3px 10px rgba(0,0,0,0.10); --greet-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; --greet-weight: 800; --greet-size: 30px; }
+body.home-theme-lanes { --home-bg: repeating-linear-gradient(90deg, #ecd0a4 0 17px, #d9b27c 17px 18px, #e6c493 18px 35px, #d9b27c 35px 36px); --home-ink: #2b1d0e; --card: rgba(255,255,255,0.94); --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 1px solid rgba(80,50,20,0.18); --accent: #2f6fed; --accent-ink: #ffffff; --icon: #2f6fed; }
+body.home-theme-lebowski { --home-bg: repeating-linear-gradient(45deg, rgba(201,162,74,0.20) 0 2px, transparent 2px 26px), repeating-linear-gradient(-45deg, rgba(201,162,74,0.20) 0 2px, transparent 2px 26px), #6e1f22; --home-ink: #f6e7c4; --greet-font: "Abril Fatface", Georgia, serif; --greet-weight: 400; --greet-size: 36px; --card: rgba(251,244,228,0.96); --card-ink: #2a1410; --card-sub: #6b4a3a; --card-border: 2px solid #c9a24a; --accent: #c9a24a; --accent-ink: #2a1410; --icon: #6e1f22; }
+body.home-theme-seventies { --home-bg: #f3e3c3; --home-ink: #3d2210; --greet-font: Shrikhand, Georgia, serif; --greet-weight: 400; --greet-size: 34px; --card: #fff8ea; --card-ink: #3d2210; --card-sub: #6b3d1a; --card-border: 3px solid #5a3417; --accent: #d9641e; --accent-ink: #fff8ea; --icon: #c2541a; }
+body.home-theme-cosmic { --home-bg: radial-gradient(circle at 50% 28%, #3d0f70 0%, #14002c 70%); --home-ink: #ffffff; --greet-font: Audiowide, Arial, sans-serif; --greet-weight: 400; --greet-size: 28px; --card: rgba(24,0,48,0.82); --card-ink: #ffffff; --card-sub: #d7b8ff; --card-border: 1px solid #b44dff; --card-shadow: 0 0 14px rgba(180,77,255,0.45); --accent: #39ff88; --accent-ink: #14002c; --icon: #ff4fd8; }
+body.home-theme-shirt { --home-bg: #f2e6cf; --home-ink: #141414; --greet-font: Pacifico, cursive; --greet-weight: 400; --greet-size: 32px; --greet-max: 58%; --card: #ffffff; --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 2px solid #141414; --accent: #141414; --accent-ink: #f2e6cf; --icon: #b3202a; }
+body.home-theme-flame { --home-bg: #141414; --home-ink: #ffffff; --greet-font: Bungee, Impact, sans-serif; --greet-weight: 400; --greet-size: 28px; --card: #ffffff; --card-ink: #141414; --card-sub: #555555; --card-border: 2px solid #ff7a1a; --accent: #ff7a1a; --accent-ink: #141414; --icon: #e2450f; }
+body.home-theme-aloha { --home-bg: #0f6e6e; --home-ink: #fffaf0; --greet-font: Lobster, Georgia, serif; --greet-weight: 400; --greet-size: 36px; --card: rgba(255,250,240,0.96); --card-ink: #0d3b3b; --card-sub: #3f6b66; --card-border: 2px solid #f6c445; --accent: #f26b5b; --accent-ink: #fffaf0; --icon: #0f6e6e; }
+body.home-theme-sheet { --home-bg: repeating-linear-gradient(180deg, transparent 0 27px, rgba(47,111,237,0.16) 27px 28px), #fbf8ef; --home-ink: #22303f; --greet-font: Caveat, cursive; --greet-weight: 700; --greet-size: 44px; --card: #ffffff; --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 1.5px solid #22303f; --accent: #22303f; --accent-ink: #fbf8ef; --icon: #2f6fed; }
 @media print {
   @page { size: landscape; margin: 10mm; }
   body * { visibility: hidden; }
@@ -295,12 +334,15 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
           <div><label for="wiz-spare">Usual spare ball</label><select id="wiz-spare"></select></div>
         </div>
       </div>
-      <p style="font-size:12px;color:#6b6b6b;margin:0;line-height:1.4;">Add your whole collection. Each night you pick which ones you brought on the setup screen.</p>
+      <p style="font-size:12px;color:#6b6b6b;margin:0;line-height:1.4;">Add your whole collection. Each night you pick the ones you brought on Bowl.</p>
     </div>
     <div class="card hidden" data-wiz-step="2">
       <label for="wiz-avg">Season average you're aiming for</label>
       <input type="number" id="wiz-avg" inputmode="decimal" min="0" max="300" placeholder="Leave blank for no goal" />
-      <p style="font-size:12px;color:#6b6b6b;margin:0;line-height:1.4;">This draws the goal line on your charts. More goals, like strike % or single-pin spares, are under Menu, Profile &amp; Goals.</p>
+      <p style="font-size:12px;color:#6b6b6b;margin:0;line-height:1.4;">This draws the goal line on your charts. More goals, like strike % or single-pin spares, are on Your Goals.</p>
+    </div>
+    <div class="card hidden" data-wiz-step="3">
+      <div class="theme-grid" id="wiz-theme-grid" role="radiogroup" aria-label="Home screen theme"></div>
     </div>
     <div class="row" style="margin-top:4px;">
       <div id="wiz-back-wrap"><button class="full" id="wiz-back">Back</button></div>
@@ -358,20 +400,24 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
     <button class="primary full" id="install-close-btn">Got it</button>
   </div>
 </div>
+<div id="home-bg" class="hidden"><div class="home-stage" id="home-stage"></div></div>
 <div class="app">
 
   <div class="header">
-    <span class="place"><img src="icons/icon-192.png" alt="" class="place-icon" width="22" height="22" /><span id="place-label">Bowling Bro'</span></span>
+    <a href="#" class="place" id="home-link" aria-label="Bowling Bro', home"><img src="icons/icon-192.png" alt="" class="place-icon" width="22" height="22" /><span id="place-label">Bowling Bro'</span></a>
     <div style="display:flex;align-items:center;gap:10px;position:relative;">
       <span class="game-label" id="game-label"></span>
       <button id="menu-btn" aria-label="Menu" aria-haspopup="true" aria-expanded="false" style="padding:8px 10px;line-height:0;">
         <svg width="20" height="16" viewBox="0 0 20 16" aria-hidden="true"><path d="M1 2h18M1 8h18M1 14h18" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/></svg>
       </button>
       <div id="menu-panel" class="menu-panel hidden">
+        <button id="menu-home-btn">Home</button>
         <button id="menu-game-btn">Back to scoring</button>
-        <button id="header-setup-btn">Session Setup</button>
+        <button id="header-setup-btn">Bowl</button>
         <button id="menu-league-btn">Your Stats</button>
-        <button id="header-profile-btn">Profile &amp; Goals</button>
+        <button id="menu-goals-btn">Your Goals</button>
+        <button id="menu-arsenal-btn">Your Arsenal</button>
+        <button id="header-profile-btn">Profile</button>
         <button id="menu-install-btn">Add to Home Screen</button>
         <button id="menu-auth-btn">Sign in</button>
       </div>
@@ -383,7 +429,7 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
   <!-- SETUP VIEW -->
   <div id="view-setup">
     <div class="card">
-      <h2>Session Setup</h2>
+      <h2>Bowl</h2>
       <label id="setup-session-label">What are you bowling?</label>
       <div class="radio-row" role="radiogroup" aria-labelledby="setup-session-label">
         <label><input type="radio" name="setup-session-type" id="setup-type-league" value="league" checked /> League</label>
@@ -406,7 +452,10 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
 
     <div id="setup-frames-only">
     <div class="card">
-      <h2>Arsenal for tonight</h2>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 0 10px;">
+        <h2 style="margin:0;">Arsenal for tonight</h2>
+        <button class="small-link" id="setup-arsenal-link" style="font-size:13px;font-weight:600;">Your Arsenal ›</button>
+      </div>
       <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Tap the balls you brought tonight. <span id="arsenal-count"></span></p>
       <div class="arsenal-list" id="arsenal-list"></div>
       <div class="row">
@@ -664,7 +713,6 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
     </div>
     <div class="report-tabs" id="report-tabs" role="tablist">
       <button data-report-tab="summary" role="tab">Summary</button>
-      <button data-report-tab="goals" role="tab">Goals</button>
       <button data-report-tab="shots" role="tab">Shot Stats</button>
       <button data-report-tab="history" role="tab">History</button>
     </div>
@@ -692,17 +740,6 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
       <p id="chart-readout" style="font-size:12px;color:#444;margin:6px 0 0;min-height:30px;"></p>
     </div>
     </div>
-    <div data-report-panel="goals">
-    <div class="card hidden" id="goals-card">
-      <h2>Scoring goals</h2>
-      <div id="goals-list"></div>
-    </div>
-    <div class="card hidden" id="shot-goals-card">
-      <h2>Shot-by-shot goals</h2>
-      <p id="shot-goals-note" style="font-size:12px;color:#6b6b6b;margin:-4px 0 6px;line-height:1.4;"></p>
-      <div id="shot-goals-list"></div>
-    </div>
-    </div>
     <div data-report-panel="shots">
     <div class="card hidden" id="shots-card">
       <h2>Shot stats</h2>
@@ -724,6 +761,84 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
   </div>
 
   <!-- PROFILE VIEW -->
+  <!-- HOME VIEW -->
+  <div id="view-home" class="hidden">
+    <div style="flex:1;"></div>
+    <h1 class="home-greet" id="home-greet">Hello.</h1>
+    <button id="home-resume" class="hidden">
+      <span style="width:10px;height:10px;border-radius:50%;background:#d6332a;flex:0 0 auto;"></span>
+      <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;"><b id="home-resume-title" style="font-size:15px;"></b><span id="home-resume-detail" style="font-size:13px;color:#5a4a20;"></span></span>
+      <b style="font-size:14px;color:#2f6fed;white-space:nowrap;">Back to scoring ›</b>
+    </button>
+    <button class="home-btn home-bowl" id="home-bowl-btn">
+      <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true" style="flex:0 0 auto;"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.7"></circle><circle cx="9.4" cy="8.8" r="1.35" fill="currentColor"></circle><circle cx="13.6" cy="8" r="1.35" fill="currentColor"></circle><circle cx="12" cy="12" r="1.35" fill="currentColor"></circle></svg>
+      <span class="home-text"><span class="home-title">Bowl</span><span class="home-sub">League or practice. Score by game, photo or frame.</span></span>
+      <svg width="10" height="16" viewBox="0 0 10 16" aria-hidden="true" style="flex:0 0 auto;"><path d="M2 2l6 6-6 6" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </button>
+    <button class="home-btn home-card" id="home-stats-btn">
+      <svg class="home-icon" width="40" height="40" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V11M10 19V6M16 19v-9M21 19H3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"></path></svg>
+      <span class="home-text"><span class="home-title" style="font-size:24px;">Your Stats</span><span class="home-sub" id="home-stats-sub"></span></span>
+      <svg class="home-icon" id="home-spark" width="70" height="34" viewBox="0 0 70 34" aria-hidden="true"></svg>
+    </button>
+    <div class="home-squares">
+      <button class="home-btn home-card home-sq" id="home-goals-btn">
+        <svg class="home-icon" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"></circle><circle cx="12" cy="12" r="4.5" fill="none" stroke="currentColor" stroke-width="2"></circle><circle cx="12" cy="12" r="1.3" fill="currentColor"></circle></svg>
+        <span>Your Goals</span>
+      </button>
+      <button class="home-btn home-card home-sq" id="home-arsenal-btn">
+        <svg class="home-icon" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5" fill="none" stroke="currentColor" stroke-width="2"></circle><circle cx="16.5" cy="9" r="5" fill="none" stroke="currentColor" stroke-width="2"></circle><circle cx="15.5" cy="7.5" r="0.9" fill="currentColor"></circle><circle cx="18" cy="7.6" r="0.9" fill="currentColor"></circle></svg>
+        <span>Your Arsenal</span>
+      </button>
+      <button class="home-btn home-card home-sq" id="home-profile-btn">
+        <svg class="home-icon" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+        <span>Profile</span>
+      </button>
+    </div>
+    <div style="flex:3;"></div>
+  </div>
+
+  <!-- YOUR GOALS VIEW -->
+  <div id="view-goals" class="hidden">
+    <p id="goals-summary" style="font-size:22px;font-weight:800;margin:2px 0 12px;"></p>
+    <div class="card" id="goals-card">
+      <h2>Scoring goals</h2>
+      <div id="goals-list"></div>
+    </div>
+    <div class="card" id="shot-goals-card">
+      <h2>Shot-by-shot goals</h2>
+      <p id="shot-goals-note" style="font-size:12px;color:#6b6b6b;margin:-4px 0 6px;line-height:1.4;"></p>
+      <div id="shot-goals-list"></div>
+    </div>
+    <div class="card">
+      <h2>Set your goals</h2>
+      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Fill in the goals you want and leave the rest blank. Your goals also draw the goal lines and colours on Your Stats.</p>
+      <div id="goal-editor"></div>
+      <button class="primary full" id="goal-save-btn" style="margin-top:8px;">Save goals</button>
+      <p id="goals-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;"></p>
+    </div>
+  </div>
+
+  <!-- YOUR ARSENAL VIEW -->
+  <div id="view-arsenal" class="hidden">
+    <div class="card">
+      <h2>Your bowling balls</h2>
+      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Your whole collection. Each night you pick the ones you brought on Bowl.</p>
+      <div class="arsenal-list" id="collection-list"></div>
+      <div class="row">
+        <div><input type="text" id="collection-add-input" maxlength="60" placeholder="Add a ball" /></div>
+        <div style="flex:0 0 auto;"><button id="collection-add-btn">Add</button></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Strike and spare ball</h2>
+      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Each night starts with these. You can also switch them on Bowl.</p>
+      <div class="row">
+        <div><label for="arsenal-strike">Strike ball</label><select id="arsenal-strike"></select></div>
+        <div><label for="arsenal-spare">Spare ball</label><select id="arsenal-spare"></select></div>
+      </div>
+    </div>
+  </div>
+
   <div id="view-profile" class="hidden">
     <div class="card">
       <h2>About you</h2>
@@ -750,22 +865,21 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
     <button class="primary full" id="profile-save-btn">Save profile</button>
     <p id="profile-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0;min-height:15px;"></p>
     <div class="card">
-      <h2>Your bowling balls</h2>
-      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Your whole collection. Each night you pick which ones you brought on the setup screen.</p>
-      <div class="arsenal-list" id="collection-list"></div>
-      <div class="row">
-        <div><input type="text" id="collection-add-input" maxlength="60" placeholder="Add a ball" /></div>
-        <div style="flex:0 0 auto;"><button id="collection-add-btn">Add</button></div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 0 10px;">
+        <h2 style="margin:0;">Home screen theme</h2>
+        <span id="theme-name" style="font-size:13px;color:#6b6b6b;"></span>
       </div>
+      <div class="theme-grid" id="theme-grid" role="radiogroup" aria-label="Home screen theme"></div>
+      <p style="font-size:12px;color:#6b6b6b;margin:10px 0 0;line-height:1.4;">Changes the Home screen only. Saved to your account, so it follows you to a new phone.</p>
     </div>
     <div class="card">
-      <h2>Season goals</h2>
-      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Fill in the goals you want and leave the rest blank. They show under Your Stats, on the Goals tab.</p>
-      <div id="goal-editor"></div>
-      <button class="primary full" id="goal-save-btn" style="margin-top:8px;">Save goals</button>
-      <p id="goals-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;"></p>
+      <h2>Account</h2>
+      <p id="profile-account-note" style="font-size:13px;color:#4a4943;margin:-4px 0 10px;line-height:1.4;"></p>
+      <div class="row">
+        <div><button class="full" id="profile-install-btn">Add to Home Screen</button></div>
+        <div><button class="full" id="profile-auth-btn">Sign in</button></div>
+      </div>
     </div>
-    <button class="full" id="profile-back-btn">Back</button>
     <div style="text-align:center;margin-top:12px;"><button class="small-link" id="wizard-rerun-btn">Run first-time setup again</button></div>
   </div>
 
@@ -824,16 +938,24 @@ function setPlaceLabel(viewName){
   document.getElementById("place-label").textContent = text;
   document.getElementById("place-label").parentNode.classList.toggle("brand", text === "Bowling Bro'");
 }
-var views = ["setup","game","scores","photo","summary","history","profile"];
+var views = ["home","setup","game","scores","photo","summary","history","goals","arsenal","profile"];
 function showView(name){
   views.forEach(function(v){ document.getElementById("view-"+v).classList.toggle("hidden", v!==name); });
   document.body.classList.toggle("in-game", name==="game");
   document.getElementById("header-setup-btn").classList.toggle("hidden", name==="setup");
   document.getElementById("header-profile-btn").classList.toggle("hidden", name==="profile");
+  document.getElementById("menu-home-btn").classList.toggle("hidden", name==="home");
+  document.getElementById("menu-league-btn").classList.toggle("hidden", name==="history");
+  document.getElementById("menu-goals-btn").classList.toggle("hidden", name==="goals");
+  document.getElementById("menu-arsenal-btn").classList.toggle("hidden", name==="arsenal");
+  var onHome = name === "home";
+  document.body.classList.toggle("on-home", onHome);
+  document.getElementById("home-bg").classList.toggle("hidden", !onHome);
+  if (onHome){ loadHomeFonts(); renderHome(); }
   document.getElementById("menu-league-btn").classList.toggle("hidden", name==="history");
   setPlaceLabel(name);
   if (name!=="game"){
-    var labels = {setup:"Session Setup", scores:"Game Scores", photo:"Photo Scoring", summary:"Series Summary", history:"Your Stats", profile:"Profile & Goals"};
+    var labels = {home:"", setup:"Bowl", scores:"Game Scores", photo:"Photo Scoring", summary:"Series Summary", history:"Your Stats", goals:"Your Goals", arsenal:"Your Arsenal", profile:"Profile"};
     document.getElementById("game-label").textContent = labels[name] || "";
   }
 }
@@ -2557,7 +2679,8 @@ function applyReportTab(hasGames){
   var practiceTab = historyTab === "practice";
   // Practice is a simpler report: Summary and Sessions only. Goals are league-only, and practice
   // shot stats sit on its Summary instead of a tab of their own.
-  if (practiceTab && (reportTab === "goals" || reportTab === "shots")) reportTab = "summary";
+  if (reportTab === "goals") reportTab = "summary";   // goals have their own screen now
+  if (practiceTab && reportTab === "shots") reportTab = "summary";
   Array.prototype.forEach.call(document.querySelectorAll("#report-tabs button"), function(btn){
     var t = btn.getAttribute("data-report-tab"), on = t === reportTab;
     btn.classList.toggle("selected", on);
@@ -2605,22 +2728,25 @@ function renderHistory(){
   applyReportTab(items.some(function(it){ return seriesScores(it.h).filter(isNum).length > 0; }));
   var hasDetail = everything.some(function(it){ return hasFrameDetail(it.h); });
   document.getElementById("export-csv-btn").classList.toggle("hidden", !cloud.dl || !hasDetail);
+  renderGoalsPage();
+  if (!document.getElementById("view-home").classList.contains("hidden")) renderHome();
 }
 // ---------- profile ----------
 // Kept in the signed-in viewer's private area, so each person who uses the app has their own.
-var PROFILE_KEYS = ["name", "email", "hand", "homeCenter", "league", "team"];
+var PROFILE_KEYS = ["name", "email", "hand", "homeCenter", "league", "team", "theme"];
+var THEME_IDS = ["lanes", "lebowski", "seventies", "cosmic", "shirt", "flame", "aloha", "sheet"];
 function cleanProfile(src){
   var out = {};
   PROFILE_KEYS.forEach(function(k){ out[k] = (src && typeof src[k] === "string") ? src[k].slice(0, 120) : ""; });
   if (["right", "left", "two"].indexOf(out.hand) < 0) out.hand = "right";   // right-handed unless the bowler says otherwise
+  if (THEME_IDS.indexOf(out.theme) < 0) out.theme = "lanes";                 // Classic Lanes unless the bowler picks another
   return out;
 }
 var profile = cleanProfile(state.profile);
-var profileReturn = "setup";
 function fillProfileInputs(){
   PROFILE_KEYS.forEach(function(k){
     var el = document.getElementById("profile-" + k);
-    if (document.activeElement !== el) el.value = profile[k];
+    if (el && document.activeElement !== el) el.value = profile[k];
   });
 }
 function goToView(name){
@@ -2629,19 +2755,49 @@ function goToView(name){
   else if (name === "game" && state.games.length){ showView("game"); renderBallUsedOptions(); refreshGameScreen(); }
   else if (name === "summary" && state.games.length){ showSummary(); }
   else if (name === "history"){ renderHistory(); showView("history"); }
+  else if (name === "home"){ showView("home"); }
+  else if (name === "goals"){ openGoals(); }
+  else if (name === "arsenal"){ openArsenal(); }
+  else if (name === "profile"){ openProfile(); }
   else { initSetupFields(); showView("setup"); }
 }
-document.getElementById("header-profile-btn").addEventListener("click", function(){
-  var active = views.filter(function(v){ return !document.getElementById("view-"+v).classList.contains("hidden"); })[0];
-  profileReturn = active || "setup";
+function openProfile(){
   document.getElementById("profile-status").textContent = "";
-  document.getElementById("goals-status").textContent = "";
   fillProfileInputs();
-  renderCollectionUI();
-  fillGoalInputs(true);
+  renderThemePicker();
+  document.getElementById("profile-auth-btn").textContent = document.getElementById("menu-auth-btn").textContent;
+  document.getElementById("profile-install-btn").parentNode.classList.toggle("hidden", document.getElementById("menu-install-btn").classList.contains("hidden"));
+  document.getElementById("profile-account-note").textContent = sbUser
+    ? "Signed in. Your nights, goals and arsenal are saved to your account."
+    : "Not signed in, so everything is saved on this phone only.";
   showView("profile");
+}
+function openGoals(){
+  document.getElementById("goals-status").textContent = "";
+  renderGoalsPage();
+  fillGoalInputs(true);
+  showView("goals");
+}
+function openArsenal(){
+  renderCollectionUI();
+  showView("arsenal");
+}
+document.getElementById("header-profile-btn").addEventListener("click", function(){ goToView("profile"); });
+document.getElementById("menu-home-btn").addEventListener("click", function(){ goToView("home"); });
+document.getElementById("menu-goals-btn").addEventListener("click", function(){ goToView("goals"); });
+document.getElementById("menu-arsenal-btn").addEventListener("click", function(){ goToView("arsenal"); });
+document.getElementById("home-link").addEventListener("click", function(e){ e.preventDefault(); goToView("home"); });
+document.getElementById("setup-arsenal-link").addEventListener("click", function(){ goToView("arsenal"); });
+document.getElementById("home-bowl-btn").addEventListener("click", function(){ document.getElementById("header-setup-btn").click(); });
+document.getElementById("home-stats-btn").addEventListener("click", function(){ document.getElementById("menu-league-btn").click(); });
+document.getElementById("home-goals-btn").addEventListener("click", function(){ goToView("goals"); });
+document.getElementById("home-arsenal-btn").addEventListener("click", function(){ goToView("arsenal"); });
+document.getElementById("home-profile-btn").addEventListener("click", function(){ goToView("profile"); });
+document.getElementById("home-resume").addEventListener("click", function(){
+  goToView(nightActive() ? "scores" : (photoActive() ? "photo" : "game"));
 });
-document.getElementById("profile-back-btn").addEventListener("click", function(){ goToView(profileReturn); });
+document.getElementById("profile-install-btn").addEventListener("click", function(){ document.getElementById("menu-install-btn").click(); });
+document.getElementById("profile-auth-btn").addEventListener("click", function(){ document.getElementById("menu-auth-btn").click(); });
 var profileWrite = Promise.resolve();
 // The bowler's gear (home center, bag, strike and spare ball) is saved alongside the profile so it
 // follows them to a new phone instead of living on one device.
@@ -2693,7 +2849,8 @@ function renderCollectionUI(){
   }
   all.forEach(function(name){
     var chip = document.createElement("span"); chip.className = "arsenal-chip";
-    var txt = document.createElement("span"); txt.textContent = name;
+    var role = [name === state.strikeBall ? "strike" : "", name === state.spareBall ? "spare" : ""].filter(Boolean).join(" & ");
+    var txt = document.createElement("span"); txt.textContent = name + (role ? " · " + role : "");
     var rm = document.createElement("button"); rm.textContent = "x"; rm.setAttribute("aria-label", "Remove " + name);
     rm.addEventListener("click", function(){
       // removing a ball from the collection also takes it out of tonight's bag
@@ -2703,7 +2860,31 @@ function renderCollectionUI(){
     });
     chip.appendChild(txt); chip.appendChild(rm); list.appendChild(chip);
   });
+  renderArsenalRoles();
 }
+// the usual strike and spare ball, picked from the whole collection on Your Arsenal
+function renderArsenalRoles(){
+  var all = ballCollection();
+  [["arsenal-strike", "strikeBall"], ["arsenal-spare", "spareBall"]].forEach(function(pair){
+    var sel = document.getElementById(pair[0]); if (!sel) return;
+    sel.innerHTML = "";
+    if (!all.length){
+      var none = document.createElement("option"); none.value = ""; none.textContent = "Add a ball first";
+      sel.appendChild(none); sel.disabled = true; return;
+    }
+    sel.disabled = false;
+    all.forEach(function(name){ var o = document.createElement("option"); o.value = name; o.textContent = name; sel.appendChild(o); });
+    sel.value = all.indexOf(state[pair[1]]) >= 0 ? state[pair[1]] : all[0];
+  });
+}
+[["arsenal-strike", "strikeBall"], ["arsenal-spare", "spareBall"]].forEach(function(pair){
+  document.getElementById(pair[0]).addEventListener("change", function(e){
+    var v = e.target.value; if (!v) return;
+    state[pair[1]] = v;
+    if (state.arsenal.indexOf(v) < 0) state.arsenal.push(v);   // the usual ball comes along tonight too
+    tidyTonight(); saveState(); renderArsenalUI(); renderCollectionUI();
+  });
+});
 function collectionAdd(){
   var inp = document.getElementById("collection-add-input"), v = inp.value.trim(), all = ballCollection();
   if (v && all.indexOf(v) < 0 && all.length < 40){
@@ -2718,9 +2899,10 @@ document.getElementById("collection-add-input").addEventListener("keydown", func
 
 // ---------- first-time setup wizard ----------
 var WIZ_STEPS = [
-  { title: "Welcome to Bowling Bro'", blurb: "Three quick steps and you're ready to bowl. Everything here can be changed later." },
+  { title: "Welcome to Bowling Bro'", blurb: "Four quick steps and you're ready to bowl. Everything here can be changed later." },
   { title: "Your bowling", blurb: "Where you bowl and the balls you own, so each night starts ready to go." },
-  { title: "One goal to start", blurb: "Most bowlers start with an average to aim for." }
+  { title: "One goal to start", blurb: "Most bowlers start with an average to aim for." },
+  { title: "Pick your home screen", blurb: "This is what you'll see each time you open Bowling Bro'. You can change it any time in Profile." }
 ];
 // these were the app's built-in defaults before each bowler had their own; never treat them as a new bowler's gear
 var LEGACY_ARSENAL = ["Storm Bionic", "Storm Phase II Pearl", "Storm Hy-Road 40", "Storm Ion Max Pearl"];
@@ -2732,7 +2914,7 @@ function openWizard(isNewBowler){
     initSetupFields();
   }
   var avgGoal = presetGoal("avg");
-  wiz = { arsenal: ballCollection().slice(), strike: state.strikeBall || "", spare: state.spareBall || "" };
+  wiz = { arsenal: ballCollection().slice(), strike: state.strikeBall || "", spare: state.spareBall || "", theme: themeId() };
   document.getElementById("wiz-name").value = profile.name || "";
   document.getElementById("wiz-hand").value = profile.hand || "right";
   document.getElementById("wiz-center").value = state.center || profile.homeCenter || "";
@@ -2759,6 +2941,7 @@ function renderWizard(){
   document.getElementById("wiz-back-wrap").classList.toggle("hidden", wizStep === 0);
   document.getElementById("wiz-next").textContent = wizStep === WIZ_STEPS.length - 1 ? "Finish" : "Next";
   renderWizardBag();
+  renderThemeGrid("wiz-theme-grid", wiz.theme, function(id){ wiz.theme = id; renderWizard(); });
   document.getElementById("wizard").scrollTop = 0;
 }
 function renderWizardBag(){
@@ -2796,12 +2979,16 @@ function closeWizard(){
   saveState();
   initSetupFields(); fillProfileInputs(); renderCollectionUI(); renderHistory();
   document.getElementById("wizard").classList.add("hidden");
+  // a night in progress stays where it is; otherwise setup ends on Home
+  var scoring = ["game", "scores", "photo", "summary"].some(function(v){ return !document.getElementById("view-" + v).classList.contains("hidden"); });
+  if (!scoring) goToView("home");
 }
 function finishWizard(){
   profile.name = document.getElementById("wiz-name").value.trim().slice(0, 120);
   profile.hand = document.getElementById("wiz-hand").value;
   var center = document.getElementById("wiz-center").value.trim().slice(0, 80);
   if (center){ state.center = center; profile.homeCenter = center; }
+  profile.theme = wiz.theme;
   state.profile = profile;
   // the wizard edits the whole collection; tonight's bag keeps its picks, or starts as everything
   var hadTonight = (state.arsenal || []).filter(function(name){ return wiz.arsenal.indexOf(name) >= 0; });
@@ -2830,7 +3017,7 @@ document.getElementById("wiz-skip").addEventListener("click", closeWizard);
 document.getElementById("wizard-rerun-btn").addEventListener("click", function(){ openWizard(false); });
 document.getElementById("profile-save-btn").addEventListener("click", function(){
   var next = {};
-  PROFILE_KEYS.forEach(function(k){ next[k] = document.getElementById("profile-" + k).value.trim(); });
+  PROFILE_KEYS.forEach(function(k){ var el = document.getElementById("profile-" + k); next[k] = el ? el.value.trim() : profile[k]; });
   profile = cleanProfile(next);
   state.profile = profile;
   saveState();
@@ -3192,7 +3379,6 @@ function renderSeason(items){
   var has = s.games.length > 0;
   var practiceTab = historyTab === "practice";
   document.getElementById("season-card").classList.toggle("hidden", !has);
-  document.getElementById("goals-card").classList.toggle("hidden", !has || practiceTab);
   if (!has) return;
   document.getElementById("season-title").textContent = (practiceTab ? "Practice to date" : "Season to date") + (profile.name ? " — " + profile.name : "");
   document.getElementById("season-nights-label").textContent = practiceTab ? "Sessions" : "Weeks";
@@ -3210,16 +3396,6 @@ function renderSeason(items){
   document.getElementById("season-high-series-label").textContent = practiceTab ? "Best session avg" : "High series";
   document.getElementById("season-high-series").textContent = practiceTab ? s.bestSessionAvg.toFixed(1) : s.highSeries;
   document.getElementById("season-nights").textContent = s.totals.length;
-
-  var list = document.getElementById("goals-list");
-  list.innerHTML = "";
-  if (!scoringGoals().length){
-    var none = document.createElement("p");
-    none.style.cssText = "font-size:13px;color:#6b6b6b;margin:0;";
-    none.textContent = "No scoring goals set. Add some under Menu, Profile & Goals.";
-    list.appendChild(none);
-  }
-  scoringGoals().forEach(function(goal){ var row = goalRow(goal, s); if (row) list.appendChild(row); });
 }
 
 // ---------- shot stats (from series scored frame by frame) ----------
@@ -3240,27 +3416,11 @@ function renderShots(items){
   });
   // on the practice summary the card only appears once there is something to show
   card.classList.toggle("hidden", !gamesTotal || (practiceTab && !rows.length));
-  document.getElementById("shot-goals-card").classList.add("hidden");
   body.innerHTML = "";
   if (!gamesTotal) return;
-  // Shot-by-shot goals live on the Goals tab, with the same "how many games" note as the stats.
   var coverage = !rows.length
     ? "Measured on nights scored frame by frame or from scoreboard photos. None saved yet."
     : "From " + plural(allGames.length, "game") + " with frame detail" + (allGames.length < gamesTotal ? " (of " + gamesTotal + " on this report; the rest were entered as scores only)." : ".");
-  var sgCard = document.getElementById("shot-goals-card"), sgList = document.getElementById("shot-goals-list");
-  sgCard.classList.toggle("hidden", practiceTab);
-  sgList.innerHTML = "";
-  document.getElementById("shot-goals-note").textContent = coverage;
-  if (!practiceTab){
-    var sg = shotGoals(), st = seasonStats(items);
-    if (!sg.length){
-      var none = document.createElement("p");
-      none.style.cssText = "font-size:13px;color:#6b6b6b;margin:6px 0 0;";
-      none.textContent = "No shot-by-shot goals set. Add some under Menu, Profile & Goals.";
-      sgList.appendChild(none);
-    }
-    sg.forEach(function(goal){ var row = goalRow(goal, st); if (row) sgList.appendChild(row); });
-  }
   if (!rows.length){
     note.textContent = "Strike %, spare % and the other shot stats appear here once a " + (practiceTab ? "session" : "night") + " is scored frame by frame or from scoreboard photos. Nights entered as scores only can't be broken down.";
     return;
@@ -3813,6 +3973,196 @@ document.getElementById("night-share-btn").addEventListener("click", function(){
 document.getElementById("photo-share-btn").addEventListener("click", function(){ if (photoActive()) openSessionShare(withSavedExtras(photoNightDoc())); });
 document.getElementById("summary-share-btn").addEventListener("click", function(){ if (state.games.length) openSessionShare(withSavedExtras(buildSeriesDoc())); });
 
+
+// ---------- Home ----------
+// The landing screen: a greeting, Bowl and Your Stats as the two big buttons, then Your Goals,
+// Your Arsenal and Profile. Its background is the bowler's theme, picked on Profile.
+var THEMES = [
+  { id: "lanes", name: "Classic Lanes", swatch: "repeating-linear-gradient(90deg, #ecd0a4 0 6px, #d9b27c 6px 7px)" },
+  { id: "lebowski", name: "Lebowski", swatch: "radial-gradient(circle, #f1e2bf 0 6%, #c9a24a 6% 16%, #1e2a4a 16% 30%, transparent 31%), repeating-linear-gradient(45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), repeating-linear-gradient(-45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), #6e1f22" },
+  { id: "seventies", name: "70s Lanes", swatch: "linear-gradient(180deg, #f3e3c3 0 50%, #e7a92c 50% 62%, #d9641e 62% 75%, #8a3b14 75% 88%, #5a3417 88%)" },
+  { id: "cosmic", name: "Cosmic Bowl", swatch: "radial-gradient(circle at 65% 62%, #ff4fd8 0 3px, transparent 4px), conic-gradient(from 0deg at 65% 62%, transparent 0 8%, rgba(255,79,216,0.8) 8% 10%, transparent 10% 33%, rgba(255,79,216,0.8) 33% 35%, transparent 35% 58%, rgba(255,79,216,0.8) 58% 60%, transparent 60% 83%, rgba(255,79,216,0.8) 83% 85%, transparent 85%), radial-gradient(circle, #3d0f70, #14002c)" },
+  { id: "shirt", name: "Two-Tone Shirt", swatch: "linear-gradient(90deg, #f2e6cf 0 58%, #141414 58% 63%, #b3202a 63%)" },
+  { id: "flame", name: "Flame Shirt", swatch: "linear-gradient(180deg, #141414 0 55%, #ff7a1a 55% 70%, #ffd23f 70% 78%, #c2210c 78%)" },
+  { id: "aloha", name: "Aloha Shirt", swatch: "radial-gradient(circle at 30% 30%, #f26b5b 0 10%, transparent 11%), radial-gradient(circle at 70% 70%, #f6c445 0 9%, transparent 10%), radial-gradient(ellipse at 70% 25%, #1f8f7a 0 14%, transparent 15%), #0f6e6e" },
+  { id: "sheet", name: "Score Sheet", swatch: "repeating-linear-gradient(180deg, transparent 0 7px, rgba(47,111,237,0.3) 7px 8px), linear-gradient(90deg, transparent 0 12%, rgba(214,51,42,0.6) 12% 14%, transparent 14%), #fbf8ef" }
+];
+function themeId(){ return THEME_IDS.indexOf(profile.theme) >= 0 ? profile.theme : "lanes"; }
+function themeName(id){ var t = THEMES.filter(function(x){ return x.id === id; })[0]; return t ? t.name : "Classic Lanes"; }
+// Each theme's art, drawn in a stage that spans the phone: one picture pinned to the top (390 x 220)
+// and one to the bottom (390 x 360), so the art stays at the ends whatever the screen height.
+var TOP = '<svg class="home-top" viewBox="0 0 390 220" aria-hidden="true">', BOT = '<svg class="home-bottom" viewBox="0 0 390 360" aria-hidden="true">';
+function spandrel(x, y){ return '<circle cx="' + x + '" cy="' + y + '" r="112" fill="#1e2a4a"/><circle cx="' + x + '" cy="' + y + '" r="96" fill="none" stroke="#c9a24a" stroke-width="3"/><circle cx="' + x + '" cy="' + y + '" r="70" fill="none" stroke="#f1e2bf" stroke-width="2" stroke-dasharray="3 6"/><circle cx="' + x + '" cy="' + y + '" r="44" fill="#6e1f22" stroke="#c9a24a" stroke-width="2"/>'; }
+function boteh(x, y, r){ return '<path transform="translate(' + x + ' ' + y + ') rotate(' + r + ')" d="M0 0 c12 -18 34 -10 30 10 c-4 18 -26 26 -36 14 c8 0 12 -6 6 -24 z"/>'; }
+function cosmicUse(id, x, y, sc, col){ return '<use href="#' + id + '" transform="translate(' + x + ' ' + y + ') scale(' + sc + ')" color="' + col + '" style="filter: drop-shadow(0 0 6px ' + col + ')"/>'; }
+function alohaUse(id, x, y, extra, col){ return '<use href="#' + id + '" transform="translate(' + x + ' ' + y + ') ' + extra + '"' + (col ? ' color="' + col + '"' : '') + '/>'; }
+var HOME_ART = {
+  lanes:
+    '<div style="position:absolute;left:0;top:0;bottom:0;width:4.1%;background:linear-gradient(90deg,#6b4a2b,#8a6440);"></div>' +
+    '<div style="position:absolute;right:0;top:0;bottom:0;width:4.1%;background:linear-gradient(270deg,#6b4a2b,#8a6440);"></div>' +
+    TOP + '<g fill="#5a3a1c" opacity="0.55"><rect x="99.5" y="78" width="7.4" height="40" rx="1"/><rect x="145.4" y="98" width="7.4" height="40" rx="1"/><rect x="237.2" y="98" width="7.4" height="40" rx="1"/><rect x="283.1" y="78" width="7.4" height="40" rx="1"/></g></svg>' +
+    BOT + '<path transform="translate(0 220)" d="M50.3 92 l7 -30 l7 30 z M96.2 76 l7 -30 l7 30 z M142.1 60 l7 -30 l7 30 z M188 44 l7 -30 l7 30 z M233.9 60 l7 -30 l7 30 z M279.8 76 l7 -30 l7 30 z M325.7 92 l7 -30 l7 30 z" fill="#5a3a1c" opacity="0.55"/></svg>',
+  lebowski:
+    TOP + '<g opacity="0.9">' + spandrel(0, 0) + spandrel(390, 0) + '</g>' +
+    '<g transform="translate(195 112)"><path d="M-120 0 L-60 -26 L60 -26 L120 0 L60 26 L-60 26 Z" fill="#1e2a4a" stroke="#c9a24a" stroke-width="2.5"/><path d="M-96 0 L-52 -16 L52 -16 L96 0 L52 16 L-52 16 Z" fill="none" stroke="#f1e2bf" stroke-width="1.5" stroke-dasharray="2 4"/><rect x="-14" y="-14" width="28" height="28" transform="rotate(45)" fill="#6e1f22" stroke="#c9a24a" stroke-width="2"/><circle r="4" fill="#f1e2bf"/><circle cx="-40" r="4" fill="#c9a24a"/><circle cx="40" r="4" fill="#c9a24a"/><circle cx="-70" r="2.5" fill="#f1e2bf"/><circle cx="70" r="2.5" fill="#f1e2bf"/></g></svg>' +
+    BOT + '<g opacity="0.9">' + spandrel(0, 360) + spandrel(390, 360) + '</g>' +
+    '<g transform="translate(195 240)"><path d="M0 -150 L18 -112 L0 -96 L-18 -112 Z M0 150 L18 112 L0 96 L-18 112 Z" fill="#c9a24a"/><circle cy="-160" r="6" fill="#f1e2bf"/><rect x="-74" y="-74" width="148" height="148" fill="#1e2a4a" stroke="#c9a24a" stroke-width="3"/><rect x="-74" y="-74" width="148" height="148" fill="#1e2a4a" stroke="#c9a24a" stroke-width="3" transform="rotate(45)"/><circle r="66" fill="none" stroke="#f1e2bf" stroke-width="2" stroke-dasharray="2 5"/><circle r="54" fill="#6e1f22" stroke="#c9a24a" stroke-width="3"/><path d="M0 -44 C10 -20 20 -10 44 0 C20 10 10 20 0 44 C-10 20 -20 10 -44 0 C-20 -10 -10 -20 0 -44 Z" fill="#c9a24a"/><circle r="14" fill="#1e2a4a" stroke="#f1e2bf" stroke-width="2"/><circle r="5" fill="#f1e2bf"/></g>' +
+    '<g fill="#c9a24a" opacity="0.75">' + boteh(40, 76, -20) + boteh(330, 56, 160) + boteh(70, 156, 25) + boteh(320, 166, 200) + '</g>' +
+    '<g fill="#f1e2bf" opacity="0.8"><circle cx="52" cy="82" r="3"/><circle cx="318" cy="62" r="3"/><circle cx="80" cy="164" r="3"/><circle cx="310" cy="172" r="3"/></g></svg>',
+  seventies:
+    '<div class="home-top" style="position:absolute;left:0;right:0;top:84px;height:44px;background:linear-gradient(180deg,#5a3417 0 16%,#f3e3c3 16% 24%,#8a3b14 24% 42%,#f3e3c3 42% 50%,#d9641e 50% 68%,#f3e3c3 68% 76%,#e7a92c 76%);"></div>' +
+    '<div style="position:absolute;right:-62px;bottom:84px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#e7a92c 0 38%,#d9641e 38% 62%,#8a3b14 62% 82%,#5a3417 82% 100%);"></div>' +
+    '<div style="position:absolute;left:0;right:0;bottom:0;height:66px;background:linear-gradient(180deg,#e7a92c 0 22%,#f3e3c3 22% 28%,#d9641e 28% 50%,#f3e3c3 50% 56%,#8a3b14 56% 78%,#f3e3c3 78% 84%,#5a3417 84%);"></div>',
+  cosmic:
+    '<div style="position:absolute;inset:0;background-image:radial-gradient(circle,#fff 1px,transparent 1.6px),radial-gradient(circle,rgba(255,255,255,0.7) 1px,transparent 1.4px);background-size:61px 67px,37px 41px;background-position:0 0,20px 13px;opacity:0.5;"></div>' +
+    TOP + '<defs><g id="hb-burst" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M0 -8 L0 -40 M4 -6.9 L12 -20.8 M6.9 -4 L34.6 -20 M8 0 L24 0 M6.9 4 L34.6 20 M4 6.9 L12 20.8 M0 8 L0 40 M-4 6.9 L-12 20.8 M-6.9 4 L-34.6 20 M-8 0 L-24 0 M-6.9 -4 L-34.6 -20 M-4 -6.9 L-12 -20.8"/><circle r="4" fill="currentColor" stroke="none"/><circle cy="-40" r="3.5" fill="currentColor" stroke="none"/><circle cx="34.6" cy="-20" r="3.5" fill="currentColor" stroke="none"/><circle cx="34.6" cy="20" r="3.5" fill="currentColor" stroke="none"/><circle cy="40" r="3.5" fill="currentColor" stroke="none"/><circle cx="-34.6" cy="20" r="3.5" fill="currentColor" stroke="none"/><circle cx="-34.6" cy="-20" r="3.5" fill="currentColor" stroke="none"/></g><path id="hb-spark" d="M0 -16 C2 -2 2 -2 16 0 C2 2 2 2 0 16 C-2 2 -2 2 -16 0 C-2 -2 -2 -2 0 -16 Z" fill="currentColor"/></defs>' +
+    cosmicUse("hb-burst", 240, 108, 0.75, "#4fd8ff") + cosmicUse("hb-spark", 70, 112, 1, "#ffe14f") + cosmicUse("hb-spark", 150, 84, 0.6, "#ff4fd8") + cosmicUse("hb-burst", 345, 150, 0.6, "#ffe14f") + '</svg>' +
+    BOT + cosmicUse("hb-burst", 300, 216, 1.9, "#ff4fd8") + cosmicUse("hb-burst", 90, 286, 1.1, "#39ff88") + cosmicUse("hb-burst", 150, 156, 0.7, "#4fd8ff") + cosmicUse("hb-spark", 40, 136, 1, "#ffe14f") + cosmicUse("hb-spark", 220, 316, 0.8, "#4fd8ff") + cosmicUse("hb-spark", 370, 116, 0.6, "#39ff88") + '</svg>',
+  shirt:
+    '<div style="position:absolute;left:67.2%;right:0;top:0;bottom:0;background:#b3202a;"></div>' +
+    '<div style="position:absolute;left:67.2%;right:0;top:0;bottom:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.06) 0 2px,transparent 2px 9px);"></div>' +
+    '<div style="position:absolute;left:65.4%;width:1.8%;top:0;bottom:0;background:#141414;"></div>' +
+    TOP + '<path d="M170 0 L258 0 L258 100 Z" fill="#e8d8b8" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/><path d="M258 0 L346 0 L258 100 Z" fill="#94161f" stroke="#141414" stroke-width="2.5" stroke-linejoin="round"/><circle cx="243" cy="140" r="6" fill="#f8f3e8" stroke="#141414" stroke-width="1.5"/></svg>' +
+    BOT + '<g fill="#f8f3e8" stroke="#141414" stroke-width="1.5"><circle cx="243" cy="156" r="6"/><circle cx="243" cy="246" r="6"/><circle cx="243" cy="336" r="6"/></g></svg>',
+  flame:
+    '<div style="position:absolute;left:76.9%;width:1.3%;top:0;bottom:0;background:#f2f2f2;"></div>' +
+    TOP + '<path d="M220 0 L302 0 L302 96 Z" fill="#1e1e1e" stroke="#f2f2f2" stroke-width="2.5" stroke-linejoin="round"/><path d="M302 0 L384 0 L302 96 Z" fill="#1e1e1e" stroke="#f2f2f2" stroke-width="2.5" stroke-linejoin="round"/><g fill="#ffb347"><circle cx="40" cy="120" r="1.8"/><circle cx="110" cy="150" r="1.4"/><circle cx="180" cy="104" r="2"/><circle cx="250" cy="160" r="1.5"/><circle cx="350" cy="130" r="1.8"/><circle cx="70" cy="80" r="1.2"/></g><g fill="#ff7a1a" opacity="0.6"><circle cx="140" cy="70" r="1.2"/><circle cx="330" cy="170" r="1.3"/><circle cx="20" cy="170" r="1.1"/></g></svg>' +
+    BOT + '<defs><radialGradient id="hb-flGlow" cx="0.5" cy="1" r="0.75"><stop offset="0" stop-color="#ff7a1a" stop-opacity="0.75"/><stop offset="0.6" stop-color="#b3200c" stop-opacity="0.35"/><stop offset="1" stop-color="#141414" stop-opacity="0"/></radialGradient><linearGradient id="hb-flOuter" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ffb000"/><stop offset="0.45" stop-color="#ff5a00"/><stop offset="1" stop-color="#a81200" stop-opacity="0.85"/></linearGradient><linearGradient id="hb-flMid" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff0a0"/><stop offset="0.5" stop-color="#ffb300"/><stop offset="1" stop-color="#ff6a00"/></linearGradient><linearGradient id="hb-flCore" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fffdf0"/><stop offset="1" stop-color="#ffe066"/></linearGradient><filter id="hb-flSoft" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.5"/></filter><filter id="hb-flSoft2" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter><g id="hb-tongues"><path d="M-20 360 C-10 300 30 280 20 220 C12 170 40 140 30 90 C55 140 60 190 55 230 C52 270 80 300 90 360 Z"/><path d="M40 360 C50 290 85 260 75 190 C68 140 95 90 85 30 C115 90 120 150 112 200 C106 250 130 290 140 360 Z"/><path d="M100 360 C108 300 140 275 132 220 C126 180 150 140 145 100 C170 145 172 190 165 230 C160 270 185 305 190 360 Z"/><path d="M150 360 C160 280 195 250 186 180 C180 130 205 70 196 10 C232 80 236 145 226 195 C218 245 245 295 250 360 Z"/><path d="M215 360 C222 300 252 270 246 215 C242 175 262 135 258 90 C286 140 288 185 280 225 C275 265 298 305 305 360 Z"/><path d="M270 360 C278 290 312 265 302 200 C296 160 320 115 312 60 C344 120 346 170 338 215 C332 260 355 300 365 360 Z"/><path d="M330 360 C338 305 365 280 358 230 C353 195 372 160 370 120 C395 165 398 205 392 240 C388 275 405 310 410 360 Z"/></g></defs>' +
+    '<rect width="390" height="360" fill="url(#hb-flGlow)"/><use href="#hb-tongues" fill="url(#hb-flOuter)" filter="url(#hb-flSoft)"/><use href="#hb-tongues" fill="url(#hb-flMid)" filter="url(#hb-flSoft2)" transform="translate(195 360) scale(0.86 0.8) translate(-195 -360)"/><use href="#hb-tongues" fill="url(#hb-flCore)" filter="url(#hb-flSoft2)" opacity="0.9" transform="translate(195 360) scale(0.62 0.5) translate(-195 -360)"/>' +
+    '<g fill="#ffb347"><circle cx="70" cy="40" r="2"/><circle cx="250" cy="20" r="1.6"/><circle cx="330" cy="70" r="2.2"/><circle cx="120" cy="80" r="1.5"/><circle cx="300" cy="140" r="1.8"/><circle cx="40" cy="150" r="1.4"/></g></svg>',
+  aloha:
+    TOP + '<defs><g id="hb-leaf"><path d="M0 0 C30 -40 90 -40 120 0 C90 40 30 40 0 0 Z" fill="#1f8f7a"/><path d="M0 0 L120 0" stroke="#0f6e6e" stroke-width="3"/><path d="M30 0 L45 -18 M55 0 L70 -20 M80 0 L92 -16 M30 0 L45 18 M55 0 L70 20 M80 0 L92 16" stroke="#0f6e6e" stroke-width="2"/></g><g id="hb-hib"><ellipse cy="-20" rx="13" ry="20" fill="currentColor"/><ellipse cy="-20" rx="13" ry="20" fill="currentColor" transform="rotate(72)"/><ellipse cy="-20" rx="13" ry="20" fill="currentColor" transform="rotate(144)"/><ellipse cy="-20" rx="13" ry="20" fill="currentColor" transform="rotate(216)"/><ellipse cy="-20" rx="13" ry="20" fill="currentColor" transform="rotate(288)"/><circle r="7" fill="#7a1b2a"/><path d="M0 0 L16 -30" stroke="#f6c445" stroke-width="3"/><circle cx="16" cy="-30" r="4" fill="#f6c445"/></g></defs>' +
+    alohaUse("hb-leaf", -30, 150, "rotate(-30)") + alohaUse("hb-leaf", 280, 60, "rotate(40)") + alohaUse("hb-leaf", 150, 70, "rotate(-8) scale(0.9)") + alohaUse("hb-hib", 345, 170, "", "#f26b5b") + alohaUse("hb-hib", 232, 108, "scale(0.75)", "#f6c445") + '</svg>' +
+    BOT + alohaUse("hb-leaf", 220, 156, "rotate(-20) scale(1.3)") + alohaUse("hb-leaf", -20, 236, "rotate(15) scale(1.2)") + alohaUse("hb-hib", 70, 156, "scale(1.3)", "#f26b5b") + alohaUse("hb-hib", 320, 296, "scale(1.1)", "#f6c445") + alohaUse("hb-hib", 180, 306, "scale(0.7)", "#f9a8c0") + '</svg>',
+  sheet:
+    '<div style="position:absolute;left:18px;top:0;bottom:0;width:2px;background:rgba(214,51,42,0.55);"></div>' +
+    TOP + '<g transform="translate(0 50)"><g font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, sans-serif" font-size="10" font-weight="700" fill="#5a6577" letter-spacing="1.2"><text x="28" y="40">BOWLER</text><text x="210" y="40">LEAGUE</text></g><path d="M80 42 H196 M262 42 H368" stroke="#22303f" stroke-width="1.2"/><text id="hb-sheet-name" x="96" y="38" font-family="Caveat, cursive" font-size="26" font-weight="700" fill="#22303f"></text></g></svg>' +
+    BOT + '<g transform="translate(22 196)" font-family="Caveat, cursive"><g fill="none" stroke="#22303f" stroke-width="1.5"><rect x="1" y="20" width="350" height="70"/><path d="M36 20 V90 M71 20 V90 M106 20 V90 M141 20 V90 M176 20 V90 M211 20 V90 M246 20 V90 M281 20 V90 M316 20 V90"/><path d="M19 20 V40 H36 M54 20 V40 H71 M89 20 V40 H106 M124 20 V40 H141 M159 20 V40 H176 M194 20 V40 H211 M229 20 V40 H246 M264 20 V40 H281 M299 20 V40 H316 M328 20 V40 H351 M339 20 V40"/></g>' +
+    '<g font-size="13" fill="#5a6577" text-anchor="middle"><text x="18" y="14">1</text><text x="53" y="14">2</text><text x="88" y="14">3</text><text x="123" y="14">4</text><text x="158" y="14">5</text><text x="193" y="14">6</text><text x="228" y="14">7</text><text x="263" y="14">8</text><text x="298" y="14">9</text><text x="333" y="14">10</text></g>' +
+    '<g font-size="17" font-weight="700" fill="#22303f" text-anchor="middle"><text x="27" y="36">X</text><text x="62" y="36">X</text><text x="97" y="36">X</text><text x="132" y="36">X</text><text x="167" y="36">X</text><text x="202" y="36">X</text><text x="237" y="36">X</text><text x="272" y="36">X</text><text x="307" y="36">X</text><text x="322" y="36">X</text><text x="334" y="36">X</text><text x="345" y="36">X</text>' +
+    '<g font-size="20"><text x="18" y="76">30</text><text x="53" y="76">60</text><text x="88" y="76">90</text><text x="123" y="76">120</text><text x="158" y="76">150</text><text x="193" y="76">180</text><text x="228" y="76">210</text><text x="263" y="76">240</text><text x="298" y="76">270</text><text x="333" y="76">300</text></g></g>' +
+    '<ellipse cx="333" cy="70" rx="20" ry="14" fill="none" stroke="#d6332a" stroke-width="2" transform="rotate(-8 333 70)"/></g></svg>'
+};
+var homeFontsLoaded = false, homeArtTheme = null;
+// the themes' display fonts load only when Home is first shown; each has a fallback if they don't arrive
+function loadHomeFonts(){
+  if (homeFontsLoaded) return;
+  homeFontsLoaded = true;
+  var l = document.createElement("link"); l.rel = "stylesheet";
+  l.href = "https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Shrikhand&family=Audiowide&family=Pacifico&family=Bungee&family=Lobster&family=Caveat:wght@700&display=swap";
+  document.head.appendChild(l);
+}
+function applyHomeTheme(){
+  var id = themeId();
+  THEME_IDS.forEach(function(t){ document.body.classList.toggle("home-theme-" + t, t === id); });
+  if (homeArtTheme !== id){ document.getElementById("home-stage").innerHTML = HOME_ART[id] || ""; homeArtTheme = id; }
+  var nm = document.getElementById("hb-sheet-name");
+  if (nm) nm.textContent = (profile.name || "").trim().split(/\s+/)[0] || "";
+}
+function renderHome(){
+  var h = new Date().getHours(), part = h < 12 ? "Morning" : (h < 17 ? "Afternoon" : "Evening");
+  var first = (profile.name || "").trim().split(/\s+/)[0];
+  document.getElementById("home-greet").textContent = part + (first ? ", " + first : "") + ".";
+  // Your Stats: the league season in one line, and the running average as a little line
+  var league = allSeries().filter(function(it){ return seriesType(it.h) === "league"; });
+  var s = seasonStats(league);
+  document.getElementById("home-stats-sub").textContent = s.games.length
+    ? s.avg.toFixed(1) + " avg · high " + s.highGame + " · " + plural(s.totals.length, "week")
+    : "Your season shows here after your first league night";
+  var runs = [], pins = 0, games = 0;
+  sortChrono(league).forEach(function(it){
+    var sc = seriesScores(it.h).filter(isNum); if (!sc.length) return;
+    sc.forEach(function(x){ pins += x; games++; });
+    runs.push(pins / games);
+  });
+  runs = runs.slice(-10);
+  var spark = document.getElementById("home-spark");
+  if (runs.length < 2){ spark.innerHTML = ""; spark.style.display = "none"; }
+  else {
+    var lo = Math.min.apply(null, runs), hi = Math.max.apply(null, runs), span = (hi - lo) || 1;
+    var pts = runs.map(function(v, i){ return [3 + i * 64 / (runs.length - 1), 30 - (v - lo) / span * 24]; });
+    var last = pts[pts.length - 1];
+    spark.innerHTML = '<path d="' + pts.map(function(p, i){ return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ") + '" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/><circle cx="' + last[0].toFixed(1) + '" cy="' + last[1].toFixed(1) + '" r="3.5" fill="currentColor"/>';
+    spark.style.display = "";
+  }
+  // a night in progress gets a way straight back to it
+  var resume = document.getElementById("home-resume"), detail = null;
+  if (nightActive()) detail = plural(state.night.scores.length, "game") + " in so far";
+  else if (photoActive()) detail = plural(state.photoNight.games.length, "game") + " in so far";
+  else if (state.setupDone && state.games.length) detail = "Game " + state.games.length;
+  resume.classList.toggle("hidden", detail === null);
+  if (detail !== null){
+    document.getElementById("home-resume-title").textContent = (sessionType() === "practice" ? "Practice" : "League night") + " in progress";
+    document.getElementById("home-resume-detail").textContent = detail;
+  }
+  applyHomeTheme();
+  layoutHomeArt();
+}
+// where each theme's top art ends (in the 390-wide drawing); on a short phone the art slides up
+// just far enough to stay clear of the greeting, and stays put where there's room
+var HOME_ART_BOTTOM = { lanes: 140, lebowski: 140, seventies: 130, cosmic: 150, shirt: 148, flame: 100, aloha: 150, sheet: 96 };
+function layoutHomeArt(){
+  var g = document.getElementById("home-greet"), stage = document.getElementById("home-stage");
+  if (!g || !stage || document.getElementById("view-home").classList.contains("hidden")) return;
+  var scale = stage.getBoundingClientRect().width / 390;
+  var shift = Math.min(0, g.getBoundingClientRect().top - 10 - (HOME_ART_BOTTOM[themeId()] || 140) * scale);
+  Array.prototype.forEach.call(stage.querySelectorAll(".home-top"), function(el){ el.style.transform = shift ? "translateY(" + Math.round(shift) + "px)" : ""; });
+}
+window.addEventListener("resize", layoutHomeArt);
+function renderThemeGrid(containerId, current, onPick){
+  var el = document.getElementById(containerId); if (!el) return;
+  el.innerHTML = "";
+  THEMES.forEach(function(t){
+    var b = document.createElement("button"); b.type = "button";
+    b.setAttribute("role", "radio"); b.setAttribute("aria-checked", t.id === current ? "true" : "false");
+    var sw = document.createElement("span"); sw.className = "sw"; sw.style.background = t.swatch;
+    var nm = document.createElement("span"); nm.textContent = t.name;
+    b.appendChild(sw); b.appendChild(nm);
+    b.addEventListener("click", function(){ onPick(t.id); });
+    el.appendChild(b);
+  });
+}
+function renderThemePicker(){
+  renderThemeGrid("theme-grid", themeId(), pickTheme);
+  document.getElementById("theme-name").textContent = themeName(themeId());
+}
+// picking a theme saves it straight away, to the phone and the account
+function pickTheme(id){
+  profile.theme = id; state.profile = profile; saveState();
+  renderThemePicker(); applyHomeTheme();
+  if (cloud.profileDoc && cloud.profileLoaded){
+    var body = profileDocBody();
+    profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(null, function(){});
+  }
+}
+
+// ---------- Your Goals ----------
+// Every goal with its progress, and the editor to change them. Goals measure the league season,
+// and they also drive the goal lines and colours on Your Stats.
+function renderGoalsPage(){
+  var list = document.getElementById("goals-list"); if (!list) return;
+  var league = allSeries().filter(function(it){ return seriesType(it.h) === "league"; });
+  var s = seasonStats(league);
+  list.innerHTML = "";
+  var sc = scoringGoals(), sg = shotGoals();
+  function none(text){ var p = document.createElement("p"); p.style.cssText = "font-size:13px;color:#6b6b6b;margin:0;"; p.textContent = text; return p; }
+  if (!sc.length) list.appendChild(none("No scoring goals yet. Add one below."));
+  sc.forEach(function(goal){ var row = goalRow(goal, s); if (row) list.appendChild(row); });
+  var sgList = document.getElementById("shot-goals-list"); sgList.innerHTML = "";
+  var frameGames = 0, total = 0;
+  league.forEach(function(it){
+    total += seriesScores(it.h).filter(isNum).length;
+    if (hasFrameDetail(it.h)) frameGames += it.h.games.filter(function(g){ return g && g.frames; }).length;
+  });
+  document.getElementById("shot-goals-note").textContent = !frameGames
+    ? "Measured on nights scored frame by frame or from scoreboard photos. None saved yet."
+    : "From " + plural(frameGames, "game") + " with frame detail" + (frameGames < total ? " (of " + total + "; the rest were entered as scores only)." : ".");
+  if (!sg.length) sgList.appendChild(none("No shot-by-shot goals yet. Add one below."));
+  sg.forEach(function(goal){ var row = goalRow(goal, s); if (row) sgList.appendChild(row); });
+  var all = sc.concat(sg), met = 0;
+  all.forEach(function(goal){ var g = evalGoal(goal, s); if (g && !g.pending && g.met) met++; });
+  document.getElementById("goals-summary").textContent = all.length ? met + " of " + all.length + " on track" : "No goals yet";
+}
 // ---------- trend chart ----------
 // One y-axis per view: Average, Scores, Consistency.
 var SVGNS = "http://www.w3.org/2000/svg";
@@ -4482,17 +4832,9 @@ if (nightActive()){
     if (nums0.length===1) curBall=1; else if(nums0.length===2) curBall=2; else curBall=0;
   }
   enterGameView();
-} else if (opensOnStats()){
-  historyTab = "league"; editKey = null;
-  goToView("history");
 } else {
-  showView("setup");
-}
-// Before 5 p.m. there's usually no league night under way, so the app opens on Your Stats.
-// A night in progress always resumes (handled above), and a brand-new bowler starts on setup.
-function opensOnStats(){
-  if (new Date().getHours() >= 17) return false;
-  return !!(state.onboarded || state.skipAuth || (state.seriesHistory || []).length);
+  // the app opens on Home; a night in progress resumes instead (handled above)
+  goToView("home");
 }
 function isFrameDone(f, idx){
   var nums = frameNumeric(f);
