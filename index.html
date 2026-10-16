@@ -231,6 +231,8 @@ a.place { text-decoration: none; cursor: pointer; }
 #home-bg .home-bottom { position: absolute; left: 0; bottom: 0; width: 100%; height: auto; display: block; }
 body.on-home #menu-btn, body.on-home #game-label { display: none; }
 body.on-home .header .place.brand { color: var(--home-ink); }
+/* Home is one screen: hold it still (no drag, no bounce) */
+@media (min-height: 600px) { html.on-home, html.on-home body { height: 100%; overflow: hidden; overscroll-behavior: none; } }
 #view-home { display: flex; flex-direction: column; gap: 12px; min-height: calc(100vh - 96px); min-height: calc(100dvh - 96px); }
 .home-greet { margin: 0; font-family: var(--greet-font); font-weight: var(--greet-weight); font-size: var(--greet-size); line-height: 1.15; color: var(--home-ink); max-width: var(--greet-max, none); }
 #view-home .home-btn { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 104px; padding: 16px 18px; border-radius: 18px; text-align: left; font: inherit; cursor: pointer; box-sizing: border-box; }
@@ -950,6 +952,8 @@ function showView(name){
   document.getElementById("menu-arsenal-btn").classList.toggle("hidden", name==="arsenal");
   var onHome = name === "home";
   document.body.classList.toggle("on-home", onHome);
+  document.documentElement.classList.toggle("on-home", onHome);
+  if (onHome) window.scrollTo(0, 0);
   document.getElementById("home-bg").classList.toggle("hidden", !onHome);
   if (onHome){ loadHomeFonts(); renderHome(); }
   document.getElementById("menu-league-btn").classList.toggle("hidden", name==="history");
@@ -4109,6 +4113,10 @@ function layoutHomeArt(){
   Array.prototype.forEach.call(stage.querySelectorAll(".home-top"), function(el){ el.style.transform = shift ? "translateY(" + Math.round(shift) + "px)" : ""; });
 }
 window.addEventListener("resize", layoutHomeArt);
+// iPhone Safari still lets a full-height page be dragged; stop that on Home (tall enough screens, where Home fits)
+document.addEventListener("touchmove", function(e){
+  if (document.body.classList.contains("on-home") && window.innerHeight >= 600) e.preventDefault();
+}, { passive: false });
 function renderThemeGrid(containerId, current, onPick){
   var el = document.getElementById(containerId); if (!el) return;
   el.innerHTML = "";
