@@ -956,6 +956,7 @@ function showView(name){
   if (onHome) window.scrollTo(0, 0);
   document.getElementById("home-bg").classList.toggle("hidden", !onHome);
   if (onHome){ loadHomeFonts(); renderHome(); }
+  setTopColor(onHome);
   document.getElementById("menu-league-btn").classList.toggle("hidden", name==="history");
   setPlaceLabel(name);
   if (name!=="game"){
@@ -3982,15 +3983,25 @@ document.getElementById("summary-share-btn").addEventListener("click", function(
 // The landing screen: a greeting, Bowl and Your Stats as the two big buttons, then Your Goals,
 // Your Arsenal and Profile. Its background is the bowler's theme, picked on Profile.
 var THEMES = [
-  { id: "lanes", name: "Classic Lanes", swatch: "repeating-linear-gradient(90deg, #ecd0a4 0 6px, #d9b27c 6px 7px)" },
-  { id: "lebowski", name: "Lebowski", swatch: "radial-gradient(circle, #f1e2bf 0 6%, #c9a24a 6% 16%, #1e2a4a 16% 30%, transparent 31%), repeating-linear-gradient(45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), repeating-linear-gradient(-45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), #6e1f22" },
-  { id: "seventies", name: "70s Lanes", swatch: "linear-gradient(180deg, #f3e3c3 0 50%, #e7a92c 50% 62%, #d9641e 62% 75%, #8a3b14 75% 88%, #5a3417 88%)" },
-  { id: "cosmic", name: "Cosmic Bowl", swatch: "radial-gradient(circle at 65% 62%, #ff4fd8 0 3px, transparent 4px), conic-gradient(from 0deg at 65% 62%, transparent 0 8%, rgba(255,79,216,0.8) 8% 10%, transparent 10% 33%, rgba(255,79,216,0.8) 33% 35%, transparent 35% 58%, rgba(255,79,216,0.8) 58% 60%, transparent 60% 83%, rgba(255,79,216,0.8) 83% 85%, transparent 85%), radial-gradient(circle, #3d0f70, #14002c)" },
-  { id: "shirt", name: "Two-Tone Shirt", swatch: "linear-gradient(90deg, #f2e6cf 0 58%, #141414 58% 63%, #b3202a 63%)" },
-  { id: "flame", name: "Flame Shirt", swatch: "linear-gradient(180deg, #141414 0 55%, #ff7a1a 55% 70%, #ffd23f 70% 78%, #c2210c 78%)" },
-  { id: "aloha", name: "Aloha Shirt", swatch: "radial-gradient(circle at 30% 30%, #f26b5b 0 10%, transparent 11%), radial-gradient(circle at 70% 70%, #f6c445 0 9%, transparent 10%), radial-gradient(ellipse at 70% 25%, #1f8f7a 0 14%, transparent 15%), #0f6e6e" },
-  { id: "sheet", name: "Score Sheet", swatch: "repeating-linear-gradient(180deg, transparent 0 7px, rgba(47,111,237,0.3) 7px 8px), linear-gradient(90deg, transparent 0 12%, rgba(214,51,42,0.6) 12% 14%, transparent 14%), #fbf8ef" }
+  { id: "lanes", top: "#e6c493", name: "Classic Lanes", swatch: "repeating-linear-gradient(90deg, #ecd0a4 0 6px, #d9b27c 6px 7px)" },
+  { id: "lebowski", top: "#6e1f22", name: "Lebowski", swatch: "radial-gradient(circle, #f1e2bf 0 6%, #c9a24a 6% 16%, #1e2a4a 16% 30%, transparent 31%), repeating-linear-gradient(45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), repeating-linear-gradient(-45deg, rgba(201,162,74,0.35) 0 1px, transparent 1px 8px), #6e1f22" },
+  { id: "seventies", top: "#f3e3c3", name: "70s Lanes", swatch: "linear-gradient(180deg, #f3e3c3 0 50%, #e7a92c 50% 62%, #d9641e 62% 75%, #8a3b14 75% 88%, #5a3417 88%)" },
+  { id: "cosmic", top: "#27074c", name: "Cosmic Bowl", swatch: "radial-gradient(circle at 65% 62%, #ff4fd8 0 3px, transparent 4px), conic-gradient(from 0deg at 65% 62%, transparent 0 8%, rgba(255,79,216,0.8) 8% 10%, transparent 10% 33%, rgba(255,79,216,0.8) 33% 35%, transparent 35% 58%, rgba(255,79,216,0.8) 58% 60%, transparent 60% 83%, rgba(255,79,216,0.8) 83% 85%, transparent 85%), radial-gradient(circle, #3d0f70, #14002c)" },
+  { id: "shirt", top: "#f2e6cf", name: "Two-Tone Shirt", swatch: "linear-gradient(90deg, #f2e6cf 0 58%, #141414 58% 63%, #b3202a 63%)" },
+  { id: "flame", top: "#141414", name: "Flame Shirt", swatch: "linear-gradient(180deg, #141414 0 55%, #ff7a1a 55% 70%, #ffd23f 70% 78%, #c2210c 78%)" },
+  { id: "aloha", top: "#0f6e6e", name: "Aloha Shirt", swatch: "radial-gradient(circle at 30% 30%, #f26b5b 0 10%, transparent 11%), radial-gradient(circle at 70% 70%, #f6c445 0 9%, transparent 10%), radial-gradient(ellipse at 70% 25%, #1f8f7a 0 14%, transparent 15%), #0f6e6e" },
+  { id: "sheet", top: "#fbf8ef", name: "Score Sheet", swatch: "repeating-linear-gradient(180deg, transparent 0 7px, rgba(47,111,237,0.3) 7px 8px), linear-gradient(90deg, transparent 0 12%, rgba(214,51,42,0.6) 12% 14%, transparent 14%), #fbf8ef" }
 ];
+// The phone fills the strip behind its clock and battery with one solid colour (theme-color and the page background).
+// On Home that is the theme's colour along its top edge; elsewhere the app's usual cream.
+function setTopColor(onHome){
+  var c = "#f2f1ea";
+  if (onHome){ var id = themeId(); THEMES.forEach(function(t){ if (t.id === id) c = t.top; }); }
+  var m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.setAttribute("content", c);
+  document.documentElement.style.backgroundColor = c;
+  document.body.style.backgroundColor = c;
+}
 function themeId(){ return THEME_IDS.indexOf(profile.theme) >= 0 ? profile.theme : "lanes"; }
 function themeName(id){ var t = THEMES.filter(function(x){ return x.id === id; })[0]; return t ? t.name : "Classic Lanes"; }
 // Each theme's art, drawn in a stage that spans the phone: one picture pinned to the top (390 x 220)
@@ -4059,6 +4070,7 @@ function loadHomeFonts(){
 function applyHomeTheme(){
   var id = themeId();
   THEME_IDS.forEach(function(t){ document.body.classList.toggle("home-theme-" + t, t === id); });
+  if (document.body.classList.contains("on-home")) setTopColor(true);
   if (homeArtTheme !== id){ document.getElementById("home-stage").innerHTML = HOME_ART[id] || ""; homeArtTheme = id; }
   var nm = document.getElementById("hb-sheet-name");
   if (nm) nm.textContent = (profile.name || "").trim().split(/\s+/)[0] || "";
