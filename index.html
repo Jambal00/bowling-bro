@@ -251,6 +251,49 @@ body:not(.on-home) .preset-chip.selected, body:not(.on-home) .chart-range button
 body:not(.on-home) #view-history > .row { background: var(--chrome, rgba(255,255,255,0.14)); border-radius: 12px; padding: 4px; gap: 4px !important; }
 body:not(.on-home) #view-history > .row button { background: transparent; border-color: transparent; color: var(--page-ink); font-weight: 600; }
 body:not(.on-home) #view-history > .row button.primary { background: var(--nav); color: var(--nav-ink); }
+/* leagues: chips for two, a picker and a sheet for three or more */
+.lg-chips { display: flex; gap: 4px; overflow-x: auto; background: var(--chrome, rgba(255,255,255,0.55)); border-radius: 12px; padding: 4px; margin: 0 0 12px; scrollbar-width: none; }
+.lg-chips::-webkit-scrollbar { display: none; }
+.lg-chips button { flex: 1 0 auto; border: 0; background: transparent; padding: 9px 12px; border-radius: 9px; font-weight: 600; font-size: 14px; color: var(--page-ink, #1a1a1a); white-space: nowrap; }
+.lg-chips button.on { background: var(--nav, #2f6fed); color: var(--nav-ink, #fff); }
+.lg-picker { display: flex; align-items: center; gap: 10px; width: 100%; background: #fff; border: 1px solid rgba(0,0,0,0.12); border-radius: 12px; padding: 10px 14px; margin: 0 0 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); font: inherit; text-align: left; color: #1a1a1a; }
+.lg-picker .lbl { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: #6b6b6b; display: block; }
+.lg-picker b { font-size: 16px; display: block; }
+.lg-picker .chev { margin-left: auto; width: 9px; height: 9px; border-right: 2px solid #6b6b6b; border-bottom: 2px solid #6b6b6b; transform: rotate(45deg); margin-top: -4px; flex: 0 0 auto; }
+.lg-dots { display: flex; gap: 3px; flex: 0 0 auto; }
+.lg-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto; display: inline-block; }
+#league-sheet { position: fixed; inset: 0; z-index: 70; }
+.lg-scrim { position: absolute; inset: 0; background: rgba(0,0,0,0.42); }
+.lg-sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 86vh; overflow: auto; background: #fff; color: #1a1a1a; border-radius: 18px 18px 0 0; padding: 10px 16px calc(18px + env(safe-area-inset-bottom)); box-shadow: 0 -6px 20px rgba(0,0,0,0.2); max-width: 640px; margin: 0 auto; }
+.lg-sheet .grab { width: 40px; height: 5px; border-radius: 3px; background: #d8d5c8; margin: 0 auto 10px; }
+.lg-sheet h3 { margin: 2px 0 8px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: #6b6b6b; }
+.lg-sheet h4 { margin: 14px 0 4px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: #6b6b6b; font-weight: 600; }
+.lg-row { display: flex; align-items: center; gap: 12px; padding: 11px 4px; border-top: 1px solid #eee; font-size: 15px; }
+.lg-row:first-child { border-top: 0; }
+.lg-row.on { background: rgba(0,0,0,0.05); border-radius: 10px; border-top-color: transparent; }
+.lg-row .nm { flex: 1 1 auto; min-width: 0; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.lg-row .nm b { display: block; font-size: 15px; }
+.lg-row small { display: block; color: #6b6b6b; font-size: 12px; font-weight: 400; }
+.lg-row .r { margin-left: auto; font-weight: 700; font-size: 15px; text-align: right; white-space: nowrap; }
+.lg-tick { width: 24px; height: 24px; border-radius: 6px; border: 2px solid #bdb9ab; background: #fff; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; padding: 0; color: #fff; font-weight: 800; font-size: 14px; line-height: 1; }
+.lg-tick.on { background: var(--accent, #2f6fed); border-color: var(--accent, #2f6fed); color: var(--accent-ink, #fff); }
+.lg-tick.part { background: var(--accent, #2f6fed); border-color: var(--accent, #2f6fed); color: var(--accent-ink, #fff); opacity: 0.5; }
+.lg-sep { height: 1px; background: #d8d5c8; margin: 6px 0; }
+.lg-pick { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 4px; }
+.lg-pick .preset-chip { font-size: 14px; padding: 8px 13px; }
+.lg-note { font-size: 12px; color: #6b6b6b; margin: 4px 0 10px; line-height: 1.4; }
+.lg-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-top: 1px solid #eee; }
+.lg-item:first-child { border-top: 0; }
+.lg-item .lg-dot { margin-top: 6px; }
+.lg-item b { display: block; font-size: 15px; }
+.lg-item small { display: block; color: #6b6b6b; font-size: 12px; line-height: 1.35; }
+.lg-item .ed { margin-left: auto; background: none; border: 0; color: #2f6fed; font-size: 13px; font-weight: 600; padding: 2px 0 2px 8px; }
+.lg-form { border: 1px solid #e2e0d5; border-radius: 12px; padding: 12px; margin-top: 8px; background: #faf9f4; }
+.lg-form .chk { display: flex; align-items: center; gap: 8px; font-size: 14px; margin: 10px 0 4px; }
+.lg-form .chk input { width: auto; margin: 0; }
+.home-lg { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.home-lg b { font-weight: 700; }
+td.lg-cell { font-weight: 600; text-align: left; }
 body:not(.on-home) .report-tabs { border-bottom-color: rgba(255,255,255,0.28); }
 body:not(.on-home) .report-tabs button { color: var(--page-ink); opacity: 0.72; }
 body:not(.on-home) .report-tabs button.selected { color: var(--page-ink); opacity: 1; border-bottom-color: var(--nav); }
@@ -396,6 +439,15 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
     <div style="text-align:center;margin-top:14px;"><button class="small-link" id="wiz-skip">Skip setup for now</button></div>
   </div>
 </div>
+<div id="league-sheet" class="hidden" role="dialog" aria-modal="true" aria-labelledby="league-sheet-title">
+  <div class="lg-scrim" id="league-sheet-scrim"></div>
+  <div class="lg-sheet">
+    <div class="grab"></div>
+    <h3 id="league-sheet-title">Your leagues</h3>
+    <div id="league-sheet-body"></div>
+    <button class="primary full" id="league-sheet-done" style="margin-top:12px;">Done</button>
+  </div>
+</div>
 <div id="share-sheet" class="hidden" style="position:fixed;inset:0;background:#f2f1ea;z-index:55;overflow:auto;">
   <div style="max-width:420px;margin:0 auto;padding:18px 14px 30px;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -479,6 +531,11 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <div class="radio-row" role="radiogroup" aria-labelledby="setup-session-label">
         <label><input type="radio" name="setup-session-type" id="setup-type-league" value="league" checked /> League</label>
         <label><input type="radio" name="setup-session-type" id="setup-type-practice" value="practice" /> Practice</label>
+      </div>
+      <div id="setup-league-wrap" class="hidden">
+        <label id="setup-league-label">Which league?</label>
+        <div class="lg-pick" id="setup-league-pick" role="radiogroup" aria-labelledby="setup-league-label"></div>
+        <p class="lg-note" id="setup-league-note"></p>
       </div>
       <div id="setup-mode-wrap">
         <label id="setup-mode-label">How are you scoring tonight?</label>
@@ -756,6 +813,7 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <div><button class="full" id="history-tab-league">League</button></div>
       <div><button class="full" id="history-tab-practice">Practice</button></div>
     </div>
+    <div id="stats-leagues"></div>
     <div class="report-tabs" id="report-tabs" role="tablist">
       <button data-report-tab="summary" role="tab">Summary</button>
       <button data-report-tab="shots" role="tab">Shot Stats</button>
@@ -848,6 +906,7 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
 
   <!-- YOUR GOALS VIEW -->
   <div id="view-goals" class="hidden">
+    <div id="goals-leagues"></div>
     <p id="goals-summary" style="font-size:22px;font-weight:800;margin:2px 0 12px;"></p>
     <div class="card" id="goals-card">
       <h2>Scoring goals</h2>
@@ -861,6 +920,11 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
     <details class="card goal-set" id="goal-set">
       <summary><h2>Set your goals</h2><span class="goal-set-hint">Tap to open</span></summary>
       <p style="font-size:12px;color:#6b6b6b;margin:6px 0 10px;line-height:1.4;">Fill in the goals you want and leave the rest blank. Your goals also draw the goal lines and colours on Your Stats.</p>
+      <div id="goal-copy-wrap" class="hidden">
+        <label for="goal-copy">Copy goals from another league</label>
+        <select id="goal-copy"></select>
+        <p class="lg-note">Replaces this league's goals with a copy of the other league's. You can change them after.</p>
+      </div>
       <div id="goal-editor"></div>
       <button class="primary full" id="goal-save-btn" style="margin-top:8px;">Save goals</button>
       <p id="goals-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;"></p>
@@ -906,10 +970,13 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <h2>Where you bowl</h2>
       <label for="profile-homeCenter">Home center</label>
       <input type="text" id="profile-homeCenter" maxlength="80" />
-      <label for="profile-league">League</label>
-      <input type="text" id="profile-league" maxlength="80" />
-      <label for="profile-team">Team</label>
-      <input type="text" id="profile-team" maxlength="80" />
+    </div>
+    <div class="card" id="leagues-card">
+      <h2>Your leagues</h2>
+      <div id="leagues-list"></div>
+      <div id="league-form-holder"></div>
+      <button class="full" id="league-add-btn" style="margin-top:10px;">Add a league</button>
+      <p class="lg-note" id="leagues-note"></p>
     </div>
     <button class="primary full" id="profile-save-btn">Save profile</button>
     <p id="profile-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0;min-height:15px;"></p>
@@ -984,6 +1051,8 @@ var returnView = null;
 function setPlaceLabel(viewName){
   var scoring = viewName === "game" || viewName === "scores" || viewName === "photo";
   var text = scoring && state.center ? state.center + (state.lanes ? " · Lanes " + state.lanes : "") : "Bowling Bro'";
+  // with two or more leagues, the league goes first so a pre-bowl night can't land in the wrong one unnoticed
+  if (scoring && profile && multiLeague() && sessionType() === "league") text = leagueShort(sessionLeague()) + (state.lanes ? " · Lanes " + state.lanes : (state.center ? " · " + state.center : ""));
   document.getElementById("place-label").textContent = text;
   document.getElementById("place-label").parentNode.classList.toggle("brand", text === "Bowling Bro'");
 }
@@ -1838,13 +1907,16 @@ function startCloud(){
     applyCloudGear(snap.data());
     saveState();
     fillProfileInputs();
+    if (!leagueEdit) renderLeaguesCard();
+    renderSetupLeagues();
     renderHistory();
   }, function(){ cloud.profileDoc = null; });
   cloud.goalsDoc = sbSingleDoc("bb_goals", uid);
   cloud.goalsDoc.onSnapshot(function(snap){
     if (!snap.exists) return;
-    SEASON_GOALS = cleanGoals(snap.data());
-    state.goals = SEASON_GOALS;
+    loadGoals(snap.data());
+    useGoalsLeague(goalsLeague);
+    state.goals = goalsBody();
     saveState();
     fillGoalInputs();
     renderHistory();
@@ -1942,11 +2014,119 @@ function initCloud(){
 // League nights and practice sessions are saved the same way but reported separately.
 function sessionType(){ return state.sessionType === "practice" ? "practice" : "league"; }
 function seriesType(h){ return h && h.type === "practice" ? "practice" : "league"; }
+// ---------- leagues ----------
+// A league is "this league, this season". Every league night carries the id of its league;
+// nights saved before leagues existed (or by an older copy of the app) belong to the first one.
+// A bowler with a single league never sees any of this: every league control stays hidden.
+var LEAGUE_COLORS = ["#2f6fed", "#e07a1f", "#2a9d8f", "#b5179e", "#6a4c93", "#c9a227", "#d6332a", "#3a86a8"];
+function cleanLeagues(src, prof){
+  var out = [], seen = {};
+  (Array.isArray(src) ? src : []).forEach(function(l){
+    if (!l || typeof l !== "object" || out.length >= 12) return;
+    var id = typeof l.id === "string" ? l.id.slice(0, 40) : "";
+    if (!id || seen[id]) return;
+    seen[id] = true;
+    function s(k, n){ return typeof l[k] === "string" ? l[k].trim().slice(0, n || 80) : ""; }
+    out.push({ id: id, name: s("name") || "My league", season: s("season", 40), center: s("center"), team: s("team"), status: l.status === "finished" ? "finished" : "active" });
+  });
+  // everyone has at least one league: the one their profile always described
+  if (!out.length) out.push({ id: "lg-1", name: (prof && prof.league) || "My league", season: "", center: (prof && prof.homeCenter) || "", team: (prof && prof.team) || "", status: "active" });
+  return out;
+}
+function leagues(){ return profile.leagues; }
+function activeLeagues(){ var a = leagues().filter(function(l){ return l.status !== "finished"; }); return a.length ? a : leagues().slice(0, 1); }
+function leagueById(id){ return leagues().filter(function(l){ return l.id === id; })[0] || null; }
+function multiLeague(){ return leagues().length > 1; }
+function leagueOf(h){
+  if (seriesType(h) !== "league") return null;
+  return (h && leagueById(h.leagueId)) ? h.leagueId : leagues()[0].id;
+}
+function leagueColor(id){ var i = leagues().map(function(l){ return l.id; }).indexOf(id); return LEAGUE_COLORS[(i < 0 ? 0 : i) % LEAGUE_COLORS.length]; }
+// short label for chips and table cells: the first word of the name, unless another league shares it
+function leagueShort(id){
+  var l = leagueById(id); if (!l) return "";
+  var first = function(n){ return String(n || "").split(/\s+/)[0]; };
+  var w = first(l.name), clash = leagues().some(function(o){ return o.id !== l.id && first(o.name).toLowerCase() === w.toLowerCase(); });
+  return (clash || w.length < 3) ? l.name : w;
+}
+function leagueLabel(id){ var l = leagueById(id); return l ? l.name + (l.season ? " · " + l.season : "") : ""; }
+// the league most recently bowled (among active ones), for Bowl's default and Your Stats' first view
+function lastLeagueId(){
+  var act = activeLeagues().map(function(l){ return l.id; }), best = null, when = "";
+  allSeries().forEach(function(it){
+    var id = leagueOf(it.h);
+    if (id && act.indexOf(id) >= 0 && (it.h.savedAt || "") >= when){ when = it.h.savedAt || ""; best = id; }
+  });
+  return best || act[0];
+}
+// the league tonight's night is filed under
+function sessionLeague(){
+  var l = leagueById(state.sessionLeague);
+  return (l && l.status !== "finished") ? l.id : lastLeagueId();
+}
+function sessionLeagueField(){
+  if (sessionType() !== "league") return undefined;
+  state.sessionLeague = sessionLeague();   // pinned once the night's first save happens
+  return state.sessionLeague;
+}
+// Your Stats: which leagues are counted (any combination; one league = goals and rank are shown)
+function statsSel(){
+  var sel = (state.statsSel || []).filter(function(id){ return !!leagueById(id); });
+  return sel.length ? sel : [lastLeagueId()];
+}
+function statsSingle(){ var s = statsSel(); return s.length === 1 ? s[0] : null; }
+function setStatsSel(ids){ state.statsSel = ids.slice(); saveState(); }
+function inStatsSel(h){ return statsSel().indexOf(leagueOf(h)) >= 0; }
+// the nights on the report right now: practice, or the league nights in the selection
+function reportItems(list){
+  return (list || allSeries()).filter(function(it){
+    if (seriesType(it.h) !== historyTab) return false;
+    return historyTab === "practice" || inStatsSel(it.h);
+  });
+}
+// what the selection is called: one league's name, "All leagues", or "Thursday + Sunday"
+function selName(){
+  var sel = statsSel();
+  if (sel.length === 1) return (leagueById(sel[0]) || {}).name || "";
+  if (sel.length === leagues().length) return "All leagues";
+  return sel.map(leagueShort).join(" + ");
+}
+// tonight's name on the scoring screens: "League night", or the league's name once there are two
+function nightLeagueName(){ return multiLeague() ? leagueById(sessionLeague()).name : "League night"; }
+function leagueNights(id){ return allSeries().filter(function(it){ return leagueOf(it.h) === id; }); }
 function applySessionType(){
   var practice = sessionType() === "practice";
   document.getElementById("setup-type-league").checked = !practice;
   document.getElementById("setup-type-practice").checked = practice;
   document.getElementById("save-history-btn").textContent = practice ? "Save to practice log" : "Save to season history";
+  renderSetupLeagues();
+}
+// Bowl: "Which league?" only when two or more leagues are active. Defaults to the league bowled
+// last, never to the day of the week (a pre-bowl night is bowled on another day).
+function renderSetupLeagues(){
+  var wrap = document.getElementById("setup-league-wrap");
+  if (!wrap || !profile) return;
+  var act = activeLeagues(), show = sessionType() === "league" && act.length > 1;
+  wrap.classList.toggle("hidden", !show);
+  if (!show) return;
+  var cur = sessionLeague(), pick = document.getElementById("setup-league-pick");
+  pick.innerHTML = "";
+  act.forEach(function(l){
+    var b = document.createElement("button"); b.type = "button";
+    b.className = "preset-chip" + (l.id === cur ? " selected" : "");
+    b.setAttribute("role", "radio"); b.setAttribute("aria-checked", l.id === cur ? "true" : "false");
+    b.textContent = l.name;
+    b.addEventListener("click", function(){
+      state.sessionLeague = l.id;
+      if (l.center){ state.center = l.center; document.getElementById("setup-center").value = l.center; }
+      saveState(); renderSetupLeagues();
+    });
+    pick.appendChild(b);
+  });
+  var last = lastLeagueId(), lastDate = null;
+  allSeries().forEach(function(it){ if (leagueOf(it.h) === last && (!lastDate || (it.h.savedAt || "") >= lastDate.at)) lastDate = { at: it.h.savedAt || "", d: String(it.h.date || "").replace(/\/\d{4}$/, "") }; });
+  document.getElementById("setup-league-note").textContent = (lastDate ? "Last bowled: " + leagueById(last).name + ", " + lastDate.d + ". " : "")
+    + "Pick the league you're bowling for, even when you pre-bowl on another night.";
 }
 ["setup-type-league", "setup-type-practice"].forEach(function(id){ document.getElementById(id).addEventListener("change", sessionTypeChanged); });
 function sessionTypeChanged(e){
@@ -1970,6 +2150,7 @@ function buildSeriesDoc(){
     schema: 1,
     id: state.savedSeriesId,
     type: sessionType(),
+    leagueId: sessionLeagueField(),
     savedAt: new Date().toISOString(),
     date: new Date().toLocaleDateString(),
     center: state.center, lanes: state.lanes,
@@ -1998,7 +2179,7 @@ function nightDoc(){
   // a night entered for an earlier date files under that date; tonight keeps the current time
   var when = n.date === todayIso() ? new Date() : new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 0, 0);
   return {
-    schema: 1, id: n.id, type: sessionType(),
+    schema: 1, id: n.id, type: sessionType(), leagueId: sessionLeagueField(),
     savedAt: when.toISOString(),
     date: Number(parts[1]) + "/" + Number(parts[2]) + "/" + parts[0],
     center: state.center, lanes: state.lanes,
@@ -2043,7 +2224,7 @@ function showNight(){
 function renderNight(){
   var n = state.night, practice = sessionType() === "practice";
   document.getElementById("night-title").textContent = practice ? "Practice scores" : "Tonight's scores";
-  document.getElementById("night-sub").textContent = [practice ? "Practice session" : "League night", state.center, state.lanes ? "Lanes " + state.lanes : ""].filter(Boolean).join(" · ");
+  document.getElementById("night-sub").textContent = [practice ? "Practice session" : nightLeagueName(), state.center, state.lanes ? "Lanes " + state.lanes : ""].filter(Boolean).join(" · ");
   var dateEl = document.getElementById("night-date");
   dateEl.max = todayIso(); dateEl.value = n.date;
   var list = document.getElementById("night-games"); list.innerHTML = "";
@@ -2103,7 +2284,7 @@ document.getElementById("night-done-btn").addEventListener("click", function(){
   // everything is already saved; clear tonight and show where it landed
   var wasPractice = sessionType() === "practice";
   state.night = null; state.lanes = "";
-  state.sessionType = "league";   // the next night starts on League again
+  state.sessionType = "league"; state.sessionLeague = null;   // the next night starts on League again
   applySessionType();
   document.getElementById("setup-lanes").value = "";
   returnView = null;
@@ -2138,7 +2319,7 @@ function showPhoto(){
 function renderPhoto(){
   var n = state.photoNight, practice = sessionType() === "practice";
   document.getElementById("photo-title").textContent = practice ? "Practice games" : "Tonight's games";
-  document.getElementById("photo-sub").textContent = [practice ? "Practice session" : "League night", state.center, state.lanes ? "Lanes " + state.lanes : ""].filter(Boolean).join(" · ");
+  document.getElementById("photo-sub").textContent = [practice ? "Practice session" : nightLeagueName(), state.center, state.lanes ? "Lanes " + state.lanes : ""].filter(Boolean).join(" · ");
   var dateEl = document.getElementById("photo-date");
   dateEl.max = todayIso(); dateEl.value = n.date;
   var list = document.getElementById("photo-games"); list.innerHTML = "";
@@ -2173,7 +2354,7 @@ function photoNightDoc(){
   var n = state.photoNight, parts = n.date.split("-"), agg = aggregateStats(n.games);
   var when = n.date === todayIso() ? new Date() : new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 23, 0, 0);
   return {
-    schema: 1, id: n.id, type: sessionType(), source: "photo",
+    schema: 1, id: n.id, type: sessionType(), leagueId: sessionLeagueField(), source: "photo",
     savedAt: when.toISOString(),
     date: Number(parts[1]) + "/" + Number(parts[2]) + "/" + parts[0],
     center: state.center, lanes: state.lanes,
@@ -2223,7 +2404,7 @@ document.getElementById("photo-date").addEventListener("change", function(e){
 document.getElementById("photo-done-btn").addEventListener("click", function(){
   var wasPractice = sessionType() === "practice";
   state.photoNight = null; state.lanes = "";
-  state.sessionType = "league";
+  state.sessionType = "league"; state.sessionLeague = null;
   applySessionType();
   document.getElementById("setup-lanes").value = "";
   returnView = null;
@@ -2606,7 +2787,7 @@ document.getElementById("save-history-btn").addEventListener("click", function()
   });
 });
 function resetSeries(){
-  state.sessionType = "league";   // every new night starts on League; Practice is chosen each time
+  state.sessionType = "league"; state.sessionLeague = null;   // every new night starts on League; Practice is chosen each time
   applySessionType();
   state.night = null;
   state.photoNight = null;
@@ -2759,10 +2940,11 @@ function renderHistory(){
   var statusEl = document.getElementById("history-status");
   var everything = allSeries();
   var practiceTab = historyTab === "practice";
-  var items = everything.filter(function(it){ return seriesType(it.h) === historyTab; });
+  var items = reportItems(everything);
   document.getElementById("history-tab-league").className = "full" + (practiceTab ? "" : " primary");
   document.getElementById("history-tab-practice").className = "full" + (practiceTab ? " primary" : "");
-  document.getElementById("history-list-title").textContent = practiceTab ? "Practice sessions" : "Season history";
+  document.getElementById("history-list-title").textContent = practiceTab ? "Practice sessions" : (multiLeague() ? selName() : "Season history");
+  renderStatsLeagues();
   el.innerHTML = "";
   statusEl.textContent = !cloud.ready ? "Loading your saved series…"
     : cloud.col ? "Saved to your account — available on any device you sign in on."
@@ -2783,6 +2965,264 @@ function renderHistory(){
   renderGoalsPage();
   if (!document.getElementById("view-home").classList.contains("hidden")) renderHome();
 }
+// ---------- choosing leagues on Your Stats and Your Goals ----------
+// Two leagues: chips (each league, All leagues, Practice). Three or more: League | Practice stays,
+// with a picker under it that opens a sheet; on Your Stats the sheet takes any combination of leagues.
+function lgChips(holder, list){
+  var c = document.createElement("div"); c.className = "lg-chips"; c.setAttribute("role", "tablist");
+  list.forEach(function(ch){
+    var b = document.createElement("button"); b.type = "button"; b.textContent = ch.label;
+    b.className = ch.on ? "on" : ""; b.setAttribute("role", "tab"); b.setAttribute("aria-selected", ch.on ? "true" : "false");
+    b.addEventListener("click", ch.pick);
+    c.appendChild(b);
+  });
+  holder.appendChild(c);
+}
+function lgPickerButton(holder, ids, label, name, onClick){
+  var b = document.createElement("button"); b.type = "button"; b.className = "lg-picker";
+  var dots = document.createElement("span"); dots.className = "lg-dots";
+  ids.slice(0, 5).forEach(function(id){ var d = document.createElement("span"); d.className = "lg-dot"; d.style.background = leagueColor(id); dots.appendChild(d); });
+  var t = document.createElement("span"), l = document.createElement("span"), n = document.createElement("b");
+  l.className = "lbl"; l.textContent = label; n.textContent = name;
+  t.appendChild(l); t.appendChild(n);
+  var ch = document.createElement("span"); ch.className = "chev";
+  b.appendChild(dots); b.appendChild(t); b.appendChild(ch);
+  b.addEventListener("click", onClick);
+  holder.appendChild(b);
+}
+function renderStatsLeagues(){
+  var holder = document.getElementById("stats-leagues"), row = document.querySelector("#view-history > .row");
+  holder.innerHTML = "";
+  var all = leagues(), ids = all.map(function(l){ return l.id; }), practice = historyTab === "practice", sel = statsSel();
+  row.classList.toggle("hidden", all.length === 2);
+  if (all.length < 2) return;
+  if (all.length === 2){
+    var chips = all.map(function(l){
+      return { label: leagueShort(l.id), on: !practice && sel.length === 1 && sel[0] === l.id, pick: function(){ setStatsSel([l.id]); setHistoryTab("league"); } };
+    });
+    chips.push({ label: "All leagues", on: !practice && sel.length === 2, pick: function(){ setStatsSel(ids); setHistoryTab("league"); } });
+    chips.push({ label: "Practice", on: practice, pick: function(){ setHistoryTab("practice"); } });
+    lgChips(holder, chips);
+    return;
+  }
+  if (practice) return;
+  lgPickerButton(holder, sel, sel.length === 1 ? "League" : "Leagues", selName(), function(){
+    openLeagueSheet({ multi: true, selected: sel, onPick: function(picked){ setStatsSel(picked); setHistoryTab("league"); } });
+  });
+}
+function renderGoalsLeagues(){
+  var holder = document.getElementById("goals-leagues"); if (!holder) return;
+  holder.innerHTML = "";
+  var all = leagues(), cur = goalsLeague;
+  function pick(id){ goalsPicked = true; useGoalsLeague(id); document.getElementById("goals-status").textContent = ""; renderGoalsPage(); fillGoalInputs(true); }
+  if (all.length === 2) lgChips(holder, all.map(function(l){ return { label: leagueShort(l.id), on: l.id === cur, pick: function(){ pick(l.id); } }; }));
+  else if (all.length > 2) lgPickerButton(holder, [cur], "Goals for", leagueById(cur).name, function(){
+    openLeagueSheet({ multi: false, selected: [cur], onPick: function(p){ pick(p[0]); } });
+  });
+  // copy another league's goals into this one
+  var wrap = document.getElementById("goal-copy-wrap"), selEl = document.getElementById("goal-copy");
+  wrap.classList.toggle("hidden", all.length < 2);
+  if (all.length < 2 || document.activeElement === selEl) return;
+  selEl.innerHTML = "";
+  var o0 = document.createElement("option"); o0.value = ""; o0.textContent = "Choose a league…"; selEl.appendChild(o0);
+  all.forEach(function(l){
+    if (l.id === cur) return;
+    var n = goalsFor(l.id).length, o = document.createElement("option");
+    o.value = l.id; o.textContent = leagueLabel(l.id) + " (" + (n ? plural(n, "goal") : "no goals") + ")"; o.disabled = !n;
+    selEl.appendChild(o);
+  });
+}
+document.getElementById("goal-copy").addEventListener("change", function(e){
+  var from = e.target.value; if (!from || !leagueById(from)) return;
+  var copy = JSON.parse(JSON.stringify(goalsFor(from)));
+  SEASON_GOALS.length = 0;   // in place: the editor and GOALS_BY share this list
+  copy.forEach(function(g){ SEASON_GOALS.push(g); });
+  e.target.value = "";
+  persistGoals(); fillGoalInputs(true);
+  document.getElementById("goals-status").textContent = "Copied " + plural(copy.length, "goal") + " from " + leagueById(from).name + ".";
+});
+// The sheet: every active league with its average, then All leagues (Your Stats only), then past seasons.
+// A tick box adds or drops a league; tapping a league's name means "only this one".
+var lgSheet = null;
+function openLeagueSheet(opts){
+  lgSheet = { multi: !!opts.multi, work: opts.selected.slice(), onPick: opts.onPick };
+  renderLeagueSheet();
+  document.getElementById("league-sheet").classList.remove("hidden");
+}
+function closeLeagueSheet(){ document.getElementById("league-sheet").classList.add("hidden"); lgSheet = null; }
+function finishLeagueSheet(ids){ var cb = lgSheet && lgSheet.onPick; closeLeagueSheet(); if (cb && ids.length) cb(ids); }
+function renderLeagueSheet(){
+  var body = document.getElementById("league-sheet-body"), S = lgSheet; if (!S) return;
+  body.innerHTML = "";
+  var all = leagues(), ids = all.map(function(l){ return l.id; });
+  document.getElementById("league-sheet-title").textContent = S.multi ? "Count these leagues" : "Your leagues";
+  document.getElementById("league-sheet-done").classList.toggle("hidden", !S.multi);
+  function tick(state, onTap, label){
+    var t = document.createElement("button"); t.type = "button"; t.className = "lg-tick" + (state === "on" ? " on" : (state === "part" ? " part" : ""));
+    t.setAttribute("role", "checkbox"); t.setAttribute("aria-checked", state === "on" ? "true" : (state === "part" ? "mixed" : "false"));
+    t.setAttribute("aria-label", label); t.textContent = state === "on" ? "✓" : (state === "part" ? "–" : "");
+    t.addEventListener("click", onTap);
+    return t;
+  }
+  function row(l, holder){
+    var on = S.work.indexOf(l.id) >= 0, st = seasonStats(leagueNights(l.id));
+    var r = document.createElement("div"); r.className = "lg-row" + (on ? " on" : "");
+    if (S.multi) r.appendChild(tick(on ? "on" : "", function(){
+      if (on){ if (S.work.length > 1) S.work = S.work.filter(function(x){ return x !== l.id; }); }
+      else S.work = ids.filter(function(x){ return x === l.id || S.work.indexOf(x) >= 0; });
+      renderLeagueSheet();
+    }, "Count " + l.name));
+    var d = document.createElement("span"); d.className = "lg-dot"; d.style.background = leagueColor(l.id); r.appendChild(d);
+    var nm = document.createElement("button"); nm.type = "button"; nm.className = "nm";
+    var b = document.createElement("b"); b.textContent = l.name; nm.appendChild(b);
+    var sm = document.createElement("small"); sm.textContent = [l.season, l.center].filter(Boolean).join(" · ") || (l.status === "finished" ? "Finished" : "Active"); nm.appendChild(sm);
+    nm.addEventListener("click", function(){ finishLeagueSheet([l.id]); });
+    r.appendChild(nm);
+    var rr = document.createElement("span"); rr.className = "r";
+    rr.textContent = st.games.length ? st.avg.toFixed(1) : "—";
+    var rs = document.createElement("small"); rs.textContent = st.games.length ? "avg · " + plural(st.games.length, "game") : "no games yet"; rr.appendChild(rs);
+    r.appendChild(rr);
+    holder.appendChild(r);
+  }
+  var act = all.filter(function(l){ return l.status !== "finished"; }), past = all.filter(function(l){ return l.status === "finished"; });
+  var g1 = document.createElement("div"); act.forEach(function(l){ row(l, g1); }); body.appendChild(g1);
+  if (S.multi){
+    body.appendChild(Object.assign(document.createElement("div"), { className: "lg-sep" }));
+    var allOn = S.work.length === ids.length, st = seasonStats(allSeries().filter(function(it){ return seriesType(it.h) === "league"; }));
+    var r = document.createElement("div"); r.className = "lg-row" + (allOn ? " on" : "");
+    r.appendChild(tick(allOn ? "on" : (S.work.length > 1 ? "part" : ""), function(){ S.work = ids.slice(); renderLeagueSheet(); }, "Count all leagues"));
+    var nm = document.createElement("button"); nm.type = "button"; nm.className = "nm";
+    nm.innerHTML = "<b>All leagues</b><small>Combined average, high game, high series</small>";
+    nm.addEventListener("click", function(){ finishLeagueSheet(ids.slice()); });
+    r.appendChild(nm);
+    var rr = document.createElement("span"); rr.className = "r"; rr.textContent = st.games.length ? st.avg.toFixed(1) : "—";
+    var rs = document.createElement("small"); rs.textContent = st.games.length ? "avg · " + plural(st.games.length, "game") : ""; rr.appendChild(rs);
+    r.appendChild(rr);
+    body.appendChild(r);
+  }
+  if (past.length){
+    var h = document.createElement("h4"); h.textContent = "Past seasons"; body.appendChild(h);
+    var g2 = document.createElement("div"); past.forEach(function(l){ row(l, g2); }); body.appendChild(g2);
+  }
+}
+document.getElementById("league-sheet-scrim").addEventListener("click", closeLeagueSheet);
+document.getElementById("league-sheet-done").addEventListener("click", function(){ if (lgSheet) finishLeagueSheet(lgSheet.work.slice()); });
+document.addEventListener("keydown", function(e){ if (e.key === "Escape" && lgSheet) closeLeagueSheet(); });
+
+// ---------- Profile: Your leagues ----------
+// Add, edit, mark a season finished, or remove a league that has no nights yet.
+var leagueEdit = null;   // the id being edited, or "new"
+function saveProfileNow(done){
+  profile.leagues = cleanLeagues(profile.leagues, profile);
+  syncLegacyLeague(profile);
+  state.profile = profile;
+  saveState();
+  var statusEl = document.getElementById("profile-status");
+  if (!cloud.profileDoc){ statusEl.textContent = done + " Saved on this device only."; return; }
+  var body = profileDocBody();
+  profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(function(){
+    statusEl.textContent = done;
+  }, function(){ statusEl.textContent = done + " Saved on this device, but couldn't sync to your account just now."; });
+}
+function renderLeaguesCard(){
+  var list = document.getElementById("leagues-list"); if (!list) return;
+  list.innerHTML = "";
+  var all = leagues(), act = all.filter(function(l){ return l.status !== "finished"; }), past = all.filter(function(l){ return l.status === "finished"; });
+  function item(l, holder){
+    var r = document.createElement("div"); r.className = "lg-item";
+    var d = document.createElement("span"); d.className = "lg-dot"; d.style.background = leagueColor(l.id); r.appendChild(d);
+    var t = document.createElement("div"), b = document.createElement("b"), sm = document.createElement("small");
+    b.textContent = l.name;
+    var n = leagueNights(l.id).length;
+    sm.textContent = [l.season, l.center, l.team ? "Team: " + l.team : ""].filter(Boolean).join(" · ") || "No details yet";
+    var sm2 = document.createElement("small"); sm2.textContent = n ? plural(n, "night") + " bowled" : "No nights yet";
+    t.appendChild(b); t.appendChild(sm); t.appendChild(sm2); r.appendChild(t);
+    var ed = document.createElement("button"); ed.type = "button"; ed.className = "ed"; ed.textContent = leagueEdit === l.id ? "Close" : "Edit";
+    ed.setAttribute("aria-label", "Edit " + l.name);
+    ed.addEventListener("click", function(){ leagueEdit = leagueEdit === l.id ? null : l.id; renderLeaguesCard(); });
+    r.appendChild(ed);
+    holder.appendChild(r);
+    if (leagueEdit === l.id) holder.appendChild(leagueForm(l));
+  }
+  act.forEach(function(l){ item(l, list); });
+  if (past.length){
+    var h = document.createElement("p"); h.className = "lg-note"; h.style.cssText = "margin:12px 0 0;font-weight:600;"; h.textContent = "Past leagues"; list.appendChild(h);
+    past.forEach(function(l){ item(l, list); });
+  }
+  var formHolder = document.getElementById("league-form-holder"); formHolder.innerHTML = "";
+  if (leagueEdit === "new") formHolder.appendChild(leagueForm(null));
+  document.getElementById("league-add-btn").classList.toggle("hidden", leagueEdit === "new" || all.length >= 12);
+  document.getElementById("leagues-note").textContent = all.length < 2
+    ? "Bowl in more than one league? Add it here. A new season is a new league: mark the old one finished and its stats stay."
+    : "Finished leagues keep their stats and move to Past leagues. A new season is a new league.";
+}
+function leagueForm(l){
+  var f = document.createElement("div"); f.className = "lg-form";
+  var isNew = !l, src = l || { name: "", season: "", center: state.center || profile.homeCenter || "", team: "", status: "active" };
+  function field(key, label, ph){
+    var lb = document.createElement("label"), inp = document.createElement("input");
+    var id = "lg-f-" + key; lb.setAttribute("for", id); lb.textContent = label;
+    inp.type = "text"; inp.id = id; inp.maxLength = key === "season" ? 40 : 80; inp.value = src[key] || ""; if (ph) inp.placeholder = ph;
+    f.appendChild(lb); f.appendChild(inp);
+    return inp;
+  }
+  var name = field("name", "League name", "e.g. Thursday Night Men's"), season = field("season", "Season", "e.g. 2026–27");
+  var center = field("center", "Bowling center"), team = field("team", "Team");
+  var fin = null;
+  if (!isNew){
+    var ck = document.createElement("label"); ck.className = "chk";
+    fin = document.createElement("input"); fin.type = "checkbox"; fin.checked = src.status === "finished";
+    ck.appendChild(fin); ck.appendChild(document.createTextNode("Season finished (moves to Past leagues)"));
+    f.appendChild(ck);
+  }
+  var msg = document.createElement("p"); msg.className = "lg-note"; msg.style.minHeight = "15px"; f.appendChild(msg);
+  var btns = document.createElement("div"); btns.className = "row";
+  var save = document.createElement("button"); save.type = "button"; save.className = "primary full"; save.textContent = isNew ? "Add league" : "Save";
+  var cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "full"; cancel.textContent = "Cancel";
+  save.addEventListener("click", function(){
+    var nm = name.value.trim();
+    if (!nm){ msg.textContent = "Give the league a name."; name.focus(); return; }
+    var target = l;
+    if (isNew){ target = { id: "lg-" + Date.now().toString(36), status: "active" }; profile.leagues.push(target); }
+    target.name = nm; target.season = season.value.trim(); target.center = center.value.trim(); target.team = team.value.trim();
+    if (fin) target.status = fin.checked ? "finished" : "active";
+    leagueEdit = null;
+    saveProfileNow(isNew ? "League added." : "League saved.");
+    afterLeaguesChanged();
+  });
+  cancel.addEventListener("click", function(){ leagueEdit = null; renderLeaguesCard(); });
+  [save, cancel].forEach(function(b){ var w = document.createElement("div"); w.appendChild(b); btns.appendChild(w); });
+  f.appendChild(btns);
+  // a league can be removed only while it has no nights (they'd have nowhere to go)
+  if (!isNew && leagues().length > 1){
+    var n = leagueNights(l.id).length;
+    var rm = document.createElement("button"); rm.type = "button"; rm.className = "full"; rm.style.cssText = "margin-top:8px;color:#a33;";
+    rm.textContent = "Remove this league";
+    if (n){ rm.disabled = true; rm.style.opacity = "0.5"; }
+    var armed = false;
+    rm.addEventListener("click", function(){
+      if (!armed){ armed = true; rm.textContent = "Tap again to remove"; return; }
+      profile.leagues = profile.leagues.filter(function(x){ return x.id !== l.id; });
+      delete GOALS_BY[l.id];
+      leagueEdit = null;
+      saveProfileNow("League removed.");
+      afterLeaguesChanged();
+    });
+    f.appendChild(rm);
+    if (n){ var why = document.createElement("p"); why.className = "lg-note"; why.textContent = "It has " + plural(n, "night") + ". Move them to another league from Your Stats › History first, or mark the season finished."; f.appendChild(why); }
+  }
+  setTimeout(function(){ if (isNew) name.focus(); }, 0);
+  return f;
+}
+document.getElementById("league-add-btn").addEventListener("click", function(){ leagueEdit = "new"; renderLeaguesCard(); });
+function afterLeaguesChanged(){
+  if (!leagueById(state.sessionLeague)) state.sessionLeague = null;
+  state.statsSel = (state.statsSel || []).filter(function(id){ return !!leagueById(id); });
+  saveState();
+  renderLeaguesCard();
+  renderSetupLeagues();
+  renderHistory();
+}
 // ---------- profile ----------
 // Kept in the signed-in viewer's private area, so each person who uses the app has their own.
 var PROFILE_KEYS = ["name", "email", "hand", "homeCenter", "league", "team", "theme"];
@@ -2792,7 +3232,15 @@ function cleanProfile(src){
   PROFILE_KEYS.forEach(function(k){ out[k] = (src && typeof src[k] === "string") ? src[k].slice(0, 120) : ""; });
   if (["right", "left", "two"].indexOf(out.hand) < 0) out.hand = "right";   // right-handed unless the bowler says otherwise
   if (THEME_IDS.indexOf(out.theme) < 0) out.theme = "lanes";                 // Classic Lanes unless the bowler picks another
+  out.leagues = cleanLeagues(src && src.leagues, out);
+  syncLegacyLeague(out);
   return out;
+}
+// older copies of the app (and the share header) read one league and team: keep them matching the first league
+function syncLegacyLeague(p){
+  var first = p.leagues[0];
+  p.league = first.name === "My league" ? (p.league || "") : first.name;
+  p.team = first.team;
 }
 var profile = cleanProfile(state.profile);
 function fillProfileInputs(){
@@ -2816,6 +3264,7 @@ function goToView(name){
 function openProfile(){
   document.getElementById("profile-status").textContent = "";
   fillProfileInputs();
+  leagueEdit = null; renderLeaguesCard();
   renderThemePicker();
   document.getElementById("profile-auth-btn").textContent = document.getElementById("menu-auth-btn").textContent;
   document.getElementById("profile-install-btn").parentNode.classList.toggle("hidden", document.getElementById("menu-install-btn").classList.contains("hidden"));
@@ -3072,6 +3521,7 @@ document.getElementById("wizard-rerun-btn").addEventListener("click", function()
 document.getElementById("profile-save-btn").addEventListener("click", function(){
   var next = {};
   PROFILE_KEYS.forEach(function(k){ var el = document.getElementById("profile-" + k); next[k] = el ? el.value.trim() : profile[k]; });
+  next.leagues = profile.leagues;
   profile = cleanProfile(next);
   state.profile = profile;
   saveState();
@@ -3120,21 +3570,23 @@ GOAL_PRESETS.forEach(function(grp){ grp.items.forEach(function(it){ PRESET_TYPES
 // everything else is a "custom" goal that takes a score as well as a target
 var CUSTOM_TYPE_KEYS = Object.keys(GOAL_TYPES).filter(function(k){ return PRESET_TYPES.indexOf(k) < 0; });
 function isCustomGoal(g){ return PRESET_TYPES.indexOf(g.type) < 0; }
-function presetGoal(type){ for (var i = 0; i < SEASON_GOALS.length; i++){ if (SEASON_GOALS[i].type === type) return SEASON_GOALS[i]; } return null; }
+function presetGoal(type, list){ list = list || SEASON_GOALS; for (var i = 0; i < list.length; i++){ if (list[i].type === type) return list[i]; } return null; }
 // Two families of goal. Scoring goals are the big-picture ones (average, high game, high series
 // and the custom score-based goals); shot goals are the detailed ones that need frame-by-frame games.
 var SHOT_TYPES = [];
 GOAL_PRESETS.forEach(function(grp){ if (grp.shots) grp.items.forEach(function(it){ SHOT_TYPES.push(it.type); }); });
 function isShotGoal(g){ return SHOT_TYPES.indexOf(g.type) >= 0; }
-function scoringGoals(){
+function scoringGoals(list){
+  list = list || SEASON_GOALS;
   var out = [];
-  PRESET_TYPES.forEach(function(t){ var g = presetGoal(t); if (g && !isShotGoal(g)) out.push(g); });
-  SEASON_GOALS.forEach(function(g){ if (isCustomGoal(g)) out.push(g); });
+  PRESET_TYPES.forEach(function(t){ var g = presetGoal(t, list); if (g && !isShotGoal(g)) out.push(g); });
+  list.forEach(function(g){ if (isCustomGoal(g)) out.push(g); });
   return out;
 }
-function shotGoals(){
+function shotGoals(list){
+  list = list || SEASON_GOALS;
   var out = [];
-  SHOT_TYPES.forEach(function(t){ var g = presetGoal(t); if (g) out.push(g); });
+  SHOT_TYPES.forEach(function(t){ var g = presetGoal(t, list); if (g) out.push(g); });
   return out;
 }
 var GOAL_TYPE_KEYS = Object.keys(GOAL_TYPES);
@@ -3170,31 +3622,71 @@ function cleanGoals(src){
   });
   return out;
 }
-var SEASON_GOALS = cleanGoals(state.goals);
-function goalAverage(){
-  for (var i = 0; i < SEASON_GOALS.length; i++){ if (SEASON_GOALS[i].type === "avg") return SEASON_GOALS[i].target; }
+// Goals belong to a league. GOALS_BY holds each league's list; a list saved before leagues
+// existed (LEGACY_GOALS) becomes the first league's goals.
+var GOALS_BY = {}, LEGACY_GOALS = [];
+function loadGoals(src){
+  GOALS_BY = {};
+  var by = src && src.byLeague;
+  if (by && typeof by === "object" && !Array.isArray(by)){
+    Object.keys(by).slice(0, 24).forEach(function(id){ GOALS_BY[id.slice(0, 40)] = cleanGoals(by[id]); });
+  }
+  LEGACY_GOALS = cleanGoals(src);
+}
+function goalsFor(id){
+  if (!id) return [];
+  if (!GOALS_BY[id]) GOALS_BY[id] = id === leagues()[0].id ? LEGACY_GOALS : [];
+  return GOALS_BY[id];
+}
+loadGoals(state.goals);
+// SEASON_GOALS is the league shown on Your Goals (the editor changes it in place)
+// until the bowler picks one, Your Goals follows the league bowled most recently
+var goalsLeague = null, goalsPicked = false;
+var SEASON_GOALS = goalsFor(leagues()[0].id);
+function useGoalsLeague(id){
+  if (!leagueById(id)) id = (goalsPicked && leagueById(goalsLeague)) ? goalsLeague : lastLeagueId();
+  var changed = goalsFor(id) !== SEASON_GOALS;
+  goalsLeague = id;
+  SEASON_GOALS = goalsFor(id);
+  return changed;
+}
+// the goals that colour and line the report on Your Stats: one league's, or none for a combination
+function reportGoals(){
+  if (historyTab === "practice") return multiLeague() ? [] : goalsFor(leagues()[0].id);
+  return goalsFor(statsSingle());
+}
+function goalAverage(list){
+  list = list || reportGoals();
+  for (var i = 0; i < list.length; i++){ if (list[i].type === "avg") return list[i].target; }
   return null;   // no average goal set
 }
 // the bowler's "average high-low spread at or below" goal, for the Consistency chart
-function goalSpread(){
-  for (var i = 0; i < SEASON_GOALS.length; i++){ if (SEASON_GOALS[i].type === "spread" && isNum(SEASON_GOALS[i].target)) return SEASON_GOALS[i].target; }
+function goalSpread(list){
+  list = list || reportGoals();
+  for (var i = 0; i < list.length; i++){ if (list[i].type === "spread" && isNum(list[i].target)) return list[i].target; }
   return null;
 }
 // lowest score named in the bowler's own goals of the given types, or null when there are none
-function goalFloor(types){
+function goalFloor(types, list){
   var lo = null;
-  SEASON_GOALS.forEach(function(g){ if (types.indexOf(g.type) >= 0 && isFinite(g.score) && (lo === null || g.score < lo)) lo = g.score; });
+  (list || reportGoals()).forEach(function(g){ if (types.indexOf(g.type) >= 0 && isFinite(g.score) && (lo === null || g.score < lo)) lo = g.score; });
   return lo;
+}
+function goalsBody(){
+  var by = {};
+  leagues().forEach(function(l){ by[l.id] = JSON.parse(JSON.stringify(goalsFor(l.id))); });
+  // "list" stays the first league's goals, for an older copy of the app on another phone
+  return { v: 3, list: by[leagues()[0].id], byLeague: by };
 }
 var goalsWrite = Promise.resolve();
 function persistGoals(){
   // the editor's fields hold references to these goal objects, so update in place rather than rebuilding the list
-  state.goals = SEASON_GOALS;
+  var body = goalsBody();
+  state.goals = body;
   saveState();
   renderHistory();
   var statusEl = document.getElementById("goals-status");
   if (!cloud.goalsDoc){ statusEl.textContent = "Goals saved on this device."; return; }
-  var body = { v: 2, list: JSON.parse(JSON.stringify(SEASON_GOALS)) };
   goalsWrite = goalsWrite.then(function(){ return cloud.goalsDoc.set(body); }).then(function(){
     statusEl.textContent = "Goals saved.";
   }, function(){
@@ -3203,16 +3695,19 @@ function persistGoals(){
 }
 // Rebuilds the goal editor on the profile screen. Skipped while the bowler is typing in it
 // (unless forced), so a background sync never steals focus.
+var editorGoals = null;
 function fillGoalInputs(force){
   var holder = document.getElementById("goal-editor");
   if (!force && holder.contains(document.activeElement)) return;
   holder.innerHTML = "";
+  // the rows edit this league's list, even if Your Goals switches league while one is open
+  var GL = editorGoals = SEASON_GOALS;
   // ready-made goals: one number each, blank means "no goal"
   function presetGroup(grp){
     var h = document.createElement("div"); h.className = "goal-group"; h.textContent = grp.group; holder.appendChild(h);
     if (grp.note){ var n = document.createElement("p"); n.className = "goal-group-note"; n.textContent = grp.note; holder.appendChild(n); }
     grp.items.forEach(function(it){
-      var def = GOAL_TYPES[it.type], cur = presetGoal(it.type);
+      var def = GOAL_TYPES[it.type], cur = presetGoal(it.type, GL);
       var row = document.createElement("div"); row.className = "goal-preset";
       var l = document.createElement("label"); l.setAttribute("for", "goal-preset-" + it.type); l.textContent = it.label;
       if (it.hint){ var sm = document.createElement("small"); sm.textContent = it.hint; l.appendChild(sm); }
@@ -3220,14 +3715,14 @@ function fillGoalInputs(force){
       inp.min = "0"; inp.max = String(def.tMax); inp.setAttribute("inputmode", "decimal"); inp.placeholder = "No goal";
       inp.value = cur ? cur.target : "";
       inp.addEventListener("change", function(){
-        var n = inp.value === "" ? NaN : Number(inp.value), g = presetGoal(it.type);
+        var n = inp.value === "" ? NaN : Number(inp.value), g = presetGoal(it.type, GL);
         if (!isFinite(n) || n < 0){
           // blank (or not a number) removes this goal
-          for (var k = SEASON_GOALS.length - 1; k >= 0; k--){ if (SEASON_GOALS[k].type === it.type) SEASON_GOALS.splice(k, 1); }
+          for (var k = GL.length - 1; k >= 0; k--){ if (GL[k].type === it.type) GL.splice(k, 1); }
           inp.value = "";
         } else {
           n = Math.min(n, def.tMax);
-          if (g) g.target = n; else SEASON_GOALS.push({ id: "g-" + it.type, type: it.type, target: n });
+          if (g) g.target = n; else GL.push({ id: "g-" + it.type, type: it.type, target: n });
           inp.value = n;
         }
         persistGoals();
@@ -3238,13 +3733,13 @@ function fillGoalInputs(force){
   }
   function customGroup(){
     // custom goals: a measure, a score and a target
-    var customs = SEASON_GOALS.filter(isCustomGoal);
+    var customs = GL.filter(isCustomGoal);
     var ch = document.createElement("div"); ch.className = "goal-group"; ch.textContent = "More scoring goals"; holder.appendChild(ch);
     var cn = document.createElement("p"); cn.className = "goal-group-note";
     cn.textContent = customs.length ? "Goals built around a score you choose." : "Optional. For example, 50% of games at 200 or better, or one 700 series.";
     holder.appendChild(cn);
     var shown = 0;
-    SEASON_GOALS.forEach(function(g, idx){
+    GL.forEach(function(g, idx){
       if (!isCustomGoal(g)) return;
       shown++;
       var def = GOAL_TYPES[g.type];
@@ -3282,15 +3777,15 @@ function fillGoalInputs(force){
       var rw = document.createElement("div"); rw.style.flex = "0 0 auto";
       var rm = document.createElement("button"); rm.textContent = "Remove"; rm.style.cssText = "color:#a33;margin-bottom:10px;";
       rm.addEventListener("click", function(){
-        var at = SEASON_GOALS.indexOf(g);   // look it up now: earlier rows may have been added or removed since this was drawn
-        if (at >= 0) SEASON_GOALS.splice(at, 1);
+        var at = GL.indexOf(g);   // look it up now: earlier rows may have been added or removed since this was drawn
+        if (at >= 0) GL.splice(at, 1);
         persistGoals(); fillGoalInputs(true);
       });
       rw.appendChild(rm); row.appendChild(rw);
       box.appendChild(row);
       holder.appendChild(box);
     });
-    if (SEASON_GOALS.length < 12){
+    if (GL.length < 12){
       var add = document.createElement("button"); add.className = "full"; add.id = "goal-add-btn"; add.textContent = "Add a custom goal";
       add.addEventListener("click", addCustomGoal);
       holder.appendChild(add);
@@ -3307,7 +3802,7 @@ document.getElementById("goal-save-btn").addEventListener("click", function(){
   persistGoals();
 });
 function addCustomGoal(){
-  SEASON_GOALS.push({ id: "g" + Date.now().toString(36), type: "gamePct", score: 200, target: 50 });
+  (editorGoals || SEASON_GOALS).push({ id: "g" + Date.now().toString(36), type: "gamePct", score: 200, target: 50 });
   persistGoals(); fillGoalInputs(true);
 }
 
@@ -3434,13 +3929,14 @@ function renderSeason(items){
   var practiceTab = historyTab === "practice";
   document.getElementById("season-card").classList.toggle("hidden", !has);
   if (!has) return;
-  document.getElementById("season-title").textContent = (practiceTab ? "Practice to date" : "Season to date") + (profile.name ? " — " + profile.name : "");
+  document.getElementById("season-title").textContent = practiceTab ? "Practice to date" + (profile.name ? " — " + profile.name : "")
+    : (multiLeague() ? selName() + " to date" : "Season to date" + (profile.name ? " — " + profile.name : ""));
   document.getElementById("season-nights-label").textContent = practiceTab ? "Sessions" : "Weeks";
   document.getElementById("season-avg").textContent = s.avg.toFixed(1);
   document.getElementById("season-games").textContent = s.games.length;
   if (practiceTab){
-    var lg = seasonStats(allSeries().filter(function(it){ return seriesType(it.h) === "league"; }));
-    document.getElementById("season-pins-label").textContent = "League average";
+    var lg = seasonStats(allSeries().filter(function(it){ return seriesType(it.h) === "league" && inStatsSel(it.h); }));
+    document.getElementById("season-pins-label").textContent = multiLeague() && statsSingle() ? leagueShort(statsSingle()) + " average" : "League average";
     document.getElementById("season-pins").textContent = lg.games.length ? lg.avg.toFixed(1) : "—";
   } else {
     document.getElementById("season-pins-label").textContent = "Total pins";
@@ -3551,19 +4047,24 @@ function buildStatsSheet(opts){
   var today = new Date(), dateText = (today.getMonth() + 1) + "/" + today.getDate() + "/" + today.getFullYear();
   rect(0, 0, W, 96, BLUE);
   text(P, 42, profile.name || "Bowling stats", 28, 700, "#fff");
-  var where = state.center || profile.homeCenter || "";
-  text(P, 70, [where, profile.league, profile.team].filter(Boolean).join(" · ") || "Bowling Bro' stats summary", 15, 400, "#dbe6ff");
+  var where = state.center || profile.homeCenter || "", hLeague = profile.league, hTeam = profile.team;
+  if (multiLeague() && opts.which !== "practice"){
+    var one = leagueById(statsSingle());
+    if (one){ where = one.center || where; hLeague = leagueLabel(one.id); hTeam = one.team; }
+    else { hLeague = selName(); hTeam = ""; }
+  }
+  text(P, 70, [where, hLeague, hTeam].filter(Boolean).join(" · ") || "Bowling Bro' stats summary", 15, 400, "#dbe6ff");
   text(W - P, 42, "Bowling Bro'", 15, 700, "#fff", "end");
   text(W - P, 70, "As of " + dateText, 13, 400, "#dbe6ff", "end");
   y = 96;
 
   function section(type){
     var practice = type === "practice", unit = practice ? "session" : "week";
-    var items = allSeries().filter(function(it){ return seriesType(it.h) === type; });
+    var items = allSeries().filter(function(it){ return seriesType(it.h) === type && (practice || inStatsSel(it.h)); });
     var st = seasonStats(items);
-    var lgStats = seasonStats(allSeries().filter(function(it){ return seriesType(it.h) === "league"; }));
+    var lgStats = seasonStats(allSeries().filter(function(it){ return seriesType(it.h) === "league" && inStatsSel(it.h); }));
     var leagueAvgText = lgStats.games.length ? lgStats.avg.toFixed(1) : "—";
-    y += 34; text(P, y, practice ? "Practice" : "League season", 22, 700);
+    y += 34; text(P, y, practice ? "Practice" : (multiLeague() ? selName() : "League season"), 22, 700);
     if (!st.games.length){ y += 26; text(P, y, practice ? "No practice sessions saved yet." : "No league nights saved yet.", 14, 400, MUTE); return; }
     var pinsRun = 0, gamesRun = 0;
     var rows = sortChrono(items).map(function(it){
@@ -3608,7 +4109,7 @@ function buildStatsSheet(opts){
     }
     if (opts.chart && !practice && view.length > 1){
       heading("Trend" + (view.length < rows.length ? " · last " + view.length + " " + unit + "s" : ""));
-      var goal = practice ? null : goalAverage();
+      var goal = practice ? null : goalAverage(goalsFor(statsSingle()));
       var x0 = P + 34, x1 = W - P - (goal !== null ? 64 : 10), top = y + 30, ph = 170, n = view.length, band = (x1 - x0) / n;
       line(P, y + 12, P + 22, y + 12, BLUE, 3); text(P + 28, y + 16, "Running average", 12, 400, MUTE);
       line(P + 150, y + 12, P + 172, y + 12, GREY, 3); text(P + 178, y + 16, practice ? "Session average" : "Weekly series total", 12, 400, MUTE);
@@ -3649,7 +4150,8 @@ function buildStatsSheet(opts){
     }
 
     if ((opts.goals || opts.shotGoals) && !practice){
-      var gl = (opts.goals ? scoringGoals() : []).concat(opts.shotGoals ? shotGoals() : []);
+      var selGoals = goalsFor(statsSingle());
+      var gl = (opts.goals ? scoringGoals(selGoals) : []).concat(opts.shotGoals ? shotGoals(selGoals) : []);
       if (gl.length){
         heading("Goals");
         gl.forEach(function(goal){
@@ -3734,7 +4236,8 @@ function renderShareSheet(){
       el.appendChild(b);
     });
   }
-  seg("share-which", "which", [["league", "League"], ["practice", "Practice"], ["both", "Both"]]);
+  var lgWord = !multiLeague() ? "League" : (statsSingle() ? leagueShort(statsSingle()) : (statsSel().length === leagues().length ? "All leagues" : "Leagues"));
+  seg("share-which", "which", [["league", lgWord], ["practice", "Practice"], ["both", "Both"]]);
   seg("share-range", "range", [["all", "Full season"], ["recent", "Last " + CHART_RECENT + " weeks"]]);
   var parts = document.getElementById("share-parts"); parts.innerHTML = "";
   SHARE_PARTS.forEach(function(pt){
@@ -3847,9 +4350,9 @@ function sessionNotesTally(games){
 }
 // the season average for this session's type, counting every session up to and including this one
 function seasonAvgThrough(h){
-  var type = seriesType(h), pins = 0, games = 0, mine = false;
+  var type = seriesType(h), lg = leagueOf(h), pins = 0, games = 0, mine = false;
   allSeries().forEach(function(it){
-    if (seriesType(it.h) !== type) return;
+    if (seriesType(it.h) !== type || leagueOf(it.h) !== lg) return;
     if (h.id && it.h.id === h.id){ mine = true; it = { h: h }; }
     else if ((it.h.savedAt || "") > (h.savedAt || "")) return;
     (seriesScores(it.h) || []).filter(isNum).forEach(function(s){ pins += s; games++; });
@@ -3879,8 +4382,9 @@ function buildSessionSheet(h, opts){
 
   // ----- header -----
   rect(0, 0, W, 96, BLUE);
-  text(P, 42, profile.name || (practice ? "Practice session" : "League night"), 28, 700, "#fff");
-  text(P, 70, [profile.name ? (practice ? "Practice session" : "League night") : "", h.center, h.lanes ? "Lanes " + h.lanes : ""].filter(Boolean).join(" · ") || "Bowling Bro'", 15, 400, "#dbe6ff");
+  var nightName = practice ? "Practice session" : (multiLeague() ? leagueById(leagueOf(h)).name : "League night");
+  text(P, 42, profile.name || nightName, 28, 700, "#fff");
+  text(P, 70, [profile.name ? nightName : "", h.center, h.lanes ? "Lanes " + h.lanes : ""].filter(Boolean).join(" · ") || "Bowling Bro'", 15, 400, "#dbe6ff");
   text(W - P, 42, "Bowling Bro'", 15, 700, "#fff", "end");
   text(W - P, 70, h.date || "", 13, 400, "#dbe6ff", "end");
   y = 96;
@@ -3987,7 +4491,7 @@ function withSavedExtras(doc){
 }
 function renderSessionShare(){
   var h = sessionShare.h, kind = sessionKind(h), practice = seriesType(h) === "practice";
-  document.getElementById("ss-what").textContent = (practice ? "Practice session" : "League night") + (h.date ? ", " + h.date : "");
+  document.getElementById("ss-what").textContent = (practice ? "Practice session" : (multiLeague() ? leagueById(leagueOf(h)).name : "League night")) + (h.date ? ", " + h.date : "");
   var parts = document.getElementById("ss-parts"); parts.innerHTML = "";
   sessionParts(h).forEach(function(pt){
     var l = document.createElement("label"), cb = document.createElement("input");
@@ -4146,12 +4650,32 @@ function renderHome(){
   var gEl = document.getElementById("home-greet"), sEl = document.getElementById("home-subgreet");
   gEl.textContent = greet; document.getElementById("home-greet-wrap").classList.toggle("with-sub", !!sub);
   sEl.textContent = sub; sEl.classList.toggle("hidden", !sub);
-  // Your Stats: the league season in one line, and the running average as a little line
-  var league = allSeries().filter(function(it){ return seriesType(it.h) === "league"; });
+  // Your Stats: the league season in one line, and the running average as a little line.
+  // Two or more leagues: a line each for the two most recently bowled, and how many more.
+  var subEl = document.getElementById("home-stats-sub");
+  var league = leagueNights(lastLeagueId());
   var s = seasonStats(league);
-  document.getElementById("home-stats-sub").textContent = s.games.length
-    ? s.avg.toFixed(1) + " avg · high " + s.highGame + " · " + plural(s.totals.length, "week")
-    : "Your season shows here after your first league night";
+  if (!multiLeague()){
+    subEl.textContent = s.games.length
+      ? s.avg.toFixed(1) + " avg · high " + s.highGame + " · " + plural(s.totals.length, "week")
+      : "Your season shows here after your first league night";
+  } else {
+    var when = {};
+    allSeries().forEach(function(it){ var id = leagueOf(it.h); if (id && (it.h.savedAt || "") > (when[id] || "")) when[id] = it.h.savedAt || ""; });
+    var bowled = activeLeagues().filter(function(l){ return when[l.id]; }).sort(function(a, b){ return when[a.id] < when[b.id] ? 1 : -1; });
+    subEl.innerHTML = "";
+    if (!bowled.length) subEl.textContent = "Your season shows here after your first league night";
+    bowled.slice(0, 2).forEach(function(l, i){
+      var ls = seasonStats(leagueNights(l.id)), ln = document.createElement("span");
+      ln.className = "home-lg";
+      if (i) ln.style.opacity = "0.85";
+      var b = document.createElement("b"); b.textContent = leagueShort(l.id);
+      ln.appendChild(b); ln.appendChild(document.createTextNode(" " + (ls.games.length ? ls.avg.toFixed(1) + " avg · high " + ls.highGame : "no games yet")));
+      subEl.appendChild(ln);
+    });
+    var moreN = activeLeagues().length - Math.min(2, bowled.length);
+    if (bowled.length && moreN > 0){ var more = document.createElement("span"); more.className = "home-lg"; more.style.opacity = "0.7"; more.textContent = "+" + moreN + " more league" + (moreN > 1 ? "s" : ""); subEl.appendChild(more); }
+  }
   var runs = [], pins = 0, games = 0;
   sortChrono(league).forEach(function(it){
     var sc = seriesScores(it.h).filter(isNum); if (!sc.length) return;
@@ -4160,7 +4684,8 @@ function renderHome(){
   });
   runs = runs.slice(-10);
   var spark = document.getElementById("home-spark");
-  if (runs.length < 2){ spark.innerHTML = ""; spark.style.display = "none"; }
+  // with two or more leagues the card lists them instead; one little line couldn't say which league it is
+  if (runs.length < 2 || multiLeague()){ spark.innerHTML = ""; spark.style.display = "none"; }
   else {
     var lo = Math.min.apply(null, runs), hi = Math.max.apply(null, runs), span = (hi - lo) || 1;
     var pts = runs.map(function(v, i){ return [3 + i * 64 / (runs.length - 1), 30 - (v - lo) / span * 24]; });
@@ -4175,11 +4700,30 @@ function renderHome(){
   else if (state.setupDone && state.games.length) detail = "Game " + state.games.length;
   resume.classList.toggle("hidden", detail === null);
   if (detail !== null){
-    document.getElementById("home-resume-title").textContent = (sessionType() === "practice" ? "Practice" : "League night") + " in progress";
+    document.getElementById("home-resume-title").textContent = (sessionType() === "practice" ? "Practice" : nightLeagueName()) + " in progress";
     document.getElementById("home-resume-detail").textContent = detail;
   }
   applyHomeTheme();
+  keepBowlInPlace();
   layoutHomeArt();
+}
+// Extra league lines make the Your Stats card taller, which would lift the whole group (and the
+// Bowl button) a little. Push the Bowl button back down so it sits where it does on every theme.
+function keepBowlInPlace(){
+  var bowl = document.getElementById("home-bowl-btn"), sub = document.getElementById("home-stats-sub");
+  bowl.style.marginTop = "";
+  if (!multiLeague() || document.getElementById("view-home").classList.contains("hidden")) return;
+  var keep = Array.prototype.slice.call(sub.childNodes);
+  sub.textContent = "x";
+  var want = bowl.getBoundingClientRect().top;
+  sub.textContent = ""; keep.forEach(function(n){ sub.appendChild(n); });
+  var m = 0;
+  for (var i = 0; i < 3; i++){
+    var off = want - bowl.getBoundingClientRect().top;
+    if (Math.abs(off) < 0.5) break;
+    m = Math.max(0, m + off * 4 / 3);
+    bowl.style.marginTop = m.toFixed(1) + "px";
+  }
 }
 // where each theme's top art ends (in the 390-wide drawing); on a short phone the art slides up
 // just far enough to stay clear of the greeting, and stays put where there's room
@@ -4236,7 +4780,9 @@ function pickTheme(id){
 // and they also drive the goal lines and colours on Your Stats.
 function renderGoalsPage(){
   var list = document.getElementById("goals-list"); if (!list) return;
-  var league = allSeries().filter(function(it){ return seriesType(it.h) === "league"; });
+  if (useGoalsLeague(goalsPicked ? goalsLeague : null) && editorGoals) fillGoalInputs();
+  renderGoalsLeagues();
+  var league = leagueNights(goalsLeague);
   var s = seasonStats(league);
   list.innerHTML = "";
   var sc = scoringGoals(), sg = shotGoals();
@@ -4582,6 +5128,8 @@ function renderDetailTable(el, items){
   // green = at or above the bowler's average goal; red = below the lowest game score in their goals.
   // With no goals of that kind the numbers stay plain.
   var G = { average: goalAverage(), floor: goalFloor(["gamePct", "gameCount"]), series: goalFloor(["seriesPct", "seriesCount"]) }, league = historyTab !== "practice";
+  // rank is one league's standing, so it shows only for a single league; a combination gets a League column instead
+  var showRank = league && !!statsSingle(), showLg = league && !statsSingle();
   function vsGoal(v, good, bad){ return (good !== null && v >= good) ? "good" : ((bad !== null && v < bad) ? "bad" : ""); }
   var maxGames = 0;
   var data = sortChrono(items).map(function(it, idx){
@@ -4638,6 +5186,7 @@ function renderDetailTable(el, items){
     var tr = document.createElement("tr");
     if (editKey === d.key) tr.className = "editing";
     tr.appendChild(cell("td", String(h.date || "").replace(/\/\d{4}$/, "")));
+    if (showLg){ var lc = cell("td", leagueShort(leagueOf(h))); lc.className = "lg-cell"; lc.style.color = leagueColor(leagueOf(h)); tr.appendChild(lc); }
     for (var i = 0; i < maxGames; i++){
       tr.appendChild(isNum(d.sc[i]) ? cell("td", d.sc[i], gameCls(d.sc[i])) : cell("td", ""));
     }
@@ -4649,11 +5198,11 @@ function renderDetailTable(el, items){
       tr.appendChild(cell("td", spread, spreadClass(spread)));
     } else { tr.appendChild(cell("td", "")); }
     tr.appendChild(cell("td", (pins / games).toFixed(1)));
-    if (league) tr.appendChild(cell("td", isNum(h.rank) ? h.rank : ""));
+    if (showRank) tr.appendChild(cell("td", isNum(h.rank) ? h.rank : ""));
     tr.appendChild(cell("td", (h.note || "") + (d.it.local && cloud.col ? (h.note ? " · " : "") + "this device only" : ""), "note"));
     tr.addEventListener("click", function(){
       if (editKey === d.key){ editKey = null; editDraft = null; }
-      else { editKey = d.key; editDraft = { rank: isNum(h.rank) ? String(h.rank) : "", note: h.note || "" }; }
+      else { editKey = d.key; editDraft = { rank: isNum(h.rank) ? String(h.rank) : "", note: h.note || "", leagueId: leagueOf(h) }; }
       pendingDeleteKey = null;
       renderHistory();
     });
@@ -4664,6 +5213,7 @@ function renderDetailTable(el, items){
   var thead = document.createElement("thead");
   var avgRow = document.createElement("tr"); avgRow.className = "col-avgs";
   avgRow.appendChild(cell("td", "Avg"));
+  if (showLg) avgRow.appendChild(cell("td", ""));
   for (var i = 0; i < maxGames; i++) avgRow.appendChild(cell("td", colN[i] ? (colSum[i] / colN[i]).toFixed(1) : ""));
   avgRow.appendChild(cell("td", pins, "strong"));
   var overall = pins / games;
@@ -4673,13 +5223,14 @@ function renderDetailTable(el, items){
   // rank is the league's standing by season average, so the season row shows the latest one entered
   var latestRank = null;
   data.forEach(function(d){ if (isNum(d.it.h.rank)) latestRank = d.it.h.rank; });
-  if (league) avgRow.appendChild(cell("td", latestRank === null ? "" : latestRank, "strong"));
+  if (showRank) avgRow.appendChild(cell("td", latestRank === null ? "" : latestRank, "strong"));
   avgRow.appendChild(cell("td", ""));
   var headRow = document.createElement("tr");
-  headRow.appendChild(cell("th", league ? "League" : "Practice"));
+  headRow.appendChild(cell("th", league ? (showLg ? "Night" : "League") : "Practice"));
+  if (showLg) headRow.appendChild(cell("th", "League"));
   for (var j = 0; j < maxGames; j++) headRow.appendChild(cell("th", "Game " + (j + 1)));
   [league ? "Series" : "Total", "Average", "+/- HL", "Running avg"].forEach(function(t){ headRow.appendChild(cell("th", t)); });
-  if (league) headRow.appendChild(cell("th", "Rank"));
+  if (showRank) headRow.appendChild(cell("th", "Rank"));
   var noteTh = cell("th", "Notes"); noteTh.style.textAlign = "left"; headRow.appendChild(noteTh);
   thead.appendChild(avgRow); thead.appendChild(headRow);
   var tbody = document.createElement("tbody");
@@ -4691,7 +5242,7 @@ function renderDetailTable(el, items){
 
   var hint = document.createElement("p");
   hint.style.cssText = "font-size:11px;color:#999;margin:8px 0 0;";
-  hint.textContent = "Swipe sideways for more columns. Tap a row to add " + (league ? "your season rank or a note" : "a note") + ", or to delete it.";
+  hint.textContent = "Swipe sideways for more columns. Tap a row to add " + (showRank ? "your season rank or a note" : "a note") + (multiLeague() ? ", move it to another league" : "") + ", or to delete it.";
   el.appendChild(hint);
   }
 
@@ -4712,6 +5263,15 @@ function renderDetailTable(el, items){
       gl.appendChild(chip);
     });
     box.appendChild(gl);
+  }
+  if (league && multiLeague()){
+    var ml = document.createElement("label"); ml.textContent = "League"; ml.setAttribute("for", "edit-league");
+    var ms = document.createElement("select"); ms.id = "edit-league";
+    leagues().forEach(function(l){ var o = document.createElement("option"); o.value = l.id; o.textContent = leagueLabel(l.id) + (l.status === "finished" ? " (finished)" : ""); ms.appendChild(o); });
+    ms.value = editDraft.leagueId || leagueOf(editing.it.h);
+    ms.addEventListener("change", function(){ editDraft.leagueId = ms.value; });
+    var mn = document.createElement("p"); mn.className = "lg-note"; mn.textContent = "Scored this under the wrong league? Pick the right one and Save.";
+    box.appendChild(ml); box.appendChild(ms); box.appendChild(mn);
   }
   if (league){
     var rl = document.createElement("label"); rl.textContent = "Season Rank"; rl.setAttribute("for", "edit-rank");
@@ -4746,10 +5306,11 @@ function updateSeriesMeta(it, draft){
   var h = it.h;
   var r = parseInt(draft.rank, 10);
   var patch = { rank: (isNum(r) && r > 0) ? r : null, note: String(draft.note || "").trim().slice(0, 200) };
+  if (seriesType(h) === "league" && leagueById(draft.leagueId)) patch.leagueId = draft.leagueId;
   var statusEl = document.getElementById("csv-status");
   editKey = null; editDraft = null;
   if (it.local || !cloud.col){
-    state.seriesHistory.forEach(function(x){ if (x === h || (h.id && x.id === h.id)){ x.rank = patch.rank; x.note = patch.note; } });
+    state.seriesHistory.forEach(function(x){ if (x === h || (h.id && x.id === h.id)){ x.rank = patch.rank; x.note = patch.note; if (patch.leagueId) x.leagueId = patch.leagueId; } });
     saveState();
     statusEl.textContent = "Saved.";
     renderHistory();
@@ -4799,7 +5360,7 @@ function csvCell(v){
   return /[",\n\r]/.test(s) ? "\"" + s.replace(/"/g, "\"\"") + "\"" : s;
 }
 function buildSeriesCsv(){
-  var rows = [["series_id","session_type","saved_at","date","center","lanes","game","game_score","frame","ball","pins_knocked","mark","pins_left_standing","ball_used","feet_board","arrow_board","preset_notes","note"]];
+  var rows = [["series_id","session_type","league","saved_at","date","center","lanes","game","game_score","frame","ball","pins_knocked","mark","pins_left_standing","ball_used","feet_board","arrow_board","preset_notes","note"]];
   allSeries().forEach(function(it){
     var h = it.h;
     if (!hasFrameDetail(h)) return;
@@ -4811,7 +5372,7 @@ function buildSeriesCsv(){
           if (!b) return;
           var standing = ((f._pinSets && f._pinSets[bi]) || []).map(function(i){ return i + 1; }).sort(function(a, c){ return a - c; });
           rows.push([
-            h.id || "", seriesType(h), h.savedAt || "", h.date || "", h.center || "", h.lanes || "",
+            h.id || "", seriesType(h), leagueOf(h) ? leagueLabel(leagueOf(h)) : "", h.savedAt || "", h.date || "", h.center || "", h.lanes || "",
             gi + 1, score, fi + 1, bi + 1, b.knocked, marks[bi] || "",
             standing.join(" "), b.ballUsed || "",
             (f.lines && f.lines[bi] && hasVal(f.lines[bi].feet)) ? f.lines[bi].feet : (hasVal(f.feet) ? f.feet : ""),
