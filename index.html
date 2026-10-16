@@ -35,6 +35,14 @@ body {
   padding: 14px; margin-bottom: 12px;
 }
 .card h2 { font-size: 14px; margin: 0 0 10px; color: #1a1a1a; }
+/* Set your goals: closed until tapped */
+.goal-set summary { list-style: none; display: flex; align-items: center; gap: 8px; cursor: pointer; min-height: 28px; }
+.goal-set summary::-webkit-details-marker { display: none; }
+.goal-set summary h2 { margin: 0; flex: 1; }
+.goal-set summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid #6b6b6b; border-bottom: 2px solid #6b6b6b; transform: rotate(45deg); margin: -4px 4px 0 0; transition: transform .15s; }
+.goal-set[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.goal-set .goal-set-hint { font-size: 12px; color: #6b6b6b; }
+.goal-set[open] .goal-set-hint { display: none; }
 label { font-size: 12px; color: #6b6b6b; display: block; margin-bottom: 4px; }
 /* date pickers: iPhone Safari gives these a fixed built-in width that ignores the card, so
    reset its styling and size it to fit, centered */
@@ -838,13 +846,13 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <p id="shot-goals-note" style="font-size:12px;color:#6b6b6b;margin:-4px 0 6px;line-height:1.4;"></p>
       <div id="shot-goals-list"></div>
     </div>
-    <div class="card">
-      <h2>Set your goals</h2>
-      <p style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;line-height:1.4;">Fill in the goals you want and leave the rest blank. Your goals also draw the goal lines and colours on Your Stats.</p>
+    <details class="card goal-set" id="goal-set">
+      <summary><h2>Set your goals</h2><span class="goal-set-hint">Tap to open</span></summary>
+      <p style="font-size:12px;color:#6b6b6b;margin:6px 0 10px;line-height:1.4;">Fill in the goals you want and leave the rest blank. Your goals also draw the goal lines and colours on Your Stats.</p>
       <div id="goal-editor"></div>
       <button class="primary full" id="goal-save-btn" style="margin-top:8px;">Save goals</button>
       <p id="goals-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;"></p>
-    </div>
+    </details>
   </div>
 
   <!-- YOUR ARSENAL VIEW -->
@@ -2808,6 +2816,8 @@ function openGoals(){
   document.getElementById("goals-status").textContent = "";
   renderGoalsPage();
   fillGoalInputs(true);
+  // goal editor starts closed; open it only for a bowler with no goals yet, so the page isn't empty
+  document.getElementById("goal-set").open = !SEASON_GOALS.length;
   showView("goals");
 }
 function openArsenal(){
