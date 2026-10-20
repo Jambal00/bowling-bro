@@ -3806,12 +3806,13 @@ function weekDetail(dc, m){
     var br = bt.insertRow(); if (b.id === sheetLg.me) br.className = "mine";
     br.insertCell().textContent = shortName(b.name);
     b.scores.forEach(function(sc, gi){ var c = br.insertCell(); c.textContent = sc; if (b.won && b.won[gi]) c.className = "win"; });
-    br.insertCell().textContent = sum(b.scores);
-    br.insertCell().textContent = b.pts === null ? "" : fmtPts(b.pts) + "/4";
+    var sc = br.insertCell(); sc.textContent = sum(b.scores); if (b.wonSeries) sc.className = "win";
+    br.insertCell().textContent = b.pts === null ? "" : fmtPts(b.pts) + "/" + m.ptsEach;
   });
-  add(dc, "p", "lg-fine", m.men.some(function(b){ return !b.won && b.pts !== null; })
-    ? "Bold: individual games won. The sheet only gives each bowler's points, so where it doesn't show which games they took, none are bolded."
-    : "Bold: individual games won.");
+  var unsure = m.men.some(function(b){ return b.pts !== null && (!b.won || (m.ptsEach === 4 && b.wonSeries === null)); });
+  add(dc, "p", "lg-fine", "Bold: games and series won in your individual match." + (unsure
+    ? " The sheet gives each bowler's points but not which games they took, so a game is bolded only when the points make it certain."
+    : ""));
 }
 function sum(a){ return a.reduce(function(s, x){ return s + x; }, 0); }
 var lgOpenWeek = null;
@@ -3827,13 +3828,15 @@ function teamWeeks(team){
         var pb = prev && sheetBowler(prev, x.id);
         // individual points that night: the sheet lists each bowler's season total, so it's the change
         var pts = typeof x.mp === "number" ? x.mp - (pb && typeof pb.mp === "number" ? pb.mp : 0) : null;
-        return { id: x.id, name: x.name, scores: x.scores, before: pb && pb.games ? pb.avg : null, pts: pts, won: x.won || null };
+        return { id: x.id, name: x.name, scores: x.scores, before: pb && pb.games ? pb.avg : null, pts: pts, won: x.won || null, wonSeries: typeof x.wonSeries === "boolean" ? x.wonSeries : null };
       });
       var st = w.standings.filter(function(s){ return s.team === team; })[0];
+      var maxPts = 0;
+      (w.bowlers || []).forEach(function(x){ if (!x.scores || typeof x.mp !== "number") return; var px = prev && sheetBowler(prev, x.id); maxPts = Math.max(maxPts, x.mp - (px && typeof px.mp === "number" ? px.mp : 0)); });
       out.push({ week: w.week, date: w.date, opp: a === team ? b : a, us: us.won, them: them.won,
         games: us.hdcpGames, oppGames: them.hdcpGames, hdcp: us.hdcpTotal, oppHdcp: them.hdcpTotal,
         gamesWon: us.hdcpGames.filter(function(g, i){ return g > them.hdcpGames[i]; }).length,
-        scratch: sum(men.map(function(m){ return sum(m.scores); })), men: men, place: st ? st.place : null });
+        scratch: sum(men.map(function(m){ return sum(m.scores); })), men: men, place: st ? st.place : null, ptsEach: maxPts > 3 ? 4 : 3 });
     });
   });
   return out;
