@@ -6020,9 +6020,8 @@ function renderDetailTable(el, items){
   // With no goals of that kind the numbers stay plain.
   var G = { average: goalAverage(), floor: goalFloor(["gamePct", "gameCount"]), series: goalFloor(["seriesPct", "seriesCount"]) }, league = historyTab !== "practice";
   // rank is one league's standing, so it shows only for a single league; a combination gets a League column instead
-  // a league whose sheet is loaded has its ranks on Your League, so History doesn't ask for them
-  var rankFromSheet = inSheetLeague() && statsSingle() === sheetAppLeague();
-  var showRank = league && !!statsSingle() && !rankFromSheet, showLg = league && !statsSingle();
+  // Rank was retired 2026-10-20 (league ranks live on Your League); ranks already saved stay on the nights
+  var showRank = false, showLg = league && !statsSingle();
   function vsGoal(v, good, bad){ return (good !== null && v >= good) ? "good" : ((bad !== null && v < bad) ? "bad" : ""); }
   var maxGames = 0;
   var data = sortChrono(items).map(function(it, idx){
