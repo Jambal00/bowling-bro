@@ -3752,7 +3752,7 @@ function renderTeamRecords(el, embedded){
   // leaderboard
   var c3 = card("Leaderboard", "Season to date, scratch", "individual");
   var t = add(c3, "table", "lg-table rec-board"), hr = add(add(t, "thead"), "tr");
-  ["", "Avg", "High", "Series", "200s", "Pts", "Over avg"].forEach(function(x){ add(hr, "th", "", x); });
+  ["", "Avg", "High", "Series", "200s", "Pts"].forEach(function(x){ add(hr, "th", "", x); });
   var tb = add(t, "tbody");
   var rows = men.map(function(b){
     var mine = log.filter(function(x){ return x.id === b.id; }), gs = allG.filter(function(x){ return x.id === b.id; });
@@ -3767,10 +3767,10 @@ function renderTeamRecords(el, embedded){
     var tr = add(tb, "tr", r.b.id === sheetLg.me ? "mine" : "");
     add(tr, "td", "", shortName(r.b.name));
     add(tr, "td", isAvg(r) ? "win" : "", r.b.avg); add(tr, "td", isHi(r) ? "win" : "", r.hi); add(tr, "td", isHs(r) ? "win" : "", r.hs);
-    add(tr, "td", isTwo(r) ? "win" : "", r.two); add(tr, "td", isPts(r) ? "win" : "", fmtPts(r.pts)); add(tr, "td", isOver(r) ? "win" : "", r.over === null ? "—" : r.over + "%");
+    add(tr, "td", isTwo(r) ? "win" : "", r.two); add(tr, "td", isPts(r) ? "win" : "", fmtPts(r.pts));
   });
   if (c3.parentNode && c2.parentNode) el.insertBefore(c3, c2);   // Individual leads with the leaderboard, then Around the league
-  add(c3, "p", "lg-fine", "Bold: team best. Over avg: share of games above that bowler's average going in (from Week 2). Pts: individual points won.");
+  add(c3, "p", "lg-fine", "Bold: team best. Pts: individual points won.");
 
   // around the league
   var c5 = card("Around the league", "Where you stand among all " + W.bowlers.filter(function(b){ return b.games >= 9; }).length + " bowlers with 9+ games", "individual");
