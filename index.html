@@ -3627,7 +3627,7 @@ function renderLeaguePage(){
   // standings
   var c4 = card("Standings", "After Week " + W.week, "standings");
   var st = add(c4, "table", "lg-table lg-stand"), sh = add(add(st, "thead"), "tr");
-  ["", "Team", "Won", "Lost", "Win %"].forEach(function(x){ add(sh, "th", "", x); });
+  ["", "Team", "Points", "Pts back", "Win %"].forEach(function(x){ add(sh, "th", "", x); });
   var sb2 = add(st, "tbody");
   W.standings.forEach(function(s){
     var ps = prev && prev.standings.filter(function(x){ return x.team === s.team; })[0], mv = ps ? ps.place - s.place : 0;
@@ -3635,11 +3635,11 @@ function renderLeaguePage(){
     var pc = add(r, "td", "lg-place", String(s.place));
     if (mv) add(pc, "span", mv > 0 ? "up" : "down", mv > 0 ? " ▲" : " ▼");
     add(r, "td", "lg-name", sheetTeamName(W, s.team));
-    add(r, "td", "", fmtPts(s.won)); add(r, "td", "", fmtPts(s.lost)); add(r, "td", "", s.pctWon.toFixed(1));
+    var back = W.standings[0].won - s.won;   // points out of first place
+    add(r, "td", "", fmtPts(s.won)); add(r, "td", "", back > 0 ? fmtPts(back) : "—"); add(r, "td", "", s.pctWon.toFixed(1));
   });
   var lead = W.standings[0];
   if (lead.team !== myT) add(c4, "p", "lg-fine", fmtPts(lead.won - stand.won) + " points behind " + sheetTeamName(W, lead.team) + " with " + (sheetLg.data.weeksInSeason - W.week) + " weeks to go. Each week is worth 36 points.");
-  c4.appendChild(gapChart(myT));
   c4.appendChild(placeChart(myT));
 
 }
