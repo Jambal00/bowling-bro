@@ -5623,8 +5623,13 @@ function layoutHomeArt(){
 }
 window.addEventListener("resize", layoutHomeArt);
 // iPhone Safari still lets a full-height page be dragged; stop that on Home (tall enough screens, where Home fits)
+// Only Home itself is held: anything opened over it (first-time setup, sign-in, sheets) must still scroll,
+// or a step taller than the screen leaves its buttons out of reach.
 document.addEventListener("touchmove", function(e){
-  if (document.body.classList.contains("on-home") && window.innerHeight >= 600) e.preventDefault();
+  if (!document.body.classList.contains("on-home") || window.innerHeight < 600) return;
+  var t = e.target;
+  if (t && t.closest && !t.closest("#view-home, #home-bg, .header")) return;
+  e.preventDefault();
 }, { passive: false });
 function renderThemeGrid(containerId, current, onPick){
   var el = document.getElementById(containerId); if (!el) return;
