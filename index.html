@@ -198,6 +198,100 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
 .menu-panel button { border: none; background: none; text-align: left; padding: 11px 12px; font-size: 14px; border-radius: 8px; }
 .menu-panel button:active { background: #f2f1ea; }
 .detail-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -4px; }
+/* league sheet: Your League page and admin card */
+.lg-card .lg-sub { font-size: 12px; color: #6b6b6b; margin: -6px 0 10px; }
+.lg-kicker { font-size: 12px; color: #6b6b6b; text-transform: uppercase; letter-spacing: 0.04em; }
+.lg-team { font-size: 22px; font-weight: 800; margin: 2px 0 4px; color: #1a1a1a; }
+.lg-big { font-size: 19px; font-weight: 800; color: #1a1a1a; margin: 0 0 2px; }
+.lg-line { font-size: 14px; color: #33322d; line-height: 1.4; }
+.lg-fine { font-size: 12px; color: #77756c; margin: 8px 0 0; line-height: 1.4; }
+.lg-notice { margin-top: 10px; background: #e6f4ea; color: #1d5e33; border-radius: 8px; padding: 8px 10px; font-size: 13px; line-height: 1.4; }
+.lg-vs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.lg-side { background: #f6f5ef; border-radius: 10px; padding: 8px 10px; min-width: 0; }
+.lg-side-h { font-size: 12px; font-weight: 700; color: #444; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lg-man { display: flex; justify-content: space-between; gap: 6px; font-size: 13px; padding: 3px 0; color: #1a1a1a; }
+.lg-man span:first-child { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.lg-man.me { font-weight: 700; }
+.lg-man.lg-tot { border-top: 1px solid #ddd9cb; margin-top: 3px; padding-top: 5px; font-weight: 700; }
+.lg-num { font-variant-numeric: tabular-nums; white-space: nowrap; color: #55534b; }
+.lg-num.ok { color: #1d7a46; font-weight: 600; }
+.lg-target { margin-top: 12px; background: #eef3fe; border-radius: 10px; padding: 9px 11px; font-size: 13px; line-height: 1.45; color: #1a1a1a; }
+.lg-games { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+.lg-chip { font-size: 12px; padding: 4px 8px; border-radius: 8px; background: #f2f1ea; border: 1px solid #e2e0d5; font-variant-numeric: tabular-nums; }
+.lg-chip.win { background: #e6f4ea; border-color: #b9dcc4; color: #1d5e33; font-weight: 600; }
+.lg-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.lg-table th { font-size: 11px; color: #77756c; font-weight: 600; text-align: right; padding: 4px 4px 6px; border-bottom: 1px solid #e6e3d8; }
+.lg-table td { text-align: right; padding: 6px 4px; border-bottom: 1px solid #f0eee6; color: #1a1a1a; }
+.lg-table th:first-child, .lg-table td:first-child { text-align: left; }
+.lg-table td.good { color: #1d7a46; font-weight: 600; } .lg-table td.bad { color: #b3261e; }
+.lg-table tr.me td { background: #eef3fe; font-weight: 700; }
+.lg-stand th:nth-child(2), .lg-stand td.lg-name { text-align: left; }
+.lg-stand td.lg-place { width: 34px; color: #77756c; }
+.lg-stand .up { color: #1d7a46; font-size: 10px; } .lg-stand .down { color: #b3261e; font-size: 10px; }
+.lg-stand td.lg-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+.lg-race { margin-top: 12px; }
+body:not(.on-home) .lg-toggle { background: var(--chrome, rgba(255,255,255,0.14)); border-radius: 12px; padding: 4px; gap: 4px !important; margin-bottom: 12px; }
+.lg-records-btn { margin: 10px 0 2px; font-weight: 600; }
+.rec-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f0eee6; }
+.rec-row:last-child { border-bottom: none; }
+.rec-sub { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8f8c80; margin: 14px 0 0; padding-bottom: 4px; border-bottom: 1px solid #e6e3d8; }
+.lg-sub + .rec-sub { margin-top: 4px; }
+.rec-l { min-width: 0; }
+.rec-label { font-size: 14px; color: #1a1a1a; }
+.rec-when { font-size: 12px; color: #8f8c80; margin-top: 1px; line-height: 1.35; }
+.rec-v { text-align: right; flex: 0 0 auto; max-width: 48%; }
+.rec-value { font-size: 17px; font-weight: 800; color: #1a1a1a; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rec-who { font-size: 12px; color: #55534b; font-weight: 600; }
+.rec-board td.win { font-weight: 800; }
+.rec-board tr.mine td:first-child { font-weight: 700; }
+.rec-board th, .rec-board td { padding-left: 2px; padding-right: 2px; }
+.lg-h2h { margin-top: 12px; border-top: 1px solid #ece9df; padding-top: 10px; }
+.lg-h2h-h { font-size: 12px; font-weight: 700; color: #444; margin-bottom: 4px; }
+.lg-meet { font-size: 13px; line-height: 1.45; color: #33322d; }
+.lg-meet b.good { color: #1d7a46; } .lg-meet b.bad { color: #b3261e; }
+.lg-meet-h { font-size: 14px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.lg-board, .lg-men { border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; width: 100%; table-layout: fixed; }
+.lg-board th, .lg-men th { font-size: 11px; font-weight: 600; color: #8f8c80; text-align: right; padding: 2px 4px; }
+.lg-board td, .lg-men td { text-align: right; padding: 3px 4px; color: #55534b; font-weight: 400; }
+.lg-board th:first-child, .lg-board td:first-child, .lg-men th:first-child, .lg-men td:first-child { text-align: left; width: 34%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lg-board th:last-child, .lg-board td:last-child, .lg-men th:last-child, .lg-men td:last-child { width: 11%; }
+.lg-board td.win, .lg-men td.win { color: #1a1a1a; font-weight: 800; }
+.lg-board td.lg-board-team { color: #1a1a1a; }
+.lg-men { margin-top: 10px; }
+.lg-men tr.mine td:first-child { font-weight: 700; color: #1a1a1a; }
+.lg-board td, .lg-men td, .lg-board th, .lg-men th { border-bottom: none !important; }
+.lg-pts-cell { white-space: nowrap; }
+.lg-meet-row { display: flex; justify-content: space-between; max-width: 200px; font-size: 13px; padding: 1px 0; font-weight: 600; }
+.lg-meet-row.good, .lg-meet-row.good .lg-num { color: #1d7a46; } .lg-meet-row.bad, .lg-meet-row.bad .lg-num { color: #b3261e; }
+.lg-pts { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 6px; margin-left: 6px; background: #f2f1ea; color: #55534b; }
+.lg-pts.good { background: #e6f4ea; color: #1d5e33; } .lg-pts.bad { background: #fdecea; color: #b3261e; }
+.lg-meet-games { font-variant-numeric: tabular-nums; color: #55534b; font-size: 12px; }
+.lg-meet-close { font-size: 12px; color: #8a5a00; font-weight: 600; }
+.lg-weeks tr.lg-wk { cursor: pointer; }
+.lg-weeks > tbody > tr > td:nth-child(3), .lg-rec td:nth-child(3) { white-space: nowrap; }
+.lg-weeks tr.lg-wk.open td { background: #f6f5ef; }
+.lg-weeks td.lg-name, .lg-weeks > thead th:nth-child(2), .lg-rec td.lg-name { text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+.lg-weeks tr.lg-detail > td { text-align: left; background: #f6f5ef; padding: 4px 8px 10px; }
+.lg-detail-men { margin-top: 6px; }
+.lg-num.neg { color: #b3261e; }
+.lg-rec { margin-top: 12px; }
+.lg-race-h { font-size: 12px; font-weight: 700; color: #444; margin-bottom: 2px; }
+.lg-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; color: #55534b; margin-top: 2px; }
+.lg-legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
+.lg-preview { margin-top: 10px; border: 1px solid #b9dcc4; background: #f3faf5; border-radius: 10px; padding: 9px 11px; }
+.lg-preview-h { font-weight: 700; font-size: 14px; margin-bottom: 4px; color: #1a1a1a; }
+.lg-check { font-size: 13px; color: #1d5e33; line-height: 1.5; }
+.lg-sub2 { font-size: 12px; font-weight: 700; color: #444; margin: 14px 0 2px; }
+.sheet-tag { display: inline-block; font-size: 9px; font-weight: 700; padding: 1px 4px; border-radius: 4px; background: #eef3fe; color: #2f6fed; margin-left: 5px; vertical-align: 2px; letter-spacing: 0.03em; }
+.sheet-tag.off { background: #fdecea; color: #b3261e; }
+.sheet-clash { margin-top: 12px; border: 1px solid #f2c46d; background: #fff6e0; border-radius: 10px; padding: 10px 12px; font-size: 13px; color: #5a3d00; line-height: 1.45; }
+.sheet-clash b { color: #3d2900; }
+.sheet-clash button { margin-top: 8px; }
+.sheet-clash a { display: inline-block; margin-top: 8px; font-size: 13px; }
+label.attach-pick { flex: 0 0 auto; padding: 8px 12px; font-size: 14px; }
+#view-home .home-squares.four { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+#view-home .home-squares.four .home-sq { padding: 10px; }
+#view-home .home-squares.four .home-sq span { font-size: 13px; }
 .detail-table { border-collapse: collapse; font-size: 13px; white-space: nowrap; min-width: 100%; }
 .detail-table th, .detail-table td { padding: 7px 8px; text-align: center; border-bottom: 1px solid #eee; font-variant-numeric: tabular-nums; }
 .detail-table thead th { background: #fde9b4; font-weight: 700; font-size: 12px; }
@@ -515,6 +609,7 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
         <button id="menu-game-btn">Back to scoring</button>
         <button id="header-setup-btn">Bowl</button>
         <button id="menu-league-btn">Your Stats</button>
+        <button id="menu-team-btn" class="hidden">Your League</button>
         <button id="menu-goals-btn">Your Goals</button>
         <button id="menu-arsenal-btn">Your Arsenal</button>
         <button id="header-profile-btn">Profile</button>
@@ -698,6 +793,7 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
         <div><label for="night-add-input" id="night-add-label">Game 1 score</label><input type="number" id="night-add-input" inputmode="numeric" min="0" max="300" placeholder="0 to 300" style="margin-bottom:0;" /></div>
         <div style="flex:0 0 auto;"><button class="primary" id="night-add-btn">Add game</button></div>
       </div>
+      <div id="night-clash" class="sheet-clash hidden"></div>
       <p id="night-status" style="font-size:12px;color:#444;margin:10px 0 0;min-height:16px;line-height:1.4;"></p>
     </div>
     <div class="card">
@@ -726,6 +822,7 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
           <input type="file" id="photo-file" class="file-pick" accept="image/*" />
         </div>
         <p style="font-size:12px;color:#6b6b6b;margin:8px 0 0;line-height:1.4;">Choose a picture from your photos, or take one. Next you'll crop it down to your line, which helps it read correctly.</p>
+        <div id="photo-clash" class="sheet-clash hidden"></div>
         <p id="photo-status" style="font-size:12px;color:#444;margin:8px 0 0;min-height:16px;line-height:1.4;"></p>
         <p style="margin:2px 0 0;font-size:12px;"><a href="#" id="photo-manual-link">No photo? Type the frames in yourself</a></p>
       </div>
@@ -739,6 +836,17 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <button class="primary full" id="photo-done-btn">Done for tonight</button>
       <button class="full hidden" id="photo-share-btn" style="margin-top:8px;">Share this session</button>
       <p style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0 0;line-height:1.4;">Each game is saved as you add it. You can close the app between games.</p>
+    </div>
+
+    <div id="photo-attach" class="hidden">
+      <div class="card">
+        <h2>Add game photos</h2>
+        <p id="attach-sub" style="font-size:12px;color:#6b6b6b;margin:-4px 0 10px;"></p>
+        <div id="attach-games"></div>
+        <input type="file" id="attach-file" class="file-pick" accept="image/*" />
+        <p id="attach-note" style="font-size:12px;color:#6b6b6b;margin:10px 0 0;line-height:1.4;"></p>
+      </div>
+      <button class="primary full" id="attach-done-btn">Done</button>
     </div>
 
     <div id="photo-crop" class="card hidden">
@@ -898,6 +1006,10 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
         <svg class="home-icon" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="14" r="5" fill="none" stroke="currentColor" stroke-width="2"></circle><circle cx="16.5" cy="9" r="5" fill="none" stroke="currentColor" stroke-width="2"></circle><circle cx="15.5" cy="7.5" r="0.9" fill="currentColor"></circle><circle cx="18" cy="7.6" r="0.9" fill="currentColor"></circle></svg>
         <span>Your Arsenal</span>
       </button>
+      <button class="home-btn home-card home-sq hidden" id="home-league-btn">
+        <svg class="home-icon" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.4M17 6h2.5a2.5 2.5 0 0 1-2.6 3.4M12 13v4M8.5 20h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+        <span>Your League</span>
+      </button>
       <button class="home-btn home-card home-sq" id="home-profile-btn">
         <svg class="home-icon" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
         <span>Profile</span>
@@ -905,6 +1017,12 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
     </div>
     <div id="home-brand" class="hidden" aria-hidden="true"></div>
     <div style="flex:3;"></div>
+  </div>
+
+  <!-- YOUR LEAGUE VIEW (league-sheet members only) -->
+  <div id="view-league" class="hidden">
+    <div id="league-body"></div>
+    <button class="full" id="league-back-btn">Back</button>
   </div>
 
   <!-- YOUR GOALS VIEW -->
@@ -980,6 +1098,10 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <div id="league-form-holder"></div>
       <button class="full" id="league-add-btn" style="margin-top:10px;">Add a league</button>
       <p class="lg-note" id="leagues-note"></p>
+    </div>
+    <div class="card hidden" id="sheet-admin-card">
+      <h2>League sheets</h2>
+      <div id="sheet-admin-body"></div>
     </div>
     <button class="primary full" id="profile-save-btn">Save profile</button>
     <p id="profile-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0;min-height:15px;"></p>
@@ -1059,7 +1181,7 @@ function setPlaceLabel(viewName){
   document.getElementById("place-label").textContent = text;
   document.getElementById("place-label").parentNode.classList.toggle("brand", text === "Bowling Bro'");
 }
-var views = ["home","setup","game","scores","photo","summary","history","goals","arsenal","profile"];
+var views = ["home","setup","game","scores","photo","summary","history","league","goals","arsenal","profile"];
 function showView(name){
   views.forEach(function(v){ document.getElementById("view-"+v).classList.toggle("hidden", v!==name); });
   document.body.classList.toggle("in-game", name==="game");
@@ -1068,6 +1190,7 @@ function showView(name){
   document.getElementById("menu-home-btn").classList.toggle("hidden", name==="home");
   document.getElementById("menu-league-btn").classList.toggle("hidden", name==="history");
   document.getElementById("menu-goals-btn").classList.toggle("hidden", name==="goals");
+  document.getElementById("menu-team-btn").classList.toggle("hidden", name==="league" || !inSheetLeague());
   document.getElementById("menu-arsenal-btn").classList.toggle("hidden", name==="arsenal");
   var onHome = name === "home";
   document.body.classList.toggle("on-home", onHome);
@@ -1079,7 +1202,7 @@ function showView(name){
   document.getElementById("menu-league-btn").classList.toggle("hidden", name==="history");
   setPlaceLabel(name);
   if (name!=="game"){
-    var labels = {home:"", setup:"Bowl", scores:"Game Scores", photo:"Photo Scoring", summary:"Series Summary", history:"Your Stats", goals:"Your Goals", arsenal:"Your Arsenal", profile:"Profile"};
+    var labels = {home:"", setup:"Bowl", scores:"Game Scores", photo:"Photo Scoring", summary:"Series Summary", history:"Your Stats", league:"Your League", goals:"Your Goals", arsenal:"Your Arsenal", profile:"Profile"};
     document.getElementById("game-label").textContent = labels[name] || "";
   }
 }
@@ -1860,6 +1983,7 @@ function sbSeriesCollection(uid){
     }, function(e){ if (errFn) errFn(sbErrCode(e)); });
   }
   function put(body){
+    Object.keys(body).forEach(function(k){ if (k.charAt(0) === "_") delete body[k]; });
     return sb.from("bb_series").upsert({
       user_id: uid, id: body.id, saved_at: body.savedAt || new Date().toISOString(),
       type: body.type === "practice" ? "practice" : "league", data: body, updated_at: new Date().toISOString()
@@ -1928,6 +2052,8 @@ function startCloud(){
   cloud.col.orderBy("savedAt", "desc").limit(500).onSnapshot(function(snap){
     cloud.docs = snap.docs.map(function(d){ return d.data(); }).filter(Boolean);
     cloud.ready = true;
+    if (!sheetLg) loadLeagueSheet().then(function(){ syncSheetNights(); renderHistory(); if (!document.getElementById("view-home").classList.contains("hidden")) renderHome(); });
+    else syncSheetNights();
     renderHistory();
   }, function(e){
     cloud.col = null; cloud.ready = true; cloud.why = "the database reported \"" + ((e && e.code) || "an error") + "\"";
@@ -2211,6 +2337,7 @@ function saveNight(){
     }
     return;
   }
+  if (renderClash("night")) return;
   if (state.practice){ statusEl.textContent = "Test mode is on, so these scores are not being saved."; return; }
   state.night.saved = true; saveState();
   var doc = nightDoc(), what = plural(doc.scores.length, "game") + " saved to your " + (doc.type === "practice" ? "practice log" : "season history") + ".";
@@ -2254,6 +2381,7 @@ function renderNight(){
     row.appendChild(w); row.appendChild(rw);
     list.appendChild(row);
   });
+  renderClash("night");
   document.getElementById("night-add-label").textContent = "Game " + (n.scores.length + 1) + " score";
   renderNightTotals();
 }
@@ -2312,7 +2440,7 @@ function scoreModeChanged(e){
 var READ_MAX_EDGE = 1568;   // longest side sent to the reader, in pixels (its standard image size)
 function photoActive(){ return !!(state.setupDone && state.photoNight && Array.isArray(state.photoNight.games)); }
 function photoStep(name){
-  ["home", "crop", "wait", "pick", "confirm"].forEach(function(k){
+  ["home", "attach", "crop", "wait", "pick", "confirm"].forEach(function(k){
     document.getElementById("photo-" + k).classList.toggle("hidden", k !== name);
   });
   window.scrollTo(0, 0);
@@ -2349,6 +2477,7 @@ function renderPhoto(){
     row.appendChild(left); row.appendChild(right);
     list.appendChild(row);
   });
+  renderClash("photo");
   document.getElementById("photo-file-label").textContent = "Add Game " + (n.games.length + 1) + " from a photo";
   var total = 0; n.games.forEach(function(g){ total += g.finalScore; });
   document.getElementById("photo-total").textContent = n.games.length ? total : "—";
@@ -2389,6 +2518,7 @@ function savePhotoNight(){
     return;
   }
   statusEl.classList.remove("photo-error");
+  if (renderClash("photo")) return;
   if (state.practice){ statusEl.textContent = "Test mode is on, so these games are not being saved."; return; }
   n.saved = true; saveState();
   var doc = photoNightDoc(), what = plural(doc.games.length, "game") + " saved to your " + (doc.type === "practice" ? "practice log" : "season history") + ".";
@@ -2426,7 +2556,9 @@ function placeCropBox(){
   cropBox.style.left = (crop.x * 100) + "%"; cropBox.style.top = (crop.y * 100) + "%";
   cropBox.style.width = (crop.w * 100) + "%"; cropBox.style.height = (crop.h * 100) + "%";
 }
-document.getElementById("photo-file").addEventListener("change", function(e){
+document.getElementById("attach-file").addEventListener("change", onPhotoPicked);
+document.getElementById("photo-file").addEventListener("change", onPhotoPicked);
+function onPhotoPicked(e){
   var file = e.target.files && e.target.files[0];
   e.target.value = "";   // so picking the same photo again still counts as a change
   if (!file) return;
@@ -2437,7 +2569,7 @@ document.getElementById("photo-file").addEventListener("change", function(e){
   cropImg.onload = function(){ crop = { x: 0, y: 0, w: 1, h: 1 }; placeCropBox(); photoStep("crop"); };
   cropImg.onerror = function(){ document.getElementById("photo-status").textContent = "That picture couldn't be opened here. Try a different photo or a screenshot of it."; };
   cropImg.src = cropUrl;
-});
+}
 function cropPoint(e){
   var r = cropStage.getBoundingClientRect();
   return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
@@ -2469,7 +2601,7 @@ function endCropDrag(){ cropDrag = null; }
 cropStage.addEventListener("pointerup", endCropDrag);
 cropStage.addEventListener("pointercancel", endCropDrag);
 document.getElementById("crop-reset").addEventListener("click", function(e){ e.preventDefault(); crop = { x: 0, y: 0, w: 1, h: 1 }; placeCropBox(); });
-document.getElementById("crop-cancel").addEventListener("click", function(){ photoStep("home"); });
+document.getElementById("crop-cancel").addEventListener("click", photoBack);
 // the cropped part of the photo as a JPEG, sized for the reader: big photos are shrunk to
 // READ_MAX_EDGE on the long side, and a tight crop of a small photo is enlarged a little
 function croppedJpeg(){
@@ -2526,7 +2658,8 @@ document.getElementById("crop-go").addEventListener("click", function(){
     el.textContent = (READ_ERRORS[code] || "Couldn't read that photo just now. Check your connection and try again.") +
       (err && err.detail ? " (Details: " + err.detail + ")" : (err && err.message ? " (Details: " + String(err.message).slice(0, 80) + ")" : ""));
     el.classList.add("photo-error");
-    photoStep("home");
+    if (attach){ document.getElementById("attach-note").textContent = el.textContent; }
+    photoBack();
   });
 });
 function cleanName(s){ return String(s || "").trim().toUpperCase().replace(/\s+/g, " "); }
@@ -2542,7 +2675,7 @@ function showLinePicker(){
   });
   photoStep("pick");
 }
-document.getElementById("pick-cancel").addEventListener("click", function(){ photoStep("home"); });
+document.getElementById("pick-cancel").addEventListener("click", photoBack);
 
 // --- the check-and-fix scoresheet ---
 // A sheet is { marks: 10 arrays of single-character marks, splits: 10 booleans (the first ball
@@ -2614,7 +2747,8 @@ function marksToBalls(fi, marks){
 var sheet = null, sheetEditIdx = null;
 function openConfirm(s, editIdx, line){
   sheet = s; sheetEditIdx = editIdx;
-  var n = state.photoNight, gameNo = editIdx === null ? n.games.length + 1 : editIdx + 1;
+  var n = state.photoNight, gameNo = attach ? attach.game + 1 : (editIdx === null ? n.games.length + 1 : editIdx + 1);
+  sheet.official = attach ? seriesScores(attachNight())[attach.game] : null;
   document.getElementById("confirm-title").textContent = "Check Game " + gameNo;
   var sub = document.getElementById("confirm-sub"); sub.innerHTML = "";
   if (line){
@@ -2731,11 +2865,16 @@ function updateSheet(){
   } else {
     check.className = "check-line ok"; check.textContent = "Adds up to " + final + ".";
   }
+  var offSheet = sheet.ok && isNum(sheet.official) && final !== sheet.official;
+  if (sheet.ok && isNum(sheet.official)){
+    if (offSheet){ check.className = "check-line warn"; check.textContent += " The league sheet has " + sheet.official + " for this game. Check the frames, or that this is the right game."; }
+    else if (check.className.indexOf("ok") >= 0) check.textContent = check.textContent.replace(/\.$/, "") + ", and matches the league sheet.";
+  }
   save.disabled = !sheet.ok;
-  var mismatch = sheet.ok && (firstOff !== null || (screenFinal !== null && final !== screenFinal));
+  var mismatch = sheet.ok && (offSheet || firstOff !== null || (screenFinal !== null && final !== screenFinal));
   save.textContent = mismatch ? "Save anyway" : (sheetEditIdx === null ? "Save game" : "Save changes");
 }
-document.getElementById("confirm-cancel").addEventListener("click", function(){ sheet = null; photoStep("home"); });
+document.getElementById("confirm-cancel").addEventListener("click", function(){ sheet = null; photoBack(); });
 document.getElementById("confirm-save").addEventListener("click", function(){
   if (!sheet || !sheet.ok) return;
   var res = sheetResult(), g = newGame();
@@ -2747,6 +2886,7 @@ document.getElementById("confirm-save").addEventListener("click", function(){
   g.complete = true;
   g.finalScore = lastKnownScore(computeScoresFromFrames(g.frames));
   g.source = "photo";
+  if (attach){ sheet = null; attachSave(g); return; }
   var n = state.photoNight;
   if (sheetEditIdx === null) n.games.push(g); else n.games[sheetEditIdx] = g;
   sheet = null;
@@ -3260,6 +3400,690 @@ function fillProfileInputs(){
     if (el && document.activeElement !== el) el.value = profile[k];
   });
 }
+// ---------- league sheet (one league's official weekly results) ----------
+// Some leagues publish a weekly sheet with every bowler's games, the standings and the schedule.
+// For a league whose sheet is loaded into Bowling Bro', its bowlers get their league nights filled
+// in automatically and a Your League page their team shares. It is invisible to everyone else:
+// the data only reaches bowlers whose email is on that league's roster (checked by the server),
+// so for anyone not on a roster nothing here ever shows.
+var sheetLg = null;            // { data, me, admin } once loaded; null = not in a sheet league
+var sheetNotice = [], sheetWriting = {};          // weeks filled in from the sheet on this visit, for the notice
+function loadLeagueSheet(){
+  if (window.__bbLeagueFake){ sheetLg = window.__bbLeagueFake; return Promise.resolve(sheetLg); }
+  if (!sb || !sbUser) return Promise.resolve(null);
+  // the roster row says which league and which bowler this account is; row-level security
+  // returns nothing at all to an account that isn't on a roster
+  var email = String(sbUser.email || "").toLowerCase();
+  if (!email) return Promise.resolve(null);
+  return sb.from("bb_league_members").select("league_id, bowler_id, admin").eq("email", email).limit(1).then(function(r){
+    var m = r && !r.error && r.data && r.data[0];
+    if (!m) return null;
+    return sb.from("bb_league_weeks").select("week, data").eq("league_id", m.league_id).order("week").then(function(w){
+      if (!w || w.error || !w.data || !w.data.length) return null;
+      var last = w.data[w.data.length - 1].data;
+      var lg = { data: { id: m.league_id, name: last.leagueName, season: last.season, center: last.center, weeksInSeason: last.weeksInSeason,
+        weeks: w.data.map(function(x){ return x.data; }) }, me: m.bowler_id, admin: !!m.admin, members: [] };
+      if (!lg.admin){ sheetLg = lg; return lg; }
+      // the league's admin also sees who's on the roster
+      return sb.from("bb_league_members").select("name, bowler_id").eq("league_id", m.league_id).then(function(ms){
+        lg.members = (ms && !ms.error && ms.data) ? ms.data.map(function(x){ return { name: x.name || ("Bowler " + x.bowler_id) }; }) : [];
+        sheetLg = lg; return lg;
+      });
+    });
+  }).then(null, function(){ return null; });
+}
+function inSheetLeague(){ return !!sheetLg; }
+function sheetWeeks(){ return sheetLg.data.weeks; }
+function sheetLatest(){ var w = sheetWeeks(); return w[w.length - 1]; }
+function sheetBowler(week, id){ return (week.bowlers || []).filter(function(b){ return b.id === id; })[0] || null; }
+function sheetMyTeam(){ var b = sheetBowler(sheetLatest(), sheetLg.me); return b ? b.team : null; }
+function sheetTeamName(week, n){ return titleCase(week.teams[n] || ("Team " + n)); }
+function titleCase(s){ return String(s || "").toLowerCase().replace(/(^|[\s'-])([a-z])/g, function(m, a, b){ return a + b.toUpperCase(); }).replace(/\bX X X\b/i, "X X X").replace(/'S\b/g, "'s"); }
+function shortDate(iso){ var p = iso.split("-"); return Number(p[1]) + "/" + Number(p[2]); }
+function addDays(iso, n){ var p = iso.split("-"), d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]) + n); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+// the result line names teams in shortened form ("FINGER DEPTH CH", "XXX"); match on letters only
+function sheetTeamByShort(week, short){
+  var key = String(short).replace(/[^A-Z0-9]/gi, "").toUpperCase();
+  for (var n in week.teams){ if (String(week.teams[n]).replace(/[^A-Z0-9]/gi, "").toUpperCase().indexOf(key) === 0) return Number(n); }
+  return null;
+}
+// the bowler's league in the app that this sheet fills: the one marked with it, or the only one
+function sheetAppLeague(){
+  var marked = leagues().filter(function(l){ return l.sheetId === sheetLg.data.id; })[0];
+  return marked ? marked.id : (leagues().length === 1 ? leagues()[0].id : null);
+}
+// what it takes next week, the way the sheet works it out: the series that lifts the
+// whole-number average by one, and the one that drops it
+function sheetToRaise(b){ return (b.avg + 1) * (b.games + 3) - b.pins; }
+function sheetToDrop(b){ return b.avg * (b.games + 3) - b.pins - 1; }
+
+// --- filling in league nights ---
+// Every week the bowler bowled gets a league night. A night they already scored in the app counts
+// for that week when it falls in the seven days up to league night (pre-bowling included); if its
+// scores differ from the sheet it's flagged rather than changed. A filled-in night the bowler
+// deletes stays deleted.
+function nightIso(h){
+  var m = String(h.date || "").match(/^(\d+)\/(\d+)\/(\d{4})$/);
+  return m ? m[3] + "-" + ("0" + m[1]).slice(-2) + "-" + ("0" + m[2]).slice(-2) : String(h.savedAt || "").slice(0, 10);
+}
+function syncSheetNights(){
+  if (!inSheetLeague()) return;
+  var lgId = sheetAppLeague(); if (!lgId) return;
+  var mine = leagueNights(lgId), declined = state.sheetDeclined || [];
+  sheetNotice = [];
+  sheetWeeks().forEach(function(w){
+    var b = sheetBowler(w, sheetLg.me);
+    if (!b || !b.scores) return;
+    var from = addDays(w.date, -6);
+    var match = mine.filter(function(it){ var d = nightIso(it.h); return d >= from && d <= w.date; })[0];
+    if (match){
+      var sc = seriesScores(match.h).filter(isNum);
+      match.h._sheet = { week: w.week, scores: b.scores, same: sc.join(",") === b.scores.join(",") };
+      return;
+    }
+    var id = "sheet-" + sheetLg.data.id + "-w" + w.week;
+    if (declined.indexOf(id) >= 0 || sheetWriting[id]) return;
+    sheetWriting[id] = true;
+    var p = w.date.split("-"), total = b.scores[0] + b.scores[1] + b.scores[2];
+    var doc = { schema: 1, id: id, type: "league", leagueId: lgId, source: "sheet", sheetWeek: w.week,
+      savedAt: new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 23, 0, 0).toISOString(),
+      date: Number(p[1]) + "/" + Number(p[2]) + "/" + p[0], center: sheetLg.data.center, lanes: "",
+      scores: b.scores.slice(), total: total, average: (total / 3).toFixed(1), scoreOnly: true };
+    if (cloud.col) cloud.col.doc(id).set(doc).then(null, function(){ saveSeriesLocal(doc); });
+    else saveSeriesLocal(doc);
+    sheetNotice.push(w.week);
+  });
+}
+
+// --- Your League page ---
+function openLeaguePage(){ lgOpenWeek = null; lgMode = "main"; renderLeaguePage(); showView("league"); }   // every visit starts with all weeks closed
+function renderLeaguePage(){
+  var el = document.getElementById("league-body"); el.innerHTML = "";
+  if (!inSheetLeague()) return;
+  if (lgMode === "records"){ renderTeamRecords(el); return; }
+  var W = sheetLatest(), weeks = sheetWeeks(), prev = weeks.length > 1 ? weeks[weeks.length - 2] : null;
+  var myT = sheetMyTeam(), me = sheetBowler(W, sheetLg.me);
+  function card(title, sub){
+    var c = document.createElement("div"); c.className = "card lg-card";
+    if (title){ var h = document.createElement("h2"); h.textContent = title; c.appendChild(h); }
+    if (sub){ var s = document.createElement("p"); s.className = "lg-sub"; s.textContent = sub; c.appendChild(s); }
+    el.appendChild(c); return c;
+  }
+  function add(parent, tag, cls, text){ var n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; parent.appendChild(n); return n; }
+
+  // heading
+  var head = card(null);
+  add(head, "div", "lg-kicker", sheetLg.data.name + " · " + sheetLg.data.season);
+  add(head, "div", "lg-team", sheetTeamName(W, myT));
+  var stand = W.standings.filter(function(s){ return s.team === myT; })[0];
+  var prevStand = prev && prev.standings.filter(function(s){ return s.team === myT; })[0];
+  var move = prevStand ? prevStand.place - stand.place : 0;
+  add(head, "div", "lg-line", ordinal(stand.place) + " place · " + fmtPts(stand.won) + "–" + fmtPts(stand.lost) + " points" + (move ? (move > 0 ? " · up " + move : " · down " + (-move)) + " since last week" : ""));
+  var rb = add(head, "button", "full lg-records-btn", "Team records ›");
+  rb.addEventListener("click", function(){ lgMode = "records"; recTab = "individual"; renderLeaguePage(); window.scrollTo(0, 0); });
+  add(head, "div", "lg-fine", "From the league sheet for Week " + W.week + " of " + sheetLg.data.weeksInSeason + " (" + shortDate(W.date) + ")");
+  if (sheetNotice.length){
+    var nb = add(head, "div", "lg-notice");
+    nb.textContent = "Added to your history from the sheet: " + sheetNotice.map(function(wk){ var b = sheetBowler(weeks[wk - 1], sheetLg.me); return "Week " + wk + " (" + b.scores.join(", ") + ")"; }).join("; ") + ".";
+  }
+
+  // next up. On the Week N sheet, "Today" is Week N+1's lanes.
+  var nextWk = W.week + 1, games = (W.schedule[String(nextWk)] || []);
+  var mu = games.filter(function(g){ return g.teams.indexOf(myT) >= 0; })[0];
+  if (mu){
+    var opp = mu.teams[0] === myT ? mu.teams[1] : mu.teams[0];
+    var oppStand = W.standings.filter(function(s){ return s.team === opp; })[0];
+    var c2 = card("Next up · Week " + nextWk);
+    add(c2, "div", "lg-big", "vs " + sheetTeamName(W, opp));
+    add(c2, "div", "lg-line", "Thursday " + shortDate(addDays(W.date, 7)) + " · Lanes " + mu.lanes + " · they're " + ordinal(oppStand.place) + " (" + fmtPts(oppStand.won) + " points)");
+    var cols = add(c2, "div", "lg-vs");
+    [[myT, "Your team"], [opp, sheetTeamName(W, opp)]].forEach(function(t){
+      var side = add(cols, "div", "lg-side");
+      add(side, "div", "lg-side-h", t[1]);
+      var roster = recentRoster(t[0]), avgSum = 0, hcSum = 0;
+      roster.forEach(function(b){
+        avgSum += b.avg; hcSum += b.hdcp;
+        var r = add(side, "div", "lg-man" + (b.id === sheetLg.me ? " me" : ""));
+        add(r, "span", "", shortName(b.name)); add(r, "span", "lg-num", b.avg + (b.hdcp ? " +" + b.hdcp : ""));
+      });
+      var tot = add(side, "div", "lg-man lg-tot"); add(tot, "span", "", "Per game"); add(tot, "span", "lg-num", String(avgSum + hcSum));
+      t.push(avgSum + hcSum);
+    });
+    var mine = recentRoster(myT).reduce(function(s, b){ return s + b.avg + b.hdcp; }, 0), theirs = recentRoster(opp).reduce(function(s, b){ return s + b.avg + b.hdcp; }, 0);
+    add(c2, "p", "lg-fine", "Average plus handicap for the four who bowled most recently. " + (mine >= theirs ? "On paper you're " + (mine - theirs) + " pins a game ahead." : "On paper they're " + (theirs - mine) + " pins a game ahead."));
+    var h2h = headToHead(myT, opp);
+    var hb = add(c2, "div", "lg-h2h");
+    if (h2h.length){
+      add(hb, "div", "lg-h2h-h", "Last time you met");
+      h2h.slice().reverse().forEach(function(m){ meetingLine(hb, m); });
+    } else add(hb, "div", "lg-h2h-h", "First time you meet them this season.");
+    var then = (W.schedule[String(W.week + 2)] || []).filter(function(g){ return g.teams.indexOf(myT) >= 0; })[0];
+    if (then){
+      var opp2 = then.teams[0] === myT ? then.teams[1] : then.teams[0], m2 = headToHead(myT, opp2), last2 = m2[m2.length - 1];
+      add(c2, "p", "lg-fine", "Then Week " + (W.week + 2) + " (" + shortDate(addDays(W.date, 14)) + "): " + sheetTeamName(W, opp2) + ", lanes " + then.lanes +
+        (last2 ? ". " + (last2.us > last2.them ? "You beat them " : (last2.us < last2.them ? "They beat you " : "You split ")) + fmtPts(Math.max(last2.us, last2.them)) + "–" + fmtPts(Math.min(last2.us, last2.them)) + " in Week " + last2.week + "." : ". First meeting."));
+    }
+    if (me){
+      var tr = add(c2, "div", "lg-target");
+      add(tr, "b", "", "Your number: " + sheetToRaise(me));
+      add(tr, "span", "", " raises your league average to " + (me.avg + 1) + ". Under " + (sheetToDrop(me) + 1) + " drops it.");
+    }
+  }
+
+  // last week
+  var res = W.results.filter(function(r){ return sheetTeamByShort(W, r.a.name) === myT || sheetTeamByShort(W, r.b.name) === myT; })[0];
+  if (res){
+    var us = sheetTeamByShort(W, res.a.name) === myT ? res.a : res.b, them = us === res.a ? res.b : res.a;
+    var c3 = card("Last week · Week " + W.week);
+    var themN = sheetTeamByShort(W, them.name);
+    add(c3, "div", "lg-big", (us.won > them.won ? "Won " : (us.won < them.won ? "Lost, " : "Split, ")) + fmtPts(us.won) + " of " + fmtPts(us.won + them.won) + " points");
+    add(c3, "div", "lg-line", "vs " + sheetTeamName(W, themN) + " · handicap " + us.hdcpTotal + " to " + them.hdcpTotal);
+    var gl = add(c3, "div", "lg-games");
+    us.hdcpGames.forEach(function(g, i){ var chip = add(gl, "span", "lg-chip" + (g > them.hdcpGames[i] ? " win" : ""), "G" + (i + 1) + " " + g + "–" + them.hdcpGames[i]); });
+    var t = add(c3, "table", "lg-table"), hr = add(add(t, "thead"), "tr");
+    ["Bowler", "Series", "vs avg", "Avg"].forEach(function(x){ add(hr, "th", "", x); });
+    var tb = add(t, "tbody");
+    teamBowlers(W, myT).filter(function(b){ return b.scores; }).sort(function(a, b){ return sum(b.scores) - b.avg * 3 - (sum(a.scores) - a.avg * 3); }).forEach(function(b){
+      var pb = prev && sheetBowler(prev, b.id), before = pb && pb.games ? pb.avg : null, diff = sum(b.scores) - (before === null ? b.avg : before) * 3;
+      var r = add(tb, "tr", b.id === sheetLg.me ? "me" : "");
+      add(r, "td", "", firstLast(b.name)); add(r, "td", "", sum(b.scores));
+      add(r, "td", diff >= 0 ? "good" : "bad", (diff >= 0 ? "+" : "") + diff);
+      add(r, "td", "", b.avg);
+    });
+    add(c3, "p", "lg-fine", "vs avg compares each series with that bowler's average going in.");
+  }
+
+  // the season, week by week: newest first; tap a week to see that night
+  var tw = teamWeeks(myT);
+  if (tw.length){
+    var c6 = card("Week by week", "Tap a week for the night's details");
+    var wt = add(c6, "table", "lg-table lg-weeks"), wh = add(add(wt, "thead"), "tr");
+    ["Wk", "Opponent", "Points", "Hdcp", "Scratch", "Place"].forEach(function(x){ add(wh, "th", "", x); });
+    var wb = add(wt, "tbody");
+    tw.slice().reverse().forEach(function(m){
+      var r = add(wb, "tr", "lg-wk" + (lgOpenWeek === m.week ? " open" : ""));
+      add(r, "td", "", m.week);
+      add(r, "td", "lg-name", sheetTeamName(W, m.opp));
+      add(r, "td", "lg-pts-cell", (m.us > m.them ? "W " : (m.us < m.them ? "L " : "T ")) + fmtPts(m.us) + "–" + fmtPts(m.them));
+      add(r, "td", "", m.hdcp); add(r, "td", "", m.scratch || "");
+      add(r, "td", "", ordinal(m.place));
+      r.addEventListener("click", function(){ lgOpenWeek = lgOpenWeek === m.week ? null : m.week; renderLeaguePage(); });
+      if (lgOpenWeek === m.week){
+        var dr = add(wb, "tr", "lg-detail"), dc = add(dr, "td"); dc.colSpan = 6;
+        meetingLine(dc, m, true);
+        var bt = add(dc, "table", "lg-men");
+        var bh = bt.insertRow(); ["", "G1", "G2", "G3", "Series", "Pts"].forEach(function(x){ var th = document.createElement("th"); th.textContent = x; bh.appendChild(th); });
+        m.men.forEach(function(b){
+          var br = bt.insertRow(); if (b.id === sheetLg.me) br.className = "mine";
+          br.insertCell().textContent = shortName(b.name);
+          b.scores.forEach(function(sc, gi){ var c = br.insertCell(); c.textContent = sc; if (b.won && b.won[gi]) c.className = "win"; });
+          br.insertCell().textContent = sum(b.scores);
+          br.insertCell().textContent = b.pts === null ? "" : fmtPts(b.pts) + "/4";
+        });
+        if (m.men.some(function(b){ return !b.won && b.pts !== null; })) add(dc, "p", "lg-fine", "Bold: individual games won. The sheet only gives each bowler's points, so where it doesn't show which games they took, none are bolded.");
+        else add(dc, "p", "lg-fine", "Bold: individual games won.");
+      }
+    });
+    var tot = tw.reduce(function(a, m){ a.us += m.us; a.them += m.them; a.won += m.gamesWon; return a; }, { us: 0, them: 0, won: 0 });
+    var best = tw.slice().sort(function(a, b){ return b.hdcp - a.hdcp; })[0];
+    add(c6, "p", "lg-fine", "Season: " + fmtPts(tot.us) + "–" + fmtPts(tot.them) + " in points, " + tot.won + " of " + (tw.length * 3) + " games won. Best night: Week " + best.week + ", " + best.hdcp + " handicap vs " + sheetTeamName(W, best.opp) + ".");
+    // record against each team
+    var rec = {};
+    tw.forEach(function(m){ var x = rec[m.opp] = rec[m.opp] || { met: 0, us: 0, them: 0 }; x.met++; x.us += m.us; x.them += m.them; });
+    var rt = add(c6, "table", "lg-table lg-rec"), rh = add(add(rt, "thead"), "tr");
+    ["Against", "Met", "Points"].forEach(function(x){ add(rh, "th", "", x); });
+    var rb = add(rt, "tbody");
+    W.standings.filter(function(s){ return s.team !== myT; }).forEach(function(s){
+      var x = rec[s.team], r = add(rb, "tr");
+      add(r, "td", "lg-name", sheetTeamName(W, s.team));
+      add(r, "td", "", x ? x.met : "—");
+      add(r, "td", "lg-pts-cell", x ? (x.us > x.them ? "W " : (x.us < x.them ? "L " : "T ")) + fmtPts(x.us) + "–" + fmtPts(x.them) : "not yet");
+    });
+  }
+
+  // standings
+  var c4 = card("Standings", "After Week " + W.week);
+  var st = add(c4, "table", "lg-table lg-stand"), sh = add(add(st, "thead"), "tr");
+  ["", "Team", "Won", "Lost", "Win %"].forEach(function(x){ add(sh, "th", "", x); });
+  var sb2 = add(st, "tbody");
+  W.standings.forEach(function(s){
+    var ps = prev && prev.standings.filter(function(x){ return x.team === s.team; })[0], mv = ps ? ps.place - s.place : 0;
+    var r = add(sb2, "tr", s.team === myT ? "me" : "");
+    var pc = add(r, "td", "lg-place", String(s.place));
+    if (mv) add(pc, "span", mv > 0 ? "up" : "down", mv > 0 ? " ▲" : " ▼");
+    add(r, "td", "lg-name", sheetTeamName(W, s.team));
+    add(r, "td", "", fmtPts(s.won)); add(r, "td", "", fmtPts(s.lost)); add(r, "td", "", s.pctWon.toFixed(1));
+  });
+  var lead = W.standings[0];
+  if (lead.team !== myT) add(c4, "p", "lg-fine", fmtPts(lead.won - stand.won) + " points behind " + sheetTeamName(W, lead.team) + " with " + (sheetLg.data.weeksInSeason - W.week) + " weeks to go. Each week is worth 36 points.");
+  c4.appendChild(pointsRace(myT));
+
+  // the team
+  var c5 = card("Your team", "League averages from the sheet");
+  var tt = add(c5, "table", "lg-table"), th = add(add(tt, "thead"), "tr");
+  ["Bowler", "Avg", "vs Wk 1", "Hdcp", "To raise"].forEach(function(x){ add(th, "th", "", x); });
+  var tbd = add(tt, "tbody");
+  teamBowlers(W, myT).filter(function(b){ return b.games; }).sort(function(a, b){ return b.avg - a.avg; }).forEach(function(b){
+    var firstAvg = null;
+    weeks.forEach(function(w){ var x = sheetBowler(w, b.id); if (firstAvg === null && x && x.games) firstAvg = x.avg; });
+    var r = add(tbd, "tr", b.id === sheetLg.me ? "me" : ""), d = b.avg - firstAvg;
+    add(r, "td", "", firstLast(b.name)); add(r, "td", "", b.avg);
+    add(r, "td", d > 0 ? "good" : (d < 0 ? "bad" : ""), d ? (d > 0 ? "+" : "") + d : "—");
+    add(r, "td", "", b.hdcp); add(r, "td", "", sheetToRaise(b));
+  });
+  var recs = teamRecords(myT);
+  if (recs.length) add(c5, "p", "lg-fine", "League season highs held by your team: " + recs.join("; ") + ".");
+}
+// --- Team Records: every record the sheets can give, for the team and its bowlers only ---
+var lgMode = "main", recTab = "individual";
+function teamGameLog(team){
+  // one entry per bowler per week: games, series, handicap and average going in, points won
+  var weeks = sheetWeeks(), log = [];
+  weeks.forEach(function(w, wi){
+    var prev = wi ? weeks[wi - 1] : null;
+    teamBowlers(w, team).forEach(function(b){
+      if (!b.scores) return;
+      var pb = prev && sheetBowler(prev, b.id), has = pb && pb.games;
+      log.push({ week: w.week, date: w.date, id: b.id, name: b.name, scores: b.scores, series: sum(b.scores),
+        avgIn: has ? pb.avg : null, hcIn: has ? pb.hdcp : null,
+        pts: typeof b.mp === "number" ? b.mp - (pb && typeof pb.mp === "number" ? pb.mp : 0) : null });
+    });
+  });
+  return log;
+}
+function renderTeamRecords(el){
+  var W = sheetLatest(), myT = sheetMyTeam(), tw = teamWeeks(myT), log = teamGameLog(myT);
+  var men = teamBowlers(W, myT).filter(function(b){ return b.games; });
+  function add(parent, tag, cls, text){ var n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; parent.appendChild(n); return n; }
+  // a card belongs to one side of the Individual | Team switch; the other side's cards are built but not shown
+  function card(title, sub, tab){
+    var c = document.createElement("div"); c.className = "card lg-card";
+    if (!tab || tab === recTab) el.appendChild(c);
+    add(c, "h2", "", title); if (sub) add(c, "p", "lg-sub", sub); return c;
+  }
+  function opp(wk){ var m = tw.filter(function(x){ return x.week === wk; })[0]; return m ? "vs " + sheetTeamName(W, m.opp) : ""; }
+  function rec(c, label, value, who, when){
+    var r = add(c, "div", "rec-row");
+    var l = add(r, "div", "rec-l"); add(l, "div", "rec-label", label); if (when) add(l, "div", "rec-when", when);
+    var v = add(r, "div", "rec-v"); add(v, "div", "rec-value", value); if (who) add(v, "div", "rec-who", who);
+  }
+  // best (or worst) of a list, with every tie
+  function top(list, f, low){
+    var best = null;
+    list.forEach(function(x){ var v = f(x); if (v === null || v === undefined) return; if (best === null || (low ? v < best : v > best)) best = v; });
+    return { v: best, all: list.filter(function(x){ return f(x) === best; }) };
+  }
+  function names(xs){ var seen = {}; return xs.filter(function(x){ if (seen[x.id]) return false; seen[x.id] = 1; return true; }).map(function(x){ return shortName(x.name); }).join(", "); }
+  function wks(xs){ return xs.map(function(x){ return "Week " + x.week + " " + opp(x.week); }).join("; "); }
+
+  var back = add(el, "button", "full lg-back", "‹ Your League"); back.style.marginBottom = "12px";
+  back.addEventListener("click", function(){ lgMode = "main"; renderLeaguePage(); window.scrollTo(0, 0); });
+  var head = add(el, "div", "card lg-card");
+  add(head, "div", "lg-kicker", "Team records · " + sheetLg.data.season);
+  add(head, "div", "lg-team", sheetTeamName(W, myT));
+  add(head, "div", "lg-fine", "Through Week " + W.week + " · " + plural(log.length, "series") + " bowled by " + plural(men.length, "bowler") + ". Only your team; nothing from other teams' bowlers.");
+  var tg = add(el, "div", "row lg-toggle");
+  [["individual", "Individual"], ["team", "Team"]].forEach(function(t){
+    var w = add(tg, "div"), b = add(w, "button", "full" + (recTab === t[0] ? " primary" : ""), t[1]);
+    b.addEventListener("click", function(){ recTab = t[0]; renderLeaguePage(); });
+  });
+
+  function sub(c, text){ add(c, "div", "rec-sub", text); }
+  // team: single games first, then whole matches
+  var c1 = card("Team highs", "Scratch is pins knocked down; handicap is what the league counts", "team");
+  var games = []; tw.forEach(function(m){ m.games.forEach(function(g, i){ games.push({ week: m.week, g: i + 1, v: g, opp: m.oppGames[i], scr: sum(m.men.map(function(x){ return x.scores[i]; })) }); }); });
+  var won = games.filter(function(x){ return x.v > x.opp; }), lost = games.filter(function(x){ return x.v < x.opp; });
+  function gameWhen(xs){ return xs.map(function(x){ return "Week " + x.week + " Game " + x.g + " " + opp(x.week); }).join("; "); }
+  sub(c1, "Games");
+  var sg = top(games, function(x){ return x.scr; }); rec(c1, "High scratch game", sg.v, "", gameWhen(sg.all));
+  var hg = top(games, function(x){ return x.v; }); rec(c1, "High handicap game", hg.v, "", gameWhen(hg.all));
+  var bg = top(won, function(x){ return x.v - x.opp; }); if (bg.v !== null) rec(c1, "Biggest game win", "by " + bg.v, "", gameWhen(bg.all));
+  var cw = top(won, function(x){ return x.v - x.opp; }, true), cl = top(lost, function(x){ return x.opp - x.v; }, true);
+  if (cw.v !== null) rec(c1, "Closest win", "by " + cw.v, "", cw.all.map(function(x){ return "Week " + x.week + " Game " + x.g + ", " + x.v + "–" + x.opp; }).join("; "));
+  if (cl.v !== null) rec(c1, "Closest loss", "by " + cl.v, "", cl.all.map(function(x){ return "Week " + x.week + " Game " + x.g + ", " + x.v + "–" + x.opp; }).join("; "));
+  rec(c1, "Games won", won.length + " of " + games.length, "", Math.round(100 * won.length / games.length) + "%");
+  sub(c1, "Matches");
+  var ss = top(tw, function(m){ return m.scratch; }); rec(c1, "High scratch series", ss.v, "", wks(ss.all));
+  var hs = top(tw, function(m){ return m.hdcp; }); rec(c1, "High handicap series", hs.v, "", wks(hs.all));
+  var bw = top(tw, function(m){ return m.us - m.them; }); rec(c1, "Biggest win", fmtPts(bw.all[0].us) + "–" + fmtPts(bw.all[0].them), "", wks(bw.all));
+  var bl = top(tw, function(m){ return m.us - m.them; }, true); if (bl.v < 0) rec(c1, "Toughest night", fmtPts(bl.all[0].us) + "–" + fmtPts(bl.all[0].them), "", wks(bl.all));
+  var streak = 0, best = 0; tw.forEach(function(m){ streak = m.us > m.them ? streak + 1 : 0; best = Math.max(best, streak); });
+  rec(c1, "Longest winning streak", plural(best, "week"), "", streak ? "Current: " + plural(streak, "week") : "");
+  var sweeps = tw.filter(function(m){ return m.gamesWon === 3; }); rec(c1, "Clean sweeps (all 3 games)", sweeps.length, "", sweeps.length ? wks(sweeps) : "Not yet");
+  var mw = tw.filter(function(m){ return m.us > m.them; }).length; rec(c1, "Matches won", mw + " of " + tw.length, "", fmtPts(tw.reduce(function(a, m){ return a + m.us; }, 0)) + " points");
+
+  // individuals: the same split
+  var c2 = card("Individual highs", "", "individual");
+  var allG = []; log.forEach(function(x){ x.scores.forEach(function(s, i){ allG.push({ id: x.id, name: x.name, week: x.week, g: i + 1, v: s, hc: x.hcIn, avgIn: x.avgIn }); }); });
+  function indiv(label, list, f, fmt, low){
+    var t = top(list, f, low); if (t.v === null) return;
+    rec(c2, label, fmt ? fmt(t.v) : t.v, names(t.all), t.all.map(function(x){ return "Week " + x.week + (x.g ? " Game " + x.g : ""); }).join("; "));
+  }
+  sub(c2, "Games");
+  indiv("High scratch game", allG, function(x){ return x.v; });
+  indiv("High handicap game", allG, function(x){ return x.hc === null ? null : x.v + x.hc; });
+  indiv("Most over average", allG, function(x){ return x.avgIn === null ? null : x.v - x.avgIn; }, function(v){ return "+" + v; });
+  sub(c2, "Matches");
+  indiv("High scratch series", log, function(x){ return x.series; });
+  indiv("High handicap series", log, function(x){ return x.hcIn === null ? null : x.series + 3 * x.hcIn; });
+  indiv("Most over average", log, function(x){ return x.avgIn === null ? null : x.series - 3 * x.avgIn; }, function(v){ return "+" + v; });
+  // nights a bowler took all 4 individual points, counted per bowler
+  var perfect = log.filter(function(x){ return x.pts === 4; }), byWho = {};
+  perfect.forEach(function(x){ (byWho[x.id] = byWho[x.id] || { name: x.name, wks: [] }).wks.push(x.week); });
+  rec(c2, "Perfect nights (4 of 4 points)", perfect.length, "", Object.keys(byWho).map(function(id){ var w = byWho[id]; return shortName(w.name) + " (Wk " + w.wks.join(", ") + ")"; }).sort().join(" · ") || "Not yet");
+  indiv("Week of shame", log, function(x){ return x.series; }, null, true);
+
+  // leaderboard
+  var c3 = card("Leaderboard", "Season to date, scratch", "individual");
+  var t = add(c3, "table", "lg-table rec-board"), hr = add(add(t, "thead"), "tr");
+  ["", "Avg", "High", "Series", "200s", "Pts", "Over avg"].forEach(function(x){ add(hr, "th", "", x); });
+  var tb = add(t, "tbody");
+  var rows = men.map(function(b){
+    var mine = log.filter(function(x){ return x.id === b.id; }), gs = allG.filter(function(x){ return x.id === b.id; });
+    var withAvg = gs.filter(function(x){ return x.avgIn !== null; });
+    return { b: b, hi: Math.max.apply(null, gs.map(function(x){ return x.v; })), hs: Math.max.apply(null, mine.map(function(x){ return x.series; })),
+      two: gs.filter(function(x){ return x.v >= 200; }).length, pts: b.mp || 0,
+      over: withAvg.length ? Math.round(100 * withAvg.filter(function(x){ return x.v > x.avgIn; }).length / withAvg.length) : null };
+  }).sort(function(a, z){ return z.b.avg - a.b.avg; });
+  function mark(list, f){ var m = Math.max.apply(null, list.map(f)); return function(x){ return f(x) === m && m > 0; }; }
+  var isHi = mark(rows, function(r){ return r.hi; }), isHs = mark(rows, function(r){ return r.hs; }), isTwo = mark(rows, function(r){ return r.two; }), isPts = mark(rows, function(r){ return r.pts; }), isOver = mark(rows, function(r){ return r.over || 0; }), isAvg = mark(rows, function(r){ return r.b.avg; });
+  rows.forEach(function(r){
+    var tr = add(tb, "tr", r.b.id === sheetLg.me ? "mine" : "");
+    add(tr, "td", "", shortName(r.b.name));
+    add(tr, "td", isAvg(r) ? "win" : "", r.b.avg); add(tr, "td", isHi(r) ? "win" : "", r.hi); add(tr, "td", isHs(r) ? "win" : "", r.hs);
+    add(tr, "td", isTwo(r) ? "win" : "", r.two); add(tr, "td", isPts(r) ? "win" : "", fmtPts(r.pts)); add(tr, "td", isOver(r) ? "win" : "", r.over === null ? "—" : r.over + "%");
+  });
+  if (c3.parentNode && c2.parentNode) el.insertBefore(c3, c2);   // Individual leads with the leaderboard
+  add(c3, "p", "lg-fine", "Bold: team best. Over avg: share of games above that bowler's average going in (from Week 2). Pts: individual points won.");
+
+  // the season so far, per bowler
+  var c4 = card("Most improved", "League average now vs. after Week 1", "individual");
+  men.map(function(b){
+    var first = null; sheetWeeks().forEach(function(w){ var x = sheetBowler(w, b.id); if (first === null && x && x.games) first = x.avg; });
+    return { b: b, d: b.avg - first, first: first };
+  }).sort(function(a, z){ return z.d - a.d; }).forEach(function(x){
+    rec(c4, shortName(x.b.name), (x.d > 0 ? "+" : "") + x.d, "", x.first + " → " + x.b.avg);
+  });
+
+  // around the league
+  var c5 = card("Around the league", "Where you stand among all " + W.bowlers.filter(function(b){ return b.games >= 9; }).length + " bowlers with 9+ games", "individual");
+  var ranked = W.bowlers.filter(function(b){ return b.games >= 9; }).sort(function(a, z){ return z.avg - a.avg; });
+  men.slice().sort(function(a, z){ return z.avg - a.avg; }).forEach(function(b){
+    var i = ranked.map(function(x){ return x.id; }).indexOf(b.id);
+    rec(c5, shortName(b.name), i >= 0 ? ordinal(i + 1) : "—", "", "by average (" + b.avg + ")");
+  });
+  var c7 = card("Around the league", "Your team among all " + W.standings.length + " teams", "team");
+  var sp = W.standings.slice().sort(function(a, z){ return z.scratchPins - a.scratchPins; }), myS = W.standings.filter(function(s){ return s.team === myT; })[0];
+  var hp = W.standings.slice().sort(function(a, z){ return z.hdcpPins - a.hdcpPins; });
+  rec(c7, "Standings", ordinal(myS.place) + " of " + W.standings.length, "", fmtPts(myS.won) + " points won");
+  rec(c7, "Scratch pins", ordinal(sp.indexOf(myS) + 1) + " of " + sp.length, "", myS.scratchPins.toLocaleString() + " pins");
+  rec(c7, "Handicap pins", ordinal(hp.indexOf(myS) + 1) + " of " + hp.length, "", myS.hdcpPins.toLocaleString() + " pins");
+  var recs = teamRecords(myT); if (recs.length) rec(c7, "League season highs held", recs.length, "", recs.join("; "));
+}
+
+function sum(a){ return a.reduce(function(s, x){ return s + x; }, 0); }
+var lgOpenWeek = null;
+// every week's result for one team, from each week's own sheet
+function teamWeeks(team){
+  var weeks = sheetWeeks(), out = [];
+  weeks.forEach(function(w, wi){
+    w.results.forEach(function(r){
+      var a = sheetTeamByShort(w, r.a.name), b = sheetTeamByShort(w, r.b.name);
+      if (a !== team && b !== team) return;
+      var us = a === team ? r.a : r.b, them = a === team ? r.b : r.a, prev = wi ? weeks[wi - 1] : null;
+      var men = teamBowlers(w, team).filter(function(x){ return x.scores; }).map(function(x){
+        var pb = prev && sheetBowler(prev, x.id);
+        // individual points that night: the sheet lists each bowler's season total, so it's the change
+        var pts = typeof x.mp === "number" ? x.mp - (pb && typeof pb.mp === "number" ? pb.mp : 0) : null;
+        return { id: x.id, name: x.name, scores: x.scores, before: pb && pb.games ? pb.avg : null, pts: pts, won: x.won || null };
+      });
+      var st = w.standings.filter(function(s){ return s.team === team; })[0];
+      out.push({ week: w.week, date: w.date, opp: a === team ? b : a, us: us.won, them: them.won,
+        games: us.hdcpGames, oppGames: them.hdcpGames, hdcp: us.hdcpTotal, oppHdcp: them.hdcpTotal,
+        gamesWon: us.hdcpGames.filter(function(g, i){ return g > them.hdcpGames[i]; }).length,
+        scratch: sum(men.map(function(m){ return sum(m.scores); })), men: men, place: st ? st.place : null });
+    });
+  });
+  return out;
+}
+function headToHead(team, opp){ return teamWeeks(team).filter(function(m){ return m.opp === opp; }); }
+// a meeting as a small scoreboard: the result, then both teams' handicap games and series in two
+// rows, with the higher score in each column in bold
+function meetingLine(parent, m, noWeek){
+  var W = sheetLatest(), d = document.createElement("div"); d.className = "lg-meet";
+  var res = m.us > m.them ? "Won " : (m.us < m.them ? "Lost " : "Split ");
+  var head = document.createElement("div"); head.className = "lg-meet-h";
+  head.textContent = (noWeek ? "" : "Week " + m.week + " (" + shortDate(m.date) + ") · ") + res + fmtPts(m.us) + "–" + fmtPts(m.them);
+  d.appendChild(head);
+  var t = document.createElement("table"); t.className = "lg-board";
+  var hr = t.insertRow(); ["", "G1", "G2", "G3", "Series", "Pts"].forEach(function(x){ var th = document.createElement("th"); th.textContent = x; hr.appendChild(th); });
+  [[sheetTeamName(W, sheetMyTeam()), m.games.concat([m.hdcp]), m.oppGames.concat([m.oppHdcp])], [sheetTeamName(W, m.opp), m.oppGames.concat([m.oppHdcp]), m.games.concat([m.hdcp])]].forEach(function(row){
+    var r = t.insertRow(), n = r.insertCell(); n.textContent = row[0]; n.className = "lg-board-team";
+    row[1].forEach(function(v, i){ var c = r.insertCell(); c.textContent = v; if (v > row[2][i]) c.className = "win"; });
+    r.insertCell();
+  });
+  // points won, in the same column as each bowler's points below it
+  t.rows[1].cells[5].textContent = fmtPts(m.us); t.rows[2].cells[5].textContent = fmtPts(m.them);
+  d.appendChild(t);
+  parent.appendChild(d);
+}
+function fmtPts(n){ return (Math.floor(n) === n ? String(n) : Math.floor(n) + "½").replace(/^0½$/, "½"); }
+function ordinal(n){ return n + (n % 10 === 1 && n !== 11 ? "st" : n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : "th"); }
+function firstLast(name){ var p = String(name).split(/\s+/).filter(function(x){ return !/^[A-Z]\.$/.test(x); }); return titleCase(p.join(" ")); }
+function shortName(name){ var p = firstLast(name).split(" "); return p.length > 1 ? p[0] + " " + p[p.length - 1].charAt(0) + "." : p[0]; }
+function teamBowlers(week, team){ return (week.bowlers || []).filter(function(b){ return b.team === team; }); }
+// the four who bowled most recently for a team (a team bowls four a night)
+function recentRoster(team){
+  var weeks = sheetWeeks(), last = {}, out = [];
+  weeks.forEach(function(w){ teamBowlers(w, team).forEach(function(b){ if (b.scores) last[b.id] = w.week; }); });
+  var latest = teamBowlers(sheetLatest(), team).filter(function(b){ return last[b.id]; });
+  latest.sort(function(a, b){ return (last[b.id] - last[a.id]) || (b.games - a.games); });
+  return latest.slice(0, 4);
+}
+function teamRecords(team){
+  var W = sheetLatest(), out = [], best = {};
+  sheetWeeks().forEach(function(w){
+    w.results.forEach(function(r){
+      [r.a, r.b].forEach(function(s){
+        var n = sheetTeamByShort(w, s.name);
+        var g = Math.max.apply(null, s.hdcpGames);
+        if (!best.game || g > best.game.v) best.game = { v: g, t: n, wk: w.week };
+        if (!best.series || s.hdcpTotal > best.series.v) best.series = { v: s.hdcpTotal, t: n, wk: w.week };
+      });
+    });
+  });
+  if (best.game && best.game.t === team) out.push("handicap game " + best.game.v + " (Week " + best.game.wk + ")");
+  if (best.series && best.series.t === team) out.push("handicap series " + best.series.v + " (Week " + best.series.wk + ")");
+  return out;
+}
+// points won by every team, week by week; the bowler's team drawn in colour, the rest in grey
+function pointsRace(myT){
+  var weeks = sheetWeeks(), W = 320, H = 150, L = 30, R = 10, T = 10, B = 22;
+  var maxPts = 0;
+  weeks.forEach(function(w){ w.standings.forEach(function(s){ maxPts = Math.max(maxPts, s.won); }); });
+  maxPts = Math.ceil(maxPts / 25) * 25;
+  var x = function(i){ return L + (weeks.length === 1 ? 0 : i * (W - L - R) / (weeks.length - 1)); };
+  var y = function(v){ return T + (1 - v / maxPts) * (H - T - B); };
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Points won by each team, week by week">';
+  for (var g = 0; g <= maxPts; g += 50) svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(g) + '" y2="' + y(g) + '" stroke="#e8e6dc"/><text x="' + (L - 5) + '" y="' + (y(g) + 4) + '" font-size="10" text-anchor="end" fill="#8f8c80">' + g + '</text>';
+  weeks.forEach(function(w, i){ svg += '<text x="' + x(i) + '" y="' + (H - 6) + '" font-size="10" text-anchor="middle" fill="#8f8c80">' + w.week + '</text>'; });
+  var teams = weeks[0].standings.map(function(s){ return s.team; }), leader = sheetLatest().standings[0].team;
+  teams.sort(function(a){ return a === myT ? 1 : (a === leader ? 0 : -1); }).forEach(function(t){
+    var pts = weeks.map(function(w, i){ var s = w.standings.filter(function(z){ return z.team === t; })[0]; return [x(i), y(s ? s.won : 0)]; });
+    var col = t === myT ? "var(--nav, #2f6fed)" : (t === leader ? "#8f8c80" : "#d8d5c8");
+    svg += '<path d="' + pts.map(function(p, i){ return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ") + '" fill="none" stroke="' + col + '" stroke-width="' + (t === myT ? 3 : (t === leader ? 2 : 1.5)) + '" stroke-linejoin="round"/>';
+    if (t === myT || t === leader){ var l = pts[pts.length - 1]; svg += '<circle cx="' + l[0] + '" cy="' + l[1] + '" r="3.5" fill="' + col + '"/>'; }
+  });
+  svg += "</svg>";
+  var wrap = document.createElement("div"); wrap.className = "lg-race";
+  wrap.innerHTML = '<div class="lg-race-h">Points by week</div>' + svg +
+    '<div class="lg-legend"><span><i style="background:var(--nav, #2f6fed)"></i>' + titleCase(sheetLatest().teams[myT]) + '</span><span><i style="background:#8f8c80"></i>' + titleCase(sheetLatest().teams[leader]) + ' (1st)</span><span><i style="background:#d8d5c8"></i>Everyone else</span></div>';
+  return wrap;
+}
+
+// --- photos for a night that came from the sheet (or any scores-only league night) ---
+// Each game can get its scoreboard photo afterwards. The read is checked against the scoreboard's
+// own running totals as usual, and against the game's score on the sheet.
+var attach = null;   // { id, it } while adding photos to a saved night
+function openAttach(it){
+  attach = { id: it.h.id, it: it };
+  renderAttach(); photoStep("attach"); showView("photo");
+  setPlaceLabel("history");
+  document.getElementById("game-label").textContent = "Game Photos";
+}
+function attachNight(){ var f = allSeries().filter(function(x){ return x.h.id === attach.id; })[0]; return f ? f.h : attach.it.h; }
+function renderAttach(){
+  var h = attachNight(), sc = seriesScores(h).filter(isNum), list = document.getElementById("attach-games");
+  document.getElementById("attach-sub").textContent = (h.sheetWeek ? "Week " + h.sheetWeek + " · " : "") + (h.date || "") + (h.source === "sheet" ? " · scores from the league sheet" : "");
+  list.innerHTML = "";
+  sc.forEach(function(score, i){
+    var g = h.games && h.games[i] && h.games[i].frames ? h.games[i] : null;
+    var row = document.createElement("div"); row.className = "photo-game";
+    var left = document.createElement("div");
+    left.innerHTML = "<div>Game " + (i + 1) + " &nbsp;<span class=\"pg-score\">" + score + "</span></div>";
+    var meta = document.createElement("div"); meta.className = "pg-meta";
+    if (g){ var s = computeGameStats(g); meta.textContent = "✓ Photo added · " + plural(s.strikes, "strike") + " · " + s.spares + " of " + s.spareOpportunities + " spares" + (s.opens ? " · " + plural(s.opens, "open") : " · clean"); meta.style.color = "#1d7a46"; }
+    else meta.textContent = "No photo yet";
+    left.appendChild(meta);
+    var btn = document.createElement("label"); btn.className = "btn-label " + (g ? "secondary" : "primary") + " attach-pick"; btn.setAttribute("for", "attach-file");
+    btn.textContent = g ? "Redo" : "Add photo";
+    btn.addEventListener("click", function(){ attach.game = i; });
+    row.appendChild(left); row.appendChild(btn);
+    list.appendChild(row);
+  });
+  var have = (h.games || []).filter(function(g){ return g && g.frames; }).length;
+  document.getElementById("attach-note").textContent = have
+    ? plural(have, "game") + " of " + sc.length + " now count toward Shot Stats."
+    : "A photo of each game adds strike %, spare %, opens and splits for this night.";
+}
+function attachSave(g){
+  var h = attachNight(), sc = seriesScores(h).filter(isNum);
+  var games = [];
+  for (var i = 0; i < sc.length; i++) games.push(h.games && h.games[i] && h.games[i].frames ? h.games[i] : null);
+  games[attach.game] = g;
+  h.games = games; h.scores = sc;
+  h.scoreOnly = !games.some(function(x){ return x; });
+  saveNightDoc(h);
+  renderAttach(); photoStep("attach");
+}
+// save a changed night, leaving out the in-memory notes (anything starting with "_")
+function saveNightDoc(h){
+  var doc = {}; Object.keys(h).forEach(function(k){ if (k.charAt(0) !== "_") doc[k] = h[k]; });
+  if (cloud.col) cloud.col.doc(doc.id).set(doc).then(null, function(){ saveSeriesLocal(doc); });
+  else saveSeriesLocal(doc);
+}
+// History: a night whose scores differ from the sheet can take the sheet's. Game photos whose
+// score still matches stay; any that don't are dropped, since their frames no longer add up.
+function useSheetScores(it){
+  var h = it.h, sc = h._sheet.scores.slice(), old = h.games || [];
+  var games = sc.map(function(v, i){ var g = old[i]; return g && g.frames && g.finalScore === v ? g : null; });
+  var total = sum(sc);
+  h.scores = sc; h.total = total; h.average = (total / sc.length).toFixed(1);
+  if (games.some(function(g){ return g; })){ h.games = games; h.scoreOnly = false; } else { delete h.games; h.scoreOnly = true; }
+  h._sheet.same = true;
+  saveNightDoc(h);
+  editKey = null; editDraft = null;
+  document.getElementById("csv-status").textContent = "Updated to the league sheet's scores.";
+  renderHistory();
+}
+// One league night per week: if the date being scored falls in a week the sheet has already
+// filled in, the games go onto that night instead of a second one.
+function sheetClash(iso, ownId){
+  if (!inSheetLeague() || sessionType() !== "league") return null;
+  var lgId = sheetAppLeague();
+  if (!lgId || sessionLeague() !== lgId) return null;
+  var w = sheetWeeks().filter(function(x){ return iso >= addDays(x.date, -6) && iso <= x.date; })[0];
+  if (!w) return null;
+  var it = allSeries().filter(function(x){ return x.h.source === "sheet" && x.h.sheetWeek === w.week && x.h.id !== ownId && leagueOf(x.h) === lgId; })[0];
+  return it ? { week: w, it: it } : null;
+}
+function renderClash(mode){
+  var night = mode === "photo" ? state.photoNight : state.night, box = document.getElementById(mode + "-clash");
+  var c = night ? sheetClash(night.date, night.id) : null;
+  box.classList.toggle("hidden", !c);
+  if (!c) return false;
+  document.getElementById(mode + "-status").textContent = "";   // an earlier "saved" line would contradict the notice
+  var sc = seriesScores(c.it.h).filter(isNum), have = mode === "photo" ? night.games.length : night.scores.length;
+  box.innerHTML = "";
+  var p = document.createElement("div");
+  p.innerHTML = "<b>Week " + c.week.week + " (" + shortDate(c.week.date) + ") is already in your history</b> from the league sheet: " + sc.join(", ") + ". " +
+    (mode === "photo" ? (have ? "Add " + (have === 1 ? "this game" : "these games") + " to that night so the week isn't in your history twice." : "Add your photos to that night instead of starting a second one.")
+      : "The sheet already has your scores for that week, so there's nothing to add here.");
+  box.appendChild(p);
+  var b = document.createElement("button"); b.className = "primary full";
+  b.textContent = mode === "photo" ? (have ? "Add " + (have === 1 ? "this game" : "these games") + " to that night" : "Add photos to that night") : "Open that night";
+  b.addEventListener("click", function(){ resolveClash(mode, c); });
+  box.appendChild(b);
+  var a = document.createElement("a"); a.href = "#"; a.textContent = "Wrong date? Change it above.";
+  a.addEventListener("click", function(e){ e.preventDefault(); document.getElementById(mode === "photo" ? "photo-date" : "night-date").focus(); });
+  box.appendChild(a);
+  return true;
+}
+function endNightQuietly(mode){
+  var n = mode === "photo" ? state.photoNight : state.night;
+  if (n && n.saved){
+    var gone = n.id;
+    state.seriesHistory = state.seriesHistory.filter(function(h){ return h.id !== gone; });
+    if (cloud.col) cloud.col.doc(gone).delete().then(null, function(){});
+  }
+  if (mode === "photo") state.photoNight = null; else state.night = null;
+  state.lanes = ""; state.sessionType = "league"; state.sessionLeague = null;
+  applySessionType(); document.getElementById("setup-lanes").value = "";
+  returnView = null; saveState();
+}
+function resolveClash(mode, c){
+  var h = c.it.h, sc = seriesScores(h).filter(isNum);
+  if (mode === "photo"){
+    // each game goes on the sheet's game with the same score: the same game number first, then any free one
+    var games = sc.map(function(v, i){ return h.games && h.games[i] && h.games[i].frames ? h.games[i] : null; }), extra = [];
+    state.photoNight.games.forEach(function(g, gi){
+      var idx = (sc[gi] === g.finalScore && !games[gi]) ? gi : sc.map(function(v, k){ return v === g.finalScore && !games[k] ? k : -1; }).filter(function(k){ return k >= 0; })[0];
+      if (idx === undefined || idx < 0) extra.push(g.finalScore); else games[idx] = g;
+    });
+    if (games.some(function(g){ return g; })){ h.games = games; h.scores = sc; h.scoreOnly = false; saveNightDoc(h); }
+    endNightQuietly("photo");
+    openAttach({ h: h });
+    if (extra.length) document.getElementById("attach-note").textContent = (extra.length === 1 ? "One game (" + extra[0] + ") doesn't" : extra.length + " games (" + extra.join(", ") + ") don't") + " match any score on the sheet for that week, so " + (extra.length === 1 ? "it wasn't" : "they weren't") + " added. If the date is right, check the sheet.";
+  } else {
+    endNightQuietly("night");
+    historyTab = "league"; reportTab = "history"; editKey = h.id; editDraft = { rank: isNum(h.rank) ? String(h.rank) : "", note: h.note || "", leagueId: leagueOf(h) };
+    renderHistory(); showView("history");
+  }
+}
+function photoBack(){ if (attach) { renderAttach(); photoStep("attach"); } else photoStep("home"); }
+
+// --- the league admin's card on Profile: upload each week's sheet ---
+function renderSheetAdmin(){
+  var c = document.getElementById("sheet-admin-card");
+  c.classList.toggle("hidden", !(inSheetLeague() && sheetLg.admin));
+  if (c.classList.contains("hidden")) return;
+  var W = sheetLatest(), body = document.getElementById("sheet-admin-body"); body.innerHTML = "";
+  function add(parent, tag, cls, text){ var n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; parent.appendChild(n); return n; }
+  add(body, "div", "lg-line", sheetLg.data.name + " · " + sheetLg.data.season);
+  add(body, "div", "lg-fine", "Latest: Week " + W.week + " (" + shortDate(W.date) + ") · " + W.bowlers.filter(function(b){ return b.scores; }).length + " bowlers that night");
+  add(body, "p", "lg-fine", "New weeks are loaded from the league's weekly sheet. Uploading the sheet here in the app is coming next.");
+  add(body, "div", "lg-sub2", "Who can see it");
+  (sheetLg.members || []).forEach(function(m){
+    var r = add(body, "div", "lg-man");
+    add(r, "span", "", m.name);
+  });
+  add(body, "p", "lg-fine", "Only bowlers on this list see Your League and get nights filled in from the sheet. Everyone else using Bowling Bro' sees nothing of it.");
+}
+
+function sheetTagFor(h){
+  if (!inSheetLeague()) return null;
+  var t = document.createElement("span");
+  if (h.source === "sheet"){ t.className = "sheet-tag"; t.textContent = "SHEET"; t.title = "From the league sheet"; return t; }
+  if (h._sheet && !h._sheet.same){ t.className = "sheet-tag off"; t.textContent = "≠ SHEET"; return t; }
+  return null;
+}
+document.getElementById("menu-team-btn").addEventListener("click", function(){ goToView("league"); });
+document.getElementById("home-league-btn").addEventListener("click", function(){ goToView("league"); });
+document.getElementById("league-back-btn").addEventListener("click", function(){
+  if (lgMode === "records"){ lgMode = "main"; renderLeaguePage(); window.scrollTo(0, 0); return; }   // Records goes back to Your League
+  goToView("home");
+});
+document.getElementById("attach-done-btn").addEventListener("click", function(){ attach = null; historyTab = "league"; renderHistory(); showView("history"); });
 function goToView(name){
   if ((name === "game" || name === "scores") && nightActive()){ showNight(); }
   else if ((name === "game" || name === "photo") && photoActive()){ showPhoto(); }
@@ -3267,6 +4091,7 @@ function goToView(name){
   else if (name === "summary" && state.games.length){ showSummary(); }
   else if (name === "history"){ renderHistory(); showView("history"); }
   else if (name === "home"){ showView("home"); }
+  else if (name === "league" && inSheetLeague()){ openLeaguePage(); }
   else if (name === "goals"){ openGoals(); }
   else if (name === "arsenal"){ openArsenal(); }
   else if (name === "profile"){ openProfile(); }
@@ -3276,6 +4101,7 @@ function openProfile(){
   document.getElementById("profile-status").textContent = "";
   fillProfileInputs();
   leagueEdit = null; renderLeaguesCard();
+  renderSheetAdmin();
   renderThemePicker();
   document.getElementById("profile-auth-btn").textContent = document.getElementById("menu-auth-btn").textContent;
   document.getElementById("profile-install-btn").parentNode.classList.toggle("hidden", document.getElementById("menu-install-btn").classList.contains("hidden"));
@@ -4736,6 +5562,9 @@ function renderHome(){
     document.getElementById("home-resume-title").textContent = (sessionType() === "practice" ? "Practice" : nightLeagueName()) + " in progress";
     document.getElementById("home-resume-detail").textContent = detail;
   }
+  var lgOn = inSheetLeague();
+  document.getElementById("home-league-btn").classList.toggle("hidden", !lgOn);
+  document.querySelector("#view-home .home-squares").classList.toggle("four", lgOn);
   applyHomeTheme();
   keepBowlInPlace();
   layoutHomeArt();
@@ -5233,6 +6062,8 @@ function renderDetailTable(el, items){
     tr.appendChild(cell("td", (pins / games).toFixed(1)));
     if (showRank) tr.appendChild(cell("td", isNum(h.rank) ? h.rank : ""));
     tr.appendChild(cell("td", (h.note || "") + (d.it.local && cloud.col ? (h.note ? " · " : "") + "this device only" : ""), "note"));
+    var tag = sheetTagFor(h);
+    if (tag) tr.firstChild.appendChild(tag);
     tr.addEventListener("click", function(){
       if (editKey === d.key){ editKey = null; editDraft = null; }
       else { editKey = d.key; editDraft = { rank: isNum(h.rank) ? String(h.rank) : "", note: h.note || "", leagueId: leagueOf(h) }; }
@@ -5297,6 +6128,27 @@ function renderDetailTable(el, items){
     });
     box.appendChild(gl);
   }
+  if (league && inSheetLeague()){
+    var eh = editing.it.h;
+    if (eh.source === "sheet" || eh._sheet){
+      var sl = document.createElement("p"); sl.className = "lg-note"; sl.style.margin = "0 0 8px";
+      sl.textContent = eh.source === "sheet" ? "Filled in from the league sheet (Week " + eh.sheetWeek + ")."
+        : (eh._sheet.same ? "Matches the league sheet for Week " + eh._sheet.week + "." : "The league sheet for Week " + eh._sheet.week + " has " + eh._sheet.scores.join(", ") + ". Check which is right.");
+      box.appendChild(sl);
+      if (eh._sheet && !eh._sheet.same){
+        var us = document.createElement("button"); us.className = "full"; us.style.margin = "0 0 10px";
+        us.textContent = "Use the sheet's scores (" + eh._sheet.scores.join(", ") + ")";
+        us.addEventListener("click", function(){ useSheetScores(editing.it); });
+        box.appendChild(us);
+      }
+    }
+  }
+  if (league && editing.sc.length && (editing.it.h.games || []).filter(function(g){ return g && g.frames; }).length < editing.sc.length && (editing.it.h.scoreOnly || (editing.it.h.games || []).some(function(g){ return !g || !g.frames; }))){
+    var ap = document.createElement("button"); ap.className = "full"; ap.style.margin = "0 0 10px";
+    ap.textContent = "Add game photos for shot stats";
+    ap.addEventListener("click", function(){ openAttach(editing.it); });
+    box.appendChild(ap);
+  }
   if (league && multiLeague()){
     var ml = document.createElement("label"); ml.textContent = "League"; ml.setAttribute("for", "edit-league");
     var ms = document.createElement("select"); ms.id = "edit-league";
@@ -5359,6 +6211,7 @@ function updateSeriesMeta(it, draft){
 var pendingDeleteKey = null;
 function deleteSeries(it){
   var h = it.h;
+  if (h.source === "sheet"){ state.sheetDeclined = (state.sheetDeclined || []).concat([h.id]); saveState(); }
   var statusEl = document.getElementById("csv-status");
   statusEl.textContent = "";
   if (it.local || !cloud.col){
@@ -5386,7 +6239,7 @@ document.getElementById("practice-toggle").addEventListener("change", function(e
   applyPracticeMode();
 });
 function hasFrameDetail(h){
-  return !!(h.games && h.games.length && typeof h.games[0] === "object" && h.games[0].frames);
+  return !!(h.games && h.games.some(function(g){ return g && typeof g === "object" && g.frames; }));
 }
 function csvCell(v){
   var s = (v === null || v === undefined) ? "" : String(v);
@@ -5398,6 +6251,7 @@ function buildSeriesCsv(){
     var h = it.h;
     if (!hasFrameDetail(h)) return;
     h.games.forEach(function(g, gi){
+      if (!g || !g.frames) return;
       var score = g.finalScore !== null && g.finalScore !== undefined ? g.finalScore : (g.stats ? g.stats.finalScore : "");
       g.frames.forEach(function(f, fi){
         var marks = frameMarksForIndex(g.frames, fi);
@@ -5509,6 +6363,7 @@ function initSetupFields(){
 initSetupFields();
 applyPracticeMode();
 initCloud();
+if (window.__bbLeagueFake){ loadLeagueSheet(); syncSheetNights(); }
 if (nightActive()){
   showNight();
 } else if (photoActive()){
