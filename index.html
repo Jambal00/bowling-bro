@@ -274,6 +274,8 @@ body:not(.on-home) .lg-toggle { background: var(--chrome, rgba(255,255,255,0.14)
 .lg-meet-games { font-variant-numeric: tabular-nums; color: #55534b; font-size: 12px; }
 .lg-meet-close { font-size: 12px; color: #8a5a00; font-weight: 600; }
 .lg-weeks tr.lg-wk { cursor: pointer; }
+@media (max-width: 380px) { .lg-weeks th, .lg-weeks td { padding-left: 2px; padding-right: 2px; font-size: 12px; } .lg-weeks td.lg-name { max-width: 92px; } }
+@media (max-width: 340px) { .lg-weeks th, .lg-weeks td { font-size: 11px; padding-left: 1px; padding-right: 1px; } .lg-weeks td.lg-name { max-width: 66px; } .lg-men td, .lg-board td { font-size: 12px; } }
 .lg-weeks > tbody > tr > td:nth-child(3), .lg-rec td:nth-child(3) { white-space: nowrap; }
 .lg-weeks tr.lg-wk.open td { background: #f6f5ef; }
 .lg-weeks td.lg-name, .lg-weeks > thead th:nth-child(2), .lg-rec td.lg-name { text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
@@ -3542,7 +3544,7 @@ function renderLeaguePage(){
   }
   // tabs, so each part of the page fits on a screen or so
   var tabs = add(el, "div", "report-tabs lg-tabs"); tabs.setAttribute("role", "tablist");
-  [["standings", "Standings"], ["week", "This Week"], ["season", "Season"], ["records", "Records"]].forEach(function(t){
+  [["standings", "Standings"], ["week", "This Week"], ["season", "Week-by-Week"], ["records", "Records"]].forEach(function(t){
     var b = add(tabs, "button", t[0] === lgTab ? "selected" : "", t[1]); b.setAttribute("role", "tab");
     b.addEventListener("click", function(){ lgTab = t[0]; lgOpenWeek = null; renderLeaguePage(); });
   });
