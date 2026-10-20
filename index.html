@@ -3441,6 +3441,13 @@ function loadLeagueSheet(){
   }).then(null, function(){ return null; });
 }
 function inSheetLeague(){ return !!sheetLg; }
+// league night is the weekday of the sheet's dates (Thursday for Thursday Men's Early); on that day
+// Your League opens on This Week, any other day on Standings
+function leagueNightToday(){
+  if (!inSheetLeague()) return false;
+  var p = sheetLatest().date.split("-");
+  return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2])).getDay() === new Date().getDay();
+}
 function sheetWeeks(){ return sheetLg.data.weeks; }
 function sheetLatest(){ var w = sheetWeeks(); return w[w.length - 1]; }
 function sheetBowler(week, id){ return (week.bowlers || []).filter(function(b){ return b.id === id; })[0] || null; }
@@ -3504,7 +3511,7 @@ function syncSheetNights(){
 }
 
 // --- Your League page ---
-function openLeaguePage(){ lgOpenWeek = null; lgMode = "main"; lgTab = "week"; recTab = "individual"; renderLeaguePage(); showView("league"); }   // every visit starts with all weeks closed
+function openLeaguePage(){ lgOpenWeek = null; lgMode = "main"; lgTab = leagueNightToday() ? "week" : "standings"; recTab = "individual"; renderLeaguePage(); showView("league"); }   // every visit starts with all weeks closed
 function renderLeaguePage(){
   var el = document.getElementById("league-body"); el.innerHTML = "";
   if (!inSheetLeague()) return;
@@ -3535,7 +3542,7 @@ function renderLeaguePage(){
   }
   // tabs, so each part of the page fits on a screen or so
   var tabs = add(el, "div", "report-tabs lg-tabs"); tabs.setAttribute("role", "tablist");
-  [["week", "This Week"], ["standings", "Standings"], ["season", "Season"], ["records", "Records"]].forEach(function(t){
+  [["standings", "Standings"], ["week", "This Week"], ["season", "Season"], ["records", "Records"]].forEach(function(t){
     var b = add(tabs, "button", t[0] === lgTab ? "selected" : "", t[1]); b.setAttribute("role", "tab");
     b.addEventListener("click", function(){ lgTab = t[0]; lgOpenWeek = null; renderLeaguePage(); });
   });
