@@ -227,13 +227,19 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
 .lg-table tr.me td { background: #eef3fe; font-weight: 700; }
 .lg-stand th:nth-child(2), .lg-stand td.lg-name { text-align: left; }
 .lg-stand td.lg-place { width: 34px; color: #77756c; }
-.lg-stand .up { color: #1d7a46; font-size: 10px; } .lg-stand .down { color: #b3261e; font-size: 10px; }
+.lg-stand .up, .lg-stand .down { color: #8f8c80; font-size: 10px; }
 .lg-stand td.lg-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
 .lg-race { margin-top: 12px; }
 body:not(.on-home) .lg-toggle { background: var(--chrome, rgba(255,255,255,0.14)); border-radius: 12px; padding: 4px; gap: 4px !important; margin-bottom: 12px; }
+.lg-tabs { margin-top: 2px; }
+.lg-tabs button { font-size: 13px; }
 .lg-records-btn { margin: 10px 0 2px; font-weight: 600; }
 .rec-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f0eee6; }
 .rec-row:last-child { border-bottom: none; }
+.rec-row:has(+ .rec-list) { border-bottom: none; padding-bottom: 4px; }
+.rec-list { margin: 0 0 4px; padding-bottom: 6px; border-bottom: 1px solid #f0eee6; }
+.rec-list-row { display: flex; justify-content: space-between; font-size: 13px; color: #55534b; padding: 2px 0 2px 12px; }
+.rec-list-row b { color: #1a1a1a; font-variant-numeric: tabular-nums; }
 .rec-sub { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: #8f8c80; margin: 14px 0 0; padding-bottom: 4px; border-bottom: 1px solid #e6e3d8; }
 .lg-sub + .rec-sub { margin-top: 4px; }
 .rec-l { min-width: 0; }
@@ -275,6 +281,8 @@ body:not(.on-home) .lg-toggle { background: var(--chrome, rgba(255,255,255,0.14)
 .lg-detail-men { margin-top: 6px; }
 .lg-num.neg { color: #b3261e; }
 .lg-rec { margin-top: 12px; }
+.lg-race-sub { font-size: 11px; color: #8f8c80; margin: -1px 0 2px; }
+.lg-race + .lg-race { margin-top: 16px; }
 .lg-race-h { font-size: 12px; font-weight: 700; color: #444; margin-bottom: 2px; }
 .lg-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 11px; color: #55534b; margin-top: 2px; }
 .lg-legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; vertical-align: middle; margin-right: 5px; }
@@ -3496,18 +3504,19 @@ function syncSheetNights(){
 }
 
 // --- Your League page ---
-function openLeaguePage(){ lgOpenWeek = null; lgMode = "main"; renderLeaguePage(); showView("league"); }   // every visit starts with all weeks closed
+function openLeaguePage(){ lgOpenWeek = null; lgMode = "main"; lgTab = "week"; recTab = "individual"; renderLeaguePage(); showView("league"); }   // every visit starts with all weeks closed
 function renderLeaguePage(){
   var el = document.getElementById("league-body"); el.innerHTML = "";
   if (!inSheetLeague()) return;
-  if (lgMode === "records"){ renderTeamRecords(el); return; }
   var W = sheetLatest(), weeks = sheetWeeks(), prev = weeks.length > 1 ? weeks[weeks.length - 2] : null;
   var myT = sheetMyTeam(), me = sheetBowler(W, sheetLg.me);
-  function card(title, sub){
+  // each card belongs to one tab; cards for the other tabs are built but not shown
+  function card(title, sub, tab){
     var c = document.createElement("div"); c.className = "card lg-card";
     if (title){ var h = document.createElement("h2"); h.textContent = title; c.appendChild(h); }
     if (sub){ var s = document.createElement("p"); s.className = "lg-sub"; s.textContent = sub; c.appendChild(s); }
-    el.appendChild(c); return c;
+    if (!tab || tab === lgTab) el.appendChild(c);
+    return c;
   }
   function add(parent, tag, cls, text){ var n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; parent.appendChild(n); return n; }
 
@@ -3519,13 +3528,18 @@ function renderLeaguePage(){
   var prevStand = prev && prev.standings.filter(function(s){ return s.team === myT; })[0];
   var move = prevStand ? prevStand.place - stand.place : 0;
   add(head, "div", "lg-line", ordinal(stand.place) + " place · " + fmtPts(stand.won) + "–" + fmtPts(stand.lost) + " points" + (move ? (move > 0 ? " · up " + move : " · down " + (-move)) + " since last week" : ""));
-  var rb = add(head, "button", "full lg-records-btn", "Team records ›");
-  rb.addEventListener("click", function(){ lgMode = "records"; recTab = "individual"; renderLeaguePage(); window.scrollTo(0, 0); });
-  add(head, "div", "lg-fine", "From the league sheet for Week " + W.week + " of " + sheetLg.data.weeksInSeason + " (" + shortDate(W.date) + ")");
+  add(head, "div", "lg-fine", "Through Week " + W.week + " of " + sheetLg.data.weeksInSeason + " (" + shortDate(W.date) + "), from the league sheet");
   if (sheetNotice.length){
     var nb = add(head, "div", "lg-notice");
     nb.textContent = "Added to your history from the sheet: " + sheetNotice.map(function(wk){ var b = sheetBowler(weeks[wk - 1], sheetLg.me); return "Week " + wk + " (" + b.scores.join(", ") + ")"; }).join("; ") + ".";
   }
+  // tabs, so each part of the page fits on a screen or so
+  var tabs = add(el, "div", "report-tabs lg-tabs"); tabs.setAttribute("role", "tablist");
+  [["week", "This Week"], ["standings", "Standings"], ["season", "Season"], ["records", "Records"]].forEach(function(t){
+    var b = add(tabs, "button", t[0] === lgTab ? "selected" : "", t[1]); b.setAttribute("role", "tab");
+    b.addEventListener("click", function(){ lgTab = t[0]; lgOpenWeek = null; renderLeaguePage(); });
+  });
+  if (lgTab === "records"){ renderTeamRecords(el, true); return; }
 
   // next up. On the Week N sheet, "Today" is Week N+1's lanes.
   var nextWk = W.week + 1, games = (W.schedule[String(nextWk)] || []);
@@ -3533,7 +3547,7 @@ function renderLeaguePage(){
   if (mu){
     var opp = mu.teams[0] === myT ? mu.teams[1] : mu.teams[0];
     var oppStand = W.standings.filter(function(s){ return s.team === opp; })[0];
-    var c2 = card("Next up · Week " + nextWk);
+    var c2 = card("Next up · Week " + nextWk, "", "week");
     add(c2, "div", "lg-big", "vs " + sheetTeamName(W, opp));
     add(c2, "div", "lg-line", "Thursday " + shortDate(addDays(W.date, 7)) + " · Lanes " + mu.lanes + " · they're " + ordinal(oppStand.place) + " (" + fmtPts(oppStand.won) + " points)");
     var cols = add(c2, "div", "lg-vs");
@@ -3563,40 +3577,20 @@ function renderLeaguePage(){
       add(c2, "p", "lg-fine", "Then Week " + (W.week + 2) + " (" + shortDate(addDays(W.date, 14)) + "): " + sheetTeamName(W, opp2) + ", lanes " + then.lanes +
         (last2 ? ". " + (last2.us > last2.them ? "You beat them " : (last2.us < last2.them ? "They beat you " : "You split ")) + fmtPts(Math.max(last2.us, last2.them)) + "–" + fmtPts(Math.min(last2.us, last2.them)) + " in Week " + last2.week + "." : ". First meeting."));
     }
-    if (me){
-      var tr = add(c2, "div", "lg-target");
-      add(tr, "b", "", "Your number: " + sheetToRaise(me));
-      add(tr, "span", "", " raises your league average to " + (me.avg + 1) + ". Under " + (sheetToDrop(me) + 1) + " drops it.");
-    }
-  }
-
-  // last week
-  var res = W.results.filter(function(r){ return sheetTeamByShort(W, r.a.name) === myT || sheetTeamByShort(W, r.b.name) === myT; })[0];
-  if (res){
-    var us = sheetTeamByShort(W, res.a.name) === myT ? res.a : res.b, them = us === res.a ? res.b : res.a;
-    var c3 = card("Last week · Week " + W.week);
-    var themN = sheetTeamByShort(W, them.name);
-    add(c3, "div", "lg-big", (us.won > them.won ? "Won " : (us.won < them.won ? "Lost, " : "Split, ")) + fmtPts(us.won) + " of " + fmtPts(us.won + them.won) + " points");
-    add(c3, "div", "lg-line", "vs " + sheetTeamName(W, themN) + " · handicap " + us.hdcpTotal + " to " + them.hdcpTotal);
-    var gl = add(c3, "div", "lg-games");
-    us.hdcpGames.forEach(function(g, i){ var chip = add(gl, "span", "lg-chip" + (g > them.hdcpGames[i] ? " win" : ""), "G" + (i + 1) + " " + g + "–" + them.hdcpGames[i]); });
-    var t = add(c3, "table", "lg-table"), hr = add(add(t, "thead"), "tr");
-    ["Bowler", "Series", "vs avg", "Avg"].forEach(function(x){ add(hr, "th", "", x); });
-    var tb = add(t, "tbody");
-    teamBowlers(W, myT).filter(function(b){ return b.scores; }).sort(function(a, b){ return sum(b.scores) - b.avg * 3 - (sum(a.scores) - a.avg * 3); }).forEach(function(b){
-      var pb = prev && sheetBowler(prev, b.id), before = pb && pb.games ? pb.avg : null, diff = sum(b.scores) - (before === null ? b.avg : before) * 3;
-      var r = add(tb, "tr", b.id === sheetLg.me ? "me" : "");
-      add(r, "td", "", firstLast(b.name)); add(r, "td", "", sum(b.scores));
-      add(r, "td", diff >= 0 ? "good" : "bad", (diff >= 0 ? "+" : "") + diff);
-      add(r, "td", "", b.avg);
+    // each teammate's number for the night: the series that raises their league average
+    var tr = add(c2, "div", "lg-target");
+    add(tr, "div", "lg-h2h-h", "Your numbers");
+    teamBowlers(W, myT).filter(function(b){ return b.games; }).sort(function(a, b){ return b.avg - a.avg; }).forEach(function(b){
+      var r = add(tr, "div", "lg-man" + (b.id === sheetLg.me ? " me" : ""));
+      add(r, "span", "", shortName(b.name) + " · " + b.avg + " avg");
+      add(r, "span", "lg-num", sheetToRaise(b) + " raises it");
     });
-    add(c3, "p", "lg-fine", "vs avg compares each series with that bowler's average going in.");
   }
 
   // the season, week by week: newest first; tap a week to see that night
   var tw = teamWeeks(myT);
   if (tw.length){
-    var c6 = card("Week by week", "Tap a week for the night's details");
+    var c6 = card("Week by week", "Tap a week for the night's details", "season");
     var wt = add(c6, "table", "lg-table lg-weeks"), wh = add(add(wt, "thead"), "tr");
     ["Wk", "Opponent", "Points", "Hdcp", "Scratch", "Place"].forEach(function(x){ add(wh, "th", "", x); });
     var wb = add(wt, "tbody");
@@ -3610,18 +3604,7 @@ function renderLeaguePage(){
       r.addEventListener("click", function(){ lgOpenWeek = lgOpenWeek === m.week ? null : m.week; renderLeaguePage(); });
       if (lgOpenWeek === m.week){
         var dr = add(wb, "tr", "lg-detail"), dc = add(dr, "td"); dc.colSpan = 6;
-        meetingLine(dc, m, true);
-        var bt = add(dc, "table", "lg-men");
-        var bh = bt.insertRow(); ["", "G1", "G2", "G3", "Series", "Pts"].forEach(function(x){ var th = document.createElement("th"); th.textContent = x; bh.appendChild(th); });
-        m.men.forEach(function(b){
-          var br = bt.insertRow(); if (b.id === sheetLg.me) br.className = "mine";
-          br.insertCell().textContent = shortName(b.name);
-          b.scores.forEach(function(sc, gi){ var c = br.insertCell(); c.textContent = sc; if (b.won && b.won[gi]) c.className = "win"; });
-          br.insertCell().textContent = sum(b.scores);
-          br.insertCell().textContent = b.pts === null ? "" : fmtPts(b.pts) + "/4";
-        });
-        if (m.men.some(function(b){ return !b.won && b.pts !== null; })) add(dc, "p", "lg-fine", "Bold: individual games won. The sheet only gives each bowler's points, so where it doesn't show which games they took, none are bolded.");
-        else add(dc, "p", "lg-fine", "Bold: individual games won.");
+        weekDetail(dc, m);
       }
     });
     var tot = tw.reduce(function(a, m){ a.us += m.us; a.them += m.them; a.won += m.gamesWon; return a; }, { us: 0, them: 0, won: 0 });
@@ -3642,7 +3625,7 @@ function renderLeaguePage(){
   }
 
   // standings
-  var c4 = card("Standings", "After Week " + W.week);
+  var c4 = card("Standings", "After Week " + W.week, "standings");
   var st = add(c4, "table", "lg-table lg-stand"), sh = add(add(st, "thead"), "tr");
   ["", "Team", "Won", "Lost", "Win %"].forEach(function(x){ add(sh, "th", "", x); });
   var sb2 = add(st, "tbody");
@@ -3656,26 +3639,12 @@ function renderLeaguePage(){
   });
   var lead = W.standings[0];
   if (lead.team !== myT) add(c4, "p", "lg-fine", fmtPts(lead.won - stand.won) + " points behind " + sheetTeamName(W, lead.team) + " with " + (sheetLg.data.weeksInSeason - W.week) + " weeks to go. Each week is worth 36 points.");
-  c4.appendChild(pointsRace(myT));
+  c4.appendChild(gapChart(myT));
+  c4.appendChild(placeChart(myT));
 
-  // the team
-  var c5 = card("Your team", "League averages from the sheet");
-  var tt = add(c5, "table", "lg-table"), th = add(add(tt, "thead"), "tr");
-  ["Bowler", "Avg", "vs Wk 1", "Hdcp", "To raise"].forEach(function(x){ add(th, "th", "", x); });
-  var tbd = add(tt, "tbody");
-  teamBowlers(W, myT).filter(function(b){ return b.games; }).sort(function(a, b){ return b.avg - a.avg; }).forEach(function(b){
-    var firstAvg = null;
-    weeks.forEach(function(w){ var x = sheetBowler(w, b.id); if (firstAvg === null && x && x.games) firstAvg = x.avg; });
-    var r = add(tbd, "tr", b.id === sheetLg.me ? "me" : ""), d = b.avg - firstAvg;
-    add(r, "td", "", firstLast(b.name)); add(r, "td", "", b.avg);
-    add(r, "td", d > 0 ? "good" : (d < 0 ? "bad" : ""), d ? (d > 0 ? "+" : "") + d : "—");
-    add(r, "td", "", b.hdcp); add(r, "td", "", sheetToRaise(b));
-  });
-  var recs = teamRecords(myT);
-  if (recs.length) add(c5, "p", "lg-fine", "League season highs held by your team: " + recs.join("; ") + ".");
 }
 // --- Team Records: every record the sheets can give, for the team and its bowlers only ---
-var lgMode = "main", recTab = "individual";
+var lgMode = "main", recTab = "individual", lgTab = "week";
 function teamGameLog(team){
   // one entry per bowler per week: games, series, handicap and average going in, points won
   var weeks = sheetWeeks(), log = [];
@@ -3691,7 +3660,7 @@ function teamGameLog(team){
   });
   return log;
 }
-function renderTeamRecords(el){
+function renderTeamRecords(el, embedded){
   var W = sheetLatest(), myT = sheetMyTeam(), tw = teamWeeks(myT), log = teamGameLog(myT);
   var men = teamBowlers(W, myT).filter(function(b){ return b.games; });
   function add(parent, tag, cls, text){ var n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; parent.appendChild(n); return n; }
@@ -3716,12 +3685,14 @@ function renderTeamRecords(el){
   function names(xs){ var seen = {}; return xs.filter(function(x){ if (seen[x.id]) return false; seen[x.id] = 1; return true; }).map(function(x){ return shortName(x.name); }).join(", "); }
   function wks(xs){ return xs.map(function(x){ return "Week " + x.week + " " + opp(x.week); }).join("; "); }
 
+  if (!embedded){
   var back = add(el, "button", "full lg-back", "‹ Your League"); back.style.marginBottom = "12px";
   back.addEventListener("click", function(){ lgMode = "main"; renderLeaguePage(); window.scrollTo(0, 0); });
   var head = add(el, "div", "card lg-card");
   add(head, "div", "lg-kicker", "Team records · " + sheetLg.data.season);
   add(head, "div", "lg-team", sheetTeamName(W, myT));
   add(head, "div", "lg-fine", "Through Week " + W.week + " · " + plural(log.length, "series") + " bowled by " + plural(men.length, "bowler") + ". Only your team; nothing from other teams' bowlers.");
+  }
   var tg = add(el, "div", "row lg-toggle");
   [["individual", "Individual"], ["team", "Team"]].forEach(function(t){
     var w = add(tg, "div"), b = add(w, "button", "full" + (recTab === t[0] ? " primary" : ""), t[1]);
@@ -3770,8 +3741,13 @@ function renderTeamRecords(el){
   // nights a bowler took all 4 individual points, counted per bowler
   var perfect = log.filter(function(x){ return x.pts === 4; }), byWho = {};
   perfect.forEach(function(x){ (byWho[x.id] = byWho[x.id] || { name: x.name, wks: [] }).wks.push(x.week); });
-  rec(c2, "Perfect nights (4 of 4 points)", perfect.length, "", Object.keys(byWho).map(function(id){ var w = byWho[id]; return shortName(w.name) + " (Wk " + w.wks.join(", ") + ")"; }).sort().join(" · ") || "Not yet");
-  indiv("Week of shame", log, function(x){ return x.series; }, null, true);
+  rec(c2, "Perfect nights (4 of 4 points)", perfect.length ? "" : "—", "", perfect.length ? "" : "Not yet");   // the count is per bowler, listed below
+  var pl = add(c2, "div", "rec-list");
+  Object.keys(byWho).map(function(id){ return byWho[id]; }).sort(function(a, z){ return z.wks.length - a.wks.length || (a.name < z.name ? -1 : 1); }).forEach(function(w){
+    var r = add(pl, "div", "rec-list-row");
+    add(r, "span", "", shortName(w.name) + "  ·  Wk " + w.wks.join(", ")); add(r, "b", "", w.wks.length);
+  });
+  indiv("Week of shame \uD83D\uDCA9", log, function(x){ return x.series; }, null, true);
 
   // leaderboard
   var c3 = card("Leaderboard", "Season to date, scratch", "individual");
@@ -3793,17 +3769,8 @@ function renderTeamRecords(el){
     add(tr, "td", isAvg(r) ? "win" : "", r.b.avg); add(tr, "td", isHi(r) ? "win" : "", r.hi); add(tr, "td", isHs(r) ? "win" : "", r.hs);
     add(tr, "td", isTwo(r) ? "win" : "", r.two); add(tr, "td", isPts(r) ? "win" : "", fmtPts(r.pts)); add(tr, "td", isOver(r) ? "win" : "", r.over === null ? "—" : r.over + "%");
   });
-  if (c3.parentNode && c2.parentNode) el.insertBefore(c3, c2);   // Individual leads with the leaderboard
+  if (c3.parentNode && c2.parentNode) el.insertBefore(c3, c2);   // Individual leads with the leaderboard, then Around the league
   add(c3, "p", "lg-fine", "Bold: team best. Over avg: share of games above that bowler's average going in (from Week 2). Pts: individual points won.");
-
-  // the season so far, per bowler
-  var c4 = card("Most improved", "League average now vs. after Week 1", "individual");
-  men.map(function(b){
-    var first = null; sheetWeeks().forEach(function(w){ var x = sheetBowler(w, b.id); if (first === null && x && x.games) first = x.avg; });
-    return { b: b, d: b.avg - first, first: first };
-  }).sort(function(a, z){ return z.d - a.d; }).forEach(function(x){
-    rec(c4, shortName(x.b.name), (x.d > 0 ? "+" : "") + x.d, "", x.first + " → " + x.b.avg);
-  });
 
   // around the league
   var c5 = card("Around the league", "Where you stand among all " + W.bowlers.filter(function(b){ return b.games >= 9; }).length + " bowlers with 9+ games", "individual");
@@ -3812,6 +3779,7 @@ function renderTeamRecords(el){
     var i = ranked.map(function(x){ return x.id; }).indexOf(b.id);
     rec(c5, shortName(b.name), i >= 0 ? ordinal(i + 1) : "—", "", "by average (" + b.avg + ")");
   });
+  if (c5.parentNode && c2.parentNode) el.insertBefore(c5, c2);
   var c7 = card("Around the league", "Your team among all " + W.standings.length + " teams", "team");
   var sp = W.standings.slice().sort(function(a, z){ return z.scratchPins - a.scratchPins; }), myS = W.standings.filter(function(s){ return s.team === myT; })[0];
   var hp = W.standings.slice().sort(function(a, z){ return z.hdcpPins - a.hdcpPins; });
@@ -3821,6 +3789,23 @@ function renderTeamRecords(el){
   var recs = teamRecords(myT); if (recs.length) rec(c7, "League season highs held", recs.length, "", recs.join("; "));
 }
 
+// a night against one team: the result and scoreboard, then each bowler's games (bold = won), series and points
+function weekDetail(dc, m){
+  function add(parent, tag, cls, text){ var n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; parent.appendChild(n); return n; }
+  meetingLine(dc, m, true);
+  var bt = add(dc, "table", "lg-men");
+  var bh = bt.insertRow(); ["", "G1", "G2", "G3", "Series", "Pts"].forEach(function(x){ var th = document.createElement("th"); th.textContent = x; bh.appendChild(th); });
+  m.men.forEach(function(b){
+    var br = bt.insertRow(); if (b.id === sheetLg.me) br.className = "mine";
+    br.insertCell().textContent = shortName(b.name);
+    b.scores.forEach(function(sc, gi){ var c = br.insertCell(); c.textContent = sc; if (b.won && b.won[gi]) c.className = "win"; });
+    br.insertCell().textContent = sum(b.scores);
+    br.insertCell().textContent = b.pts === null ? "" : fmtPts(b.pts) + "/4";
+  });
+  add(dc, "p", "lg-fine", m.men.some(function(b){ return !b.won && b.pts !== null; })
+    ? "Bold: individual games won. The sheet only gives each bowler's points, so where it doesn't show which games they took, none are bolded."
+    : "Bold: individual games won.");
+}
 function sum(a){ return a.reduce(function(s, x){ return s + x; }, 0); }
 var lgOpenWeek = null;
 // every week's result for one team, from each week's own sheet
@@ -3895,6 +3880,38 @@ function teamRecords(team){
   if (best.game && best.game.t === team) out.push("handicap game " + best.game.v + " (Week " + best.game.wk + ")");
   if (best.series && best.series.t === team) out.push("handicap series " + best.series.v + " (Week " + best.series.wk + ")");
   return out;
+}
+// two small charts for the Standings tab: points behind 1st place each week, and place each week
+function weekChart(title, values, opts){
+  var weeks = sheetWeeks(), W = 320, H = 130, L = 26, R = 12, T = 16, B = 20;
+  var lo = opts.min, hi = opts.max, x = function(i){ return L + (weeks.length === 1 ? (W - L - R) / 2 : i * (W - L - R) / (weeks.length - 1)); };
+  var y = function(v){ var t = (v - lo) / (hi - lo || 1); return opts.flip ? T + t * (H - T - B) : T + (1 - t) * (H - T - B); };
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + title + '">';
+  opts.ticks.forEach(function(g){ svg += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(g) + '" y2="' + y(g) + '" stroke="#e8e6dc"/><text x="' + (L - 6) + '" y="' + (y(g) + 4) + '" font-size="10" text-anchor="end" fill="#8f8c80">' + (opts.tickLabel ? opts.tickLabel(g) : g) + '</text>'; });
+  weeks.forEach(function(w, i){ svg += '<text x="' + x(i) + '" y="' + (H - 5) + '" font-size="10" text-anchor="middle" fill="#8f8c80">Wk ' + w.week + '</text>'; });
+  var pts = values.map(function(v, i){ return [x(i), y(v)]; });
+  svg += '<path d="' + pts.map(function(p, i){ return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ") + '" fill="none" stroke="var(--nav, #2f6fed)" stroke-width="2.5" stroke-linejoin="round"/>';
+  pts.forEach(function(p, i){
+    svg += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="3.5" fill="var(--nav, #2f6fed)"/>';
+    svg += '<text x="' + p[0] + '" y="' + (p[1] - 8) + '" font-size="11" font-weight="700" text-anchor="middle" fill="#1a1a1a" stroke="#fff" stroke-width="3" paint-order="stroke">' + opts.label(values[i]) + '</text>';
+  });
+  svg += "</svg>";
+  var wrap = document.createElement("div"); wrap.className = "lg-race";
+  wrap.innerHTML = '<div class="lg-race-h">' + title + '</div>' + (opts.sub ? '<div class="lg-race-sub">' + opts.sub + '</div>' : "") + svg;
+  return wrap;
+}
+function gapChart(myT){
+  var gaps = sheetWeeks().map(function(w){
+    var first = w.standings[0].won, mine = w.standings.filter(function(s){ return s.team === myT; })[0];
+    return Math.max(0, first - (mine ? mine.won : 0));
+  });
+  var hi = Math.max(10, Math.ceil(Math.max.apply(null, gaps) / 10) * 10);
+  return weekChart("Points behind 1st place", gaps, { min: 0, max: hi, ticks: [0, hi / 2, hi], label: function(v){ return v === 0 ? "1st" : fmtPts(v); }, sub: "0 means you were leading" });
+}
+function placeChart(myT){
+  var n = sheetLatest().standings.length;
+  var places = sheetWeeks().map(function(w){ var m = w.standings.filter(function(s){ return s.team === myT; })[0]; return m ? m.place : n; });
+  return weekChart("Place", places, { min: 1, max: n, flip: true, ticks: [1, Math.ceil(n / 2), n], tickLabel: ordinal, label: ordinal });
 }
 // points won by every team, week by week; the bowler's team drawn in colour, the rest in grey
 function pointsRace(myT){
@@ -4080,7 +4097,6 @@ function sheetTagFor(h){
 document.getElementById("menu-team-btn").addEventListener("click", function(){ goToView("league"); });
 document.getElementById("home-league-btn").addEventListener("click", function(){ goToView("league"); });
 document.getElementById("league-back-btn").addEventListener("click", function(){
-  if (lgMode === "records"){ lgMode = "main"; renderLeaguePage(); window.scrollTo(0, 0); return; }   // Records goes back to Your League
   goToView("home");
 });
 document.getElementById("attach-done-btn").addEventListener("click", function(){ attach = null; historyTab = "league"; renderHistory(); showView("history"); });
