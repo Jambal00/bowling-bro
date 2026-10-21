@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-title" content="Bowling Bro'">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
+<!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
+<meta name="bb-version" content="2026-10-21 18:50">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -36,6 +38,7 @@ body {
 }
 .card h2 { font-size: 14px; margin: 0 0 10px; color: #1a1a1a; }
 /* Set your goals: closed until tapped */
+#update-pill { position: fixed; z-index: 70; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top, 0px) + 62px); background: #1a1a1a; color: #fff; border: 0; border-radius: 999px; padding: 9px 16px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 14px rgba(0,0,0,0.28); white-space: nowrap; cursor: pointer; }
 .goal-set summary { list-style: none; display: flex; align-items: center; gap: 8px; cursor: pointer; min-height: 28px; }
 .goal-set summary::-webkit-details-marker { display: none; }
 .goal-set summary h2 { margin: 0; flex: 1; }
@@ -605,6 +608,7 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
   </div>
 </div>
 <div id="home-bg" class="hidden"><div class="home-stage" id="home-stage"></div></div>
+<button id="update-pill" class="hidden" type="button">New version available · Tap to refresh</button>
 <div class="app">
 
   <div class="header">
@@ -6387,6 +6391,27 @@ document.getElementById("view-history-link").addEventListener("click", function(
   showView("history");
 });
 function allGamesFreshlyReset(){ return state.games.length===0; }
+
+// ---------- new release check ----------
+// The page carries its release marker. While the app is open it quietly fetches a fresh copy of the
+// page now and then (and whenever it comes back into view); if that copy's marker differs, a button
+// offers to load it. Nothing changes until the bowler taps it.
+var APP_VERSION = (document.querySelector('meta[name="bb-version"]') || {}).content || "";
+var updateSeen = false;
+function checkForUpdate(){
+  if (updateSeen || !APP_VERSION || !/^https?:$/.test(location.protocol) || !window.fetch) return;
+  fetch(location.pathname + "?vcheck=" + Date.now(), { cache: "no-store" }).then(function(r){ return r.ok ? r.text() : ""; }).then(function(t){
+    var m = t.match(/<meta name="bb-version" content="([^"]+)"/);
+    if (m && m[1] !== APP_VERSION){ updateSeen = true; document.getElementById("update-pill").classList.remove("hidden"); }
+  }, function(){});
+}
+document.getElementById("update-pill").addEventListener("click", function(){
+  saveState();
+  location.replace(location.pathname + "?v=" + Date.now());   // a fresh address, so no cached copy is used
+});
+document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible") checkForUpdate(); });
+setTimeout(checkForUpdate, 4000);
+setInterval(checkForUpdate, 3 * 60 * 1000);
 
 // ---------- init ----------
 function initSetupFields(){
