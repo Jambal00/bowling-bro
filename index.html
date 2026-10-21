@@ -1032,7 +1032,6 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
   <!-- YOUR LEAGUE VIEW (league-sheet members only) -->
   <div id="view-league" class="hidden">
     <div id="league-body"></div>
-    <button class="full" id="league-back-btn">Back</button>
   </div>
 
   <!-- YOUR GOALS VIEW -->
@@ -2759,6 +2758,8 @@ function openConfirm(s, editIdx, line){
   sheet = s; sheetEditIdx = editIdx;
   var n = state.photoNight, gameNo = attach ? attach.game + 1 : (editIdx === null ? n.games.length + 1 : editIdx + 1);
   sheet.official = attach ? seriesScores(attachNight())[attach.game] : null;
+  // on a night whose scores come from (or match) the league sheet, the sheet's score is final
+  sheet.officialLocked = !!(attach && (attachNight().source === "sheet" || attachNight()._sheet));
   document.getElementById("confirm-title").textContent = "Check Game " + gameNo;
   var sub = document.getElementById("confirm-sub"); sub.innerHTML = "";
   if (line){
@@ -2877,11 +2878,14 @@ function updateSheet(){
   }
   var offSheet = sheet.ok && isNum(sheet.official) && final !== sheet.official;
   if (sheet.ok && isNum(sheet.official)){
-    if (offSheet){ check.className = "check-line warn"; check.textContent += " The league sheet has " + sheet.official + " for this game. Check the frames, or that this is the right game."; }
+    if (offSheet && sheet.officialLocked){
+      check.className = "check-line warn";
+      check.textContent = "Adds up to " + final + ", but the league sheet has " + sheet.official + " for Game " + (attach.game + 1) + ". Fix the box that was misread (the scoreboard totals help find it), or check this is the photo of Game " + (attach.game + 1) + ". It can't be saved until it matches.";
+    } else if (offSheet){ check.className = "check-line warn"; check.textContent += " This night has " + sheet.official + " for this game; saving changes it to " + final + "."; }
     else if (check.className.indexOf("ok") >= 0) check.textContent = check.textContent.replace(/\.$/, "") + ", and matches the league sheet.";
   }
-  save.disabled = !sheet.ok;
-  var mismatch = sheet.ok && (offSheet || firstOff !== null || (screenFinal !== null && final !== screenFinal));
+  save.disabled = !sheet.ok || (offSheet && sheet.officialLocked);
+  var mismatch = sheet.ok && !(offSheet && sheet.officialLocked) && (offSheet || firstOff !== null || (screenFinal !== null && final !== screenFinal));
   save.textContent = mismatch ? "Save anyway" : (sheetEditIdx === null ? "Save game" : "Save changes");
 }
 document.getElementById("confirm-cancel").addEventListener("click", function(){ sheet = null; photoBack(); });
@@ -3978,7 +3982,7 @@ function renderAttach(){
   });
   var have = (h.games || []).filter(function(g){ return g && g.frames; }).length;
   document.getElementById("attach-note").textContent = have
-    ? plural(have, "game") + " of " + sc.length + " now count toward Shot Stats."
+    ? plural(have, "game") + " of " + sc.length + (have === 1 ? " now counts" : " now count") + " toward Shot Stats."
     : "A photo of each game adds strike %, spare %, opens and splits for this night.";
 }
 function attachSave(g){
@@ -3986,6 +3990,7 @@ function attachSave(g){
   var games = [];
   for (var i = 0; i < sc.length; i++) games.push(h.games && h.games[i] && h.games[i].frames ? h.games[i] : null);
   games[attach.game] = g;
+  if (sc[attach.game] !== g.finalScore){ sc[attach.game] = g.finalScore; var t = sum(sc); h.total = t; h.average = (t / sc.length).toFixed(1); }
   h.games = games; h.scores = sc;
   h.scoreOnly = !games.some(function(x){ return x; });
   saveNightDoc(h);
@@ -4112,9 +4117,6 @@ function sheetTagFor(h){
 }
 document.getElementById("menu-team-btn").addEventListener("click", function(){ goToView("league"); });
 document.getElementById("home-league-btn").addEventListener("click", function(){ goToView("league"); });
-document.getElementById("league-back-btn").addEventListener("click", function(){
-  goToView("home");
-});
 document.getElementById("attach-done-btn").addEventListener("click", function(){ attach = null; historyTab = "league"; renderHistory(); showView("history"); });
 function goToView(name){
   if ((name === "game" || name === "scores") && nightActive()){ showNight(); }
