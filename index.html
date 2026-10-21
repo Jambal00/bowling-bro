@@ -3999,9 +3999,17 @@ function saveNightDoc(h){
 }
 // History: a night whose scores differ from the sheet can take the sheet's. Game photos whose
 // score still matches stay; any that don't are dropped, since their frames no longer add up.
+function sameScoresOtherOrder(a, b){ return a.length === b.length && a.slice().sort().join(",") === b.slice().sort().join(","); }
 function useSheetScores(it){
-  var h = it.h, sc = h._sheet.scores.slice(), old = h.games || [];
-  var games = sc.map(function(v, i){ var g = old[i]; return g && g.frames && g.finalScore === v ? g : null; });
+  var h = it.h, sc = h._sheet.scores.slice(), old = (h.games || []).filter(function(g){ return g && g.frames; });
+  // each game photo follows its score to wherever the sheet lists it (the order games were entered for
+  // the league can differ from the order they were bowled); only a photo whose score isn't on the sheet is dropped
+  var games = sc.map(function(){ return null; });
+  old.forEach(function(g){
+    var at = -1;
+    sc.forEach(function(v, i){ if (at < 0 && !games[i] && v === g.finalScore) at = i; });
+    if (at >= 0) games[at] = g;
+  });
   var total = sum(sc);
   h.scores = sc; h.total = total; h.average = (total / sc.length).toFixed(1);
   if (games.some(function(g){ return g; })){ h.games = games; h.scoreOnly = false; } else { delete h.games; h.scoreOnly = true; }
@@ -6164,11 +6172,14 @@ function renderDetailTable(el, items){
     if (eh.source === "sheet" || eh._sheet){
       var sl = document.createElement("p"); sl.className = "lg-note"; sl.style.margin = "0 0 8px";
       sl.textContent = eh.source === "sheet" ? "Filled in from the league sheet (Week " + eh.sheetWeek + ")."
-        : (eh._sheet.same ? "Matches the league sheet for Week " + eh._sheet.week + "." : "The league sheet for Week " + eh._sheet.week + " has " + eh._sheet.scores.join(", ") + ". Check which is right.");
+        : (eh._sheet.same ? "Matches the league sheet for Week " + eh._sheet.week + "."
+          : (sameScoresOtherOrder(editing.sc, eh._sheet.scores)
+            ? "Same scores as the league sheet for Week " + eh._sheet.week + ", in a different order (" + eh._sheet.scores.join(", ") + "). Game photos move with their scores."
+            : "The league sheet for Week " + eh._sheet.week + " has " + eh._sheet.scores.join(", ") + ". Check which is right."));
       box.appendChild(sl);
       if (eh._sheet && !eh._sheet.same){
         var us = document.createElement("button"); us.className = "full"; us.style.margin = "0 0 10px";
-        us.textContent = "Use the sheet's scores (" + eh._sheet.scores.join(", ") + ")";
+        us.textContent = sameScoresOtherOrder(editing.sc, eh._sheet.scores) ? "Use the sheet's order (" + eh._sheet.scores.join(", ") + ")" : "Use the sheet's scores (" + eh._sheet.scores.join(", ") + ")";
         us.addEventListener("click", function(){ useSheetScores(editing.it); });
         box.appendChild(us);
       }
