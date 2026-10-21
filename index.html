@@ -981,7 +981,6 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
     <p id="csv-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:0 0 8px;"></p>
     </div>
     <button class="full" id="share-stats-btn" style="margin-bottom:8px;">Share a stats summary</button>
-    <button class="full" id="history-back-btn">Back</button>
   </div>
 
   <!-- PROFILE VIEW -->
@@ -6386,11 +6385,6 @@ document.getElementById("view-history-link").addEventListener("click", function(
   document.getElementById("csv-status").textContent = "";
   renderHistory();
   showView("history");
-});
-document.getElementById("history-back-btn").addEventListener("click", function(){
-  if (nightActive()){ showNight(); return; }
-  if (photoActive()){ showPhoto(); return; }
-  showView(state.setupDone && state.games.length && !allGamesFreshlyReset() ? "game" : "setup");
 });
 function allGamesFreshlyReset(){ return state.games.length===0; }
 
