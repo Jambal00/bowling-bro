@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-10-23 06:37">
+<meta name="bb-version" content="2026-10-23 06:40">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -3656,8 +3656,8 @@ function renderLeaguePage(){
   });
   var lead = W.standings[0];
   if (lead.team !== myT) add(c4, "p", "lg-fine", fmtPts(lead.won - stand.won) + " points behind " + sheetTeamName(W, lead.team) + " with " + (sheetLg.data.weeksInSeason - W.week) + " weeks to go. Each week is worth 36 points.");
-  c4.appendChild(gapChart(myT));
   c4.appendChild(placeChart(myT));
+  c4.appendChild(gapChart(myT));
 
 }
 // --- Team Records: every record the sheets can give, for the team and its bowlers only ---
