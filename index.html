@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-10-21 18:50">
+<meta name="bb-version" content="2026-10-22 23:43">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -3796,6 +3796,15 @@ function renderTeamRecords(el, embedded){
     rec(c5, shortName(b.name), i >= 0 ? ordinal(i + 1) : "—", "", "by average (" + b.avg + ")");
   });
   if (c5.parentNode && c2.parentNode) el.insertBefore(c5, c2);
+  // individual points: everyone who has bowled, ties share a place
+  var bowled = W.bowlers.filter(function(b){ return b.games > 0; });
+  var c6 = card("Points around the league", "Individual points among all " + bowled.length + " bowlers this season", "individual");
+  men.slice().sort(function(a, z){ return (z.mp || 0) - (a.mp || 0); }).forEach(function(b){
+    var p = b.mp || 0, above = bowled.filter(function(x){ return (x.mp || 0) > p; }).length;
+    var tied = bowled.filter(function(x){ return (x.mp || 0) === p; }).length > 1;
+    rec(c6, shortName(b.name), (tied ? "T-" : "") + ordinal(above + 1), "", fmtPts(p) + (p === 1 ? " point" : " points"));
+  });
+  if (c6.parentNode && c2.parentNode) el.insertBefore(c6, c2);
   var c7 = card("Around the league", "Your team among all " + W.standings.length + " teams", "team");
   var sp = W.standings.slice().sort(function(a, z){ return z.scratchPins - a.scratchPins; }), myS = W.standings.filter(function(s){ return s.team === myT; })[0];
   var hp = W.standings.slice().sort(function(a, z){ return z.hdcpPins - a.hdcpPins; });
