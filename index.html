@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-10-23 00:01">
+<meta name="bb-version" content="2026-10-23 00:07">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -3750,6 +3750,7 @@ function renderTeamRecords(el, embedded){
   indiv("High scratch game", allG, function(x){ return x.v; });
   indiv("High handicap game", allG, function(x){ return x.hc === null ? null : x.v + x.hc; });
   indiv("Most over average", allG, function(x){ return x.avgIn === null ? null : x.v - x.avgIn; }, function(v){ return "+" + v; });
+  indiv("Low game \uD83D\uDCA9", allG, function(x){ return x.v; }, null, true);
   sub(c2, "Matches");
   indiv("High scratch series", log, function(x){ return x.series; });
   indiv("High handicap series", log, function(x){ return x.hcIn === null ? null : x.series + 3 * x.hcIn; });
@@ -3763,7 +3764,6 @@ function renderTeamRecords(el, embedded){
     var r = add(pl, "div", "rec-list-row");
     add(r, "span", "", shortName(w.name) + "  ·  Wk " + w.wks.join(", ")); add(r, "b", "", w.wks.length);
   });
-  indiv("Low game \uD83D\uDCA9", allG, function(x){ return x.v; }, null, true);
   indiv("Week of shame \uD83D\uDCA9", log, function(x){ return x.series; }, null, true);
 
   // leaderboard
