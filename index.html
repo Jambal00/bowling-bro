@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-10-23 10:50">
+<meta name="bb-version" content="2026-10-25 01:50">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -457,6 +457,9 @@ body.home-theme-pins { --chrome: rgba(255,255,255,0.26); --page: #c8241c; --page
 body.home-theme-retro { --chrome: rgba(255,255,255,0.22); --page: #1f3a42; --page-ink: #f1e3c6; --nav: #c8372d; --nav-ink: #f6ecd6; --home-bg: #1f3a42; --home-ink: #f1e3c6; --greet-font: Righteous, "Arial Black", sans-serif; --greet-weight: 400; --greet-size: 36px; --card: #f6ecd6; --card-ink: #1f3a42; --card-sub: #4f6266; --card-border: 2px solid #f1e3c6; --accent: #c8372d; --accent-ink: #f6ecd6; --icon: #c8372d; }
 body.home-theme-bigals { --chrome: rgba(255,255,255,0.22); --page: #4a4d52; --page-ink: #ffffff; --nav: #2a7de1; --nav-ink: #ffffff; --home-bg: #e3e3df; --home-ink: #1d2a3a; --greet-font: Bangers, "Arial Black", sans-serif; --greet-weight: 400; --greet-size: 40px; --card: #ffffff; --card-ink: #1d2a3a; --card-sub: #5a626e; --card-border: 1.5px solid #b9b9b4; --accent: #2a7de1; --accent-ink: #ffffff; --icon: #2a7de1; }
 body.home-theme-rose { --chrome: rgba(255,255,255,0.16); --page: #3a0d14; --page-ink: #f8e9dc; --nav: #c8102e; --nav-ink: #fff4ec; --home-bg: radial-gradient(ellipse 90% 60% at 50% 82%, #5c1421 0, #2c0a10 55%, #14050a 100%); --home-ink: #f3dcc4; --greet-font: "Abril Fatface", Georgia, serif; --greet-weight: 400; --greet-size: 36px; --card: #fbf3ee; --card-ink: #3a0d14; --card-sub: #7a4a4e; --card-border: 2px solid #c9a24a; --accent: #b3122a; --accent-ink: #fff4ec; --icon: #b3122a; }
+body.home-theme-golfer { --chrome: rgba(255,255,255,0.5); --page: #3b4650; --page-ink: #ffffff; --nav: #1f2a44; --nav-ink: #ffffff; --home-bg: linear-gradient(90deg, #c4c8c6 0 2px, transparent 2px) 0 0 / 48px 48px, linear-gradient(0deg, #c4c8c6 0 2px, transparent 2px) 0 0 / 48px 48px, #f3f3ef; --home-ink: #1f2a44; --greet-font: "Russo One", "Arial Black", sans-serif; --greet-weight: 400; --greet-size: 28px; --card: #ffffff; --card-ink: #1f2a44; --card-sub: #5a6274; --card-border: 2px solid #1f2a44; --accent: #1f2a44; --accent-ink: #ffffff; --icon: #1f2a44; }
+body.home-theme-golfer #home-greet-wrap.with-sub { margin-top: -12px; }
+body.home-theme-golfer #home-subgreet { margin-top: -8px; }
 body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,140,0.94); border-radius: 10px; padding: 3px 9px 3px 3px; margin: -3px 0 -3px -3px; }
 @media print {
   @page { size: landscape; margin: 10mm; }
@@ -3394,7 +3397,7 @@ function afterLeaguesChanged(){
 // ---------- profile ----------
 // Kept in the signed-in viewer's private area, so each person who uses the app has their own.
 var PROFILE_KEYS = ["name", "email", "hand", "homeCenter", "league", "team", "theme"];
-var THEME_IDS = ["lanes", "lebowski", "seventies", "cosmic", "shirt", "flame", "aloha", "beer", "sweater", "pins", "retro", "bigals", "rose"];
+var THEME_IDS = ["lanes", "lebowski", "seventies", "cosmic", "shirt", "flame", "aloha", "beer", "sweater", "pins", "retro", "bigals", "rose", "golfer"];
 function cleanProfile(src){
   var out = {};
   PROFILE_KEYS.forEach(function(k){ out[k] = (src && typeof src[k] === "string") ? src[k].slice(0, 120) : ""; });
@@ -5440,6 +5443,7 @@ var THEMES = [
   { id: "retro", page: "#1f3a42", top: "#1f3a42", name: "Retro", swatch: "radial-gradient(circle at 72% 24%, #f1e3c6 0 14%, transparent 15%), conic-gradient(from -40deg at 50% 105%, #f1e3c6 0 8deg, transparent 8deg 16deg, #f1e3c6 16deg 24deg, transparent 24deg 32deg, #c8372d 32deg 48deg, transparent 48deg 56deg, #f1e3c6 56deg 64deg, transparent 64deg 72deg, #f1e3c6 72deg 80deg, transparent 80deg), #1f3a42" },
   { id: "bigals", page: "#4a4d52", top: "#e3e3df", name: "Big Al\u2019s", swatch: "linear-gradient(90deg, transparent 0 10%, #1f6fd1 10% 90%, transparent 90%) 0 64% / 100% 16% no-repeat, linear-gradient(90deg, transparent 0 14%, #f39c12 14% 80%, transparent 80%) 0 80% / 100% 3% no-repeat, radial-gradient(ellipse at 84% 79%, #151515 0 7%, transparent 8%), #e3e3df" },
   { id: "rose", page: "#3a0d14", top: "#2c0a10", name: "King Pin", swatch: "radial-gradient(circle at 50% 66%, #e0283f 0 9%, transparent 10%), radial-gradient(circle at 50% 66%, rgba(255,255,255,0.28) 0 27%, transparent 28%), radial-gradient(ellipse 90% 60% at 50% 82%, #5c1421 0, #2c0a10 55%, #14050a 100%)" },
+  { id: "golfer", page: "#3b4650", top: "#f3f3ef", name: "Not a Golfer", swatch: "radial-gradient(circle at 50% 66%, #2a3550 0 20%, transparent 21%), radial-gradient(circle at 50% 66%, #8a8f93 0 30%, transparent 31%), linear-gradient(90deg, #c4c8c6 0 1px, transparent 1px) 0 0 / 12px 12px, linear-gradient(0deg, #c4c8c6 0 1px, transparent 1px) 0 0 / 12px 12px, #f3f3ef" },
 ];
 // The phone fills the strip behind its clock and battery with one solid colour (theme-color and the page background).
 // On Home that is the theme's colour along its top edge; on every other screen, the theme's page colour.
@@ -5515,6 +5519,23 @@ var HOME_ART = {
     BOT + '<defs><linearGradient id="hb-pinFace" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#f4f2ec"/><stop offset="1" stop-color="#cfcac0"/></linearGradient><g id="hb-pin"><path d="M18 0 C26 0 30 7 29 15 C28 22 24 26 24 32 C24 38 34 50 34 66 C34 84 29 96 25 100 L11 100 C7 96 2 84 2 66 C2 50 12 38 12 32 C12 26 8 22 7 15 C6 7 10 0 18 0 Z" fill="url(#hb-pinFace)" stroke="#9c968a" stroke-width="1.2"/><path d="M11.4 25 H24.6 L24.3 28.2 H11.7 Z M11.9 30.6 H24.1 L24.2 33.8 H11.8 Z" fill="#c8372d"/></g></defs><path d="M195 132 L-520 360 L-380 360 Z" fill="#f1e3c6"/><path d="M195 132 L-255 360 L-150 360 Z" fill="#f1e3c6"/><path d="M195 132 L-60 360 L20 360 Z" fill="#f1e3c6"/><path d="M195 132 L110 360 L170 360 Z" fill="#f1e3c6"/><path d="M195 132 L170 360 L280 360 Z" fill="#c8372d"/><path d="M195 132 L280 360 L370 360 Z" fill="#f1e3c6"/><path d="M195 132 L470 360 L600 360 Z" fill="#f1e3c6"/><path d="M195 132 L760 360 L920 360 Z" fill="#f1e3c6"/><rect y="128" width="390" height="6" fill="#16292f" opacity="0.5"/><use href="#hb-pin" transform="translate(111 108) rotate(0) scale(0.5) translate(-18 -50)"/><use href="#hb-pin" transform="translate(153 108) rotate(0) scale(0.6) translate(-18 -50)"/><use href="#hb-pin" transform="translate(195 108) rotate(0) scale(0.6) translate(-18 -50)"/><use href="#hb-pin" transform="translate(237 108) rotate(0) scale(0.6) translate(-18 -50)"/><use href="#hb-pin" transform="translate(279 108) rotate(0) scale(0.5) translate(-18 -50)"/><g fill="#1f3a42" opacity="0.55"><circle cx="231" cy="351" r="2.2"/><circle cx="231" cy="260" r="1.2"/><circle cx="94" cy="335" r="2.2"/><circle cx="322" cy="287" r="1.2"/><circle cx="48" cy="244" r="1.6"/><circle cx="72" cy="153" r="0.8"/><circle cx="304" cy="231" r="2.2"/><circle cx="334" cy="319" r="1.2"/><circle cx="319" cy="133" r="0.8"/><circle cx="30" cy="139" r="1.2"/><circle cx="123" cy="283" r="0.8"/><circle cx="237" cy="213" r="2.2"/><circle cx="302" cy="345" r="1.2"/><circle cx="265" cy="189" r="1.6"/><circle cx="255" cy="131" r="0.8"/><circle cx="234" cy="297" r="1.6"/><circle cx="208" cy="271" r="0.8"/><circle cx="362" cy="195" r="1.6"/><circle cx="388" cy="188" r="1.6"/><circle cx="15" cy="147" r="0.8"/><circle cx="205" cy="157" r="1.6"/><circle cx="197" cy="147" r="0.8"/><circle cx="350" cy="130" r="1.2"/><circle cx="107" cy="143" r="2.2"/><circle cx="192" cy="311" r="2.2"/><circle cx="214" cy="148" r="1.2"/><circle cx="345" cy="199" r="1.6"/><circle cx="44" cy="209" r="1.6"/><circle cx="7" cy="234" r="0.8"/><circle cx="68" cy="193" r="0.8"/><circle cx="5" cy="145" r="2.2"/><circle cx="249" cy="175" r="1.2"/><circle cx="229" cy="260" r="1.2"/><circle cx="374" cy="326" r="1.2"/><circle cx="214" cy="294" r="2.2"/><circle cx="59" cy="231" r="2.2"/><circle cx="108" cy="130" r="1.6"/><circle cx="303" cy="207" r="0.8"/><circle cx="107" cy="177" r="2.2"/><circle cx="308" cy="294" r="0.8"/><circle cx="21" cy="167" r="1.2"/><circle cx="226" cy="196" r="0.8"/><circle cx="312" cy="214" r="1.6"/><circle cx="197" cy="148" r="0.8"/><circle cx="46" cy="183" r="1.2"/><circle cx="7" cy="283" r="1.6"/><circle cx="190" cy="289" r="2.2"/><circle cx="65" cy="280" r="2.2"/><circle cx="294" cy="164" r="2.2"/><circle cx="93" cy="290" r="1.2"/><circle cx="159" cy="188" r="1.2"/><circle cx="371" cy="178" r="1.2"/><circle cx="378" cy="291" r="1.2"/><circle cx="351" cy="229" r="2.2"/><circle cx="309" cy="150" r="2.2"/><circle cx="24" cy="156" r="0.8"/><circle cx="19" cy="261" r="1.6"/><circle cx="122" cy="319" r="2.2"/><circle cx="131" cy="237" r="2.2"/><circle cx="150" cy="263" r="1.2"/><circle cx="368" cy="147" r="1.2"/><circle cx="116" cy="252" r="0.8"/><circle cx="143" cy="184" r="1.2"/><circle cx="383" cy="134" r="0.8"/><circle cx="137" cy="235" r="2.2"/><circle cx="127" cy="145" r="0.8"/><circle cx="90" cy="202" r="1.6"/><circle cx="271" cy="276" r="1.2"/><circle cx="47" cy="222" r="1.2"/><circle cx="230" cy="214" r="1.2"/><circle cx="302" cy="138" r="0.8"/><circle cx="243" cy="221" r="1.6"/><circle cx="17" cy="135" r="0.8"/><circle cx="246" cy="147" r="1.6"/><circle cx="163" cy="164" r="0.8"/><circle cx="38" cy="245" r="1.6"/><circle cx="377" cy="141" r="1.2"/><circle cx="174" cy="220" r="0.8"/><circle cx="350" cy="251" r="0.8"/><circle cx="213" cy="332" r="0.8"/><circle cx="255" cy="276" r="0.8"/><circle cx="319" cy="299" r="2.2"/><circle cx="194" cy="279" r="0.8"/><circle cx="311" cy="148" r="0.8"/><circle cx="46" cy="293" r="0.8"/><circle cx="131" cy="355" r="2.2"/><circle cx="372" cy="214" r="2.2"/><circle cx="376" cy="307" r="2.2"/><circle cx="225" cy="248" r="0.8"/><circle cx="265" cy="322" r="0.8"/></g></svg>',
   bigals:
     '',
+  // Not a Golfer (id "golfer"): a bowling ball dropped on a white tile bathroom floor, sitting in a crater of shattered tile
+  golfer:
+    TOP + '<g fill="#ffffff" stroke="#b9bdbb" stroke-width="1"><path d="M300 100 l12 -6 l6 10 l-10 6 z"/><path d="M60 118 l9 -2 l2 8 l-9 3 z"/><path d="M340 136 l7 2 l-2 7 l-7 -3 z"/></g></svg>' +
+    BOT + '<defs><radialGradient id="hb-gfBall" cx="0.36" cy="0.32" r="0.75"><stop offset="0" stop-color="#5b6c9a"/><stop offset="0.45" stop-color="#26315a"/><stop offset="1" stop-color="#0d1226"/></radialGradient>' +
+    '<radialGradient id="hb-gfHole" cx="0.5" cy="0.5" r="0.6"><stop offset="0" stop-color="#5e6366"/><stop offset="1" stop-color="#8d9295"/></radialGradient>' +
+    '<filter id="hb-gfSh" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity="0.3"/></filter></defs>' +
+    '<g stroke="#5a5f62" stroke-width="1.6" fill="none" stroke-linecap="round"><path d="M200 248 L120 196 L84 190 L40 160"/><path d="M200 248 L150 150 L156 120"/><path d="M200 248 L262 156 L300 140 L344 104"/><path d="M200 248 L320 236 L390 250"/><path d="M200 248 L292 326 L330 360"/><path d="M200 248 L90 300 L20 296"/><path d="M200 248 L172 360"/><path d="M120 196 L110 236 M262 156 L282 196 M292 326 L252 344 M90 300 L104 330 M150 150 L118 154"/></g>' +
+    '<g stroke="#8d9295" stroke-width="0.8" fill="none"><path d="M84 190 L70 214 M300 140 L304 170 M320 236 L336 214 M90 300 L60 320"/></g>' +
+    '<path d="M136 214 L158 178 L196 170 L236 176 L262 196 L274 230 L270 268 L250 300 L212 314 L170 310 L140 290 L126 254 Z" fill="url(#hb-gfHole)"/>' +
+    '<g fill="#ffffff" stroke="#b9bdbb" stroke-width="1" filter="url(#hb-gfSh)"><path d="M126 254 L136 214 L114 222 L108 252 Z"/><path d="M158 178 L196 170 L190 154 L162 160 Z"/><path d="M262 196 L274 230 L294 222 L284 190 Z"/><path d="M250 300 L212 314 L218 330 L258 318 Z"/><path d="M140 290 L170 310 L160 324 L132 306 Z"/>' +
+    '<path d="M96 170 l14 -4 l4 12 l-14 4 z"/><path d="M300 270 l12 4 l-4 12 l-12 -4 z"/><path d="M226 140 l10 -2 l2 9 l-10 2 z"/><path d="M110 330 l9 3 l-3 9 l-9 -3 z"/><path d="M320 300 l7 1 l-1 7 l-7 -1 z"/><path d="M70 250 l8 -1 l1 8 l-8 1 z"/></g>' +
+    '<ellipse cx="204" cy="300" rx="70" ry="14" fill="rgba(0,0,0,0.35)"/>' +
+    '<circle cx="200" cy="240" r="68" fill="url(#hb-gfBall)"/>' +
+    '<g fill="#05070f"><ellipse cx="184" cy="214" rx="8" ry="9"/><ellipse cx="210" cy="210" rx="8" ry="9"/><ellipse cx="198" cy="244" rx="10" ry="11"/></g>' +
+    '<g fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"><ellipse cx="184" cy="214" rx="8" ry="9"/><ellipse cx="210" cy="210" rx="8" ry="9"/><ellipse cx="198" cy="244" rx="10" ry="11"/></g>' +
+    '<path d="M150 214 C158 192 176 180 196 177" stroke="rgba(255,255,255,0.45)" stroke-width="6" fill="none" stroke-linecap="round"/>' +
+    '<ellipse cx="236" cy="200" rx="9" ry="5" transform="rotate(35 236 200)" fill="rgba(255,255,255,0.3)"/></svg>',
   // King Pin (shown as "King Pin"; id "rose"): a clear ball with a red rose inside, glowing on the approach under a spotlight,
   // with a few petals falling at the top
   rose:
@@ -5559,6 +5580,7 @@ function renderHome(){
   var first = (profile.name || "").trim().split(/\s+/)[0];
   var tid = themeId(), greet = part + (first ? ", " + first : "") + ".", sub = "";
   if (tid === "sweater") greet = "Dude!";
+  if (tid === "golfer") sub = "\u201cYou\u2019re obviously not a golfer\u201d \u2013 The Dude";
   if (tid === "lebowski"){ greet = "Nice Rug" + (first ? ", " + first : ""); sub = "It really ties the app together"; }
   var gEl = document.getElementById("home-greet"), sEl = document.getElementById("home-subgreet");
   gEl.textContent = greet; document.getElementById("home-greet-wrap").classList.toggle("with-sub", !!sub);
@@ -5643,8 +5665,8 @@ function keepBowlInPlace(){
 }
 // where each theme's top art ends (in the 390-wide drawing); on a short phone the art slides up
 // just far enough to stay clear of the greeting, and stays put where there's room
-var HOME_ART_CLEAR = { sweater: 54, retro: 70 };
-var HOME_ART_BOTTOM = { rose: 136, lanes: 140, lebowski: 112, seventies: 130, cosmic: 150, shirt: 148, flame: 100, aloha: 150, beer: 128, sweater: 128, pins: 120, retro: 112, bigals: 20 };
+var HOME_ART_CLEAR = { sweater: 54, retro: 70, golfer: 150 };
+var HOME_ART_BOTTOM = { golfer: 110, rose: 136, lanes: 140, lebowski: 112, seventies: 130, cosmic: 150, shirt: 148, flame: 100, aloha: 150, beer: 128, sweater: 128, pins: 120, retro: 112, bigals: 20 };
 function layoutHomeArt(){
   var g = document.getElementById("home-greet"), stage = document.getElementById("home-stage");
   if (!g || !stage || document.getElementById("view-home").classList.contains("hidden")) return;
