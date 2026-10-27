@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-10-25 01:50">
+<meta name="bb-version" content="2026-10-26 19:45">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -460,6 +460,8 @@ body.home-theme-rose { --chrome: rgba(255,255,255,0.16); --page: #3a0d14; --page
 body.home-theme-golfer { --chrome: rgba(255,255,255,0.5); --page: #3b4650; --page-ink: #ffffff; --nav: #1f2a44; --nav-ink: #ffffff; --home-bg: linear-gradient(90deg, #c4c8c6 0 2px, transparent 2px) 0 0 / 48px 48px, linear-gradient(0deg, #c4c8c6 0 2px, transparent 2px) 0 0 / 48px 48px, #f3f3ef; --home-ink: #1f2a44; --greet-font: "Russo One", "Arial Black", sans-serif; --greet-weight: 400; --greet-size: 28px; --card: #ffffff; --card-ink: #1f2a44; --card-sub: #5a6274; --card-border: 2px solid #1f2a44; --accent: #1f2a44; --accent-ink: #ffffff; --icon: #1f2a44; }
 body.home-theme-golfer #home-greet-wrap.with-sub { margin-top: -12px; }
 body.home-theme-golfer #home-subgreet { margin-top: -8px; }
+body.home-theme-fault { --chrome: rgba(255,255,255,0.18); --page: #2e4636; --page-ink: #f3f1e6; --nav: #f2c94c; --nav-ink: #22332a; --home-bg: radial-gradient(ellipse 60% 30% at 30% 22%, rgba(255,255,255,0.06), transparent 70%), radial-gradient(ellipse 50% 25% at 75% 70%, rgba(255,255,255,0.05), transparent 70%), radial-gradient(ellipse 120% 90% at 50% 45%, #355241 0, #2a4133 70%, #22362a 100%); --home-ink: #f3f1e6; --greet-font: Caveat, "Comic Sans MS", cursive; --greet-weight: 700; --greet-size: 44px; --card: #f7f4ea; --card-ink: #22332a; --card-sub: #5c6b60; --card-border: 2px solid #f3f1e6; --accent: #f2c94c; --accent-ink: #22332a; --icon: #2e7d5b; }
+@media (min-height: 740px) { body.home-theme-fault #home-greet-wrap { margin-top: 26px; } }
 body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,140,0.94); border-radius: 10px; padding: 3px 9px 3px 3px; margin: -3px 0 -3px -3px; }
 @media print {
   @page { size: landscape; margin: 10mm; }
@@ -3397,7 +3399,7 @@ function afterLeaguesChanged(){
 // ---------- profile ----------
 // Kept in the signed-in viewer's private area, so each person who uses the app has their own.
 var PROFILE_KEYS = ["name", "email", "hand", "homeCenter", "league", "team", "theme"];
-var THEME_IDS = ["lanes", "lebowski", "seventies", "cosmic", "shirt", "flame", "aloha", "beer", "sweater", "pins", "retro", "bigals", "rose", "golfer"];
+var THEME_IDS = ["lanes", "lebowski", "seventies", "cosmic", "shirt", "flame", "aloha", "beer", "sweater", "pins", "retro", "bigals", "rose", "golfer", "fault"];
 function cleanProfile(src){
   var out = {};
   PROFILE_KEYS.forEach(function(k){ out[k] = (src && typeof src[k] === "string") ? src[k].slice(0, 120) : ""; });
@@ -5444,6 +5446,7 @@ var THEMES = [
   { id: "bigals", page: "#4a4d52", top: "#e3e3df", name: "Big Al\u2019s", swatch: "linear-gradient(90deg, transparent 0 10%, #1f6fd1 10% 90%, transparent 90%) 0 64% / 100% 16% no-repeat, linear-gradient(90deg, transparent 0 14%, #f39c12 14% 80%, transparent 80%) 0 80% / 100% 3% no-repeat, radial-gradient(ellipse at 84% 79%, #151515 0 7%, transparent 8%), #e3e3df" },
   { id: "rose", page: "#3a0d14", top: "#2c0a10", name: "King Pin", swatch: "radial-gradient(circle at 50% 66%, #e0283f 0 9%, transparent 10%), radial-gradient(circle at 50% 66%, rgba(255,255,255,0.28) 0 27%, transparent 28%), radial-gradient(ellipse 90% 60% at 50% 82%, #5c1421 0, #2c0a10 55%, #14050a 100%)" },
   { id: "golfer", page: "#3b4650", top: "#f3f3ef", name: "Not a Golfer", swatch: "radial-gradient(circle at 50% 66%, #2a3550 0 20%, transparent 21%), radial-gradient(circle at 50% 66%, #8a8f93 0 30%, transparent 31%), linear-gradient(90deg, #c4c8c6 0 1px, transparent 1px) 0 0 / 12px 12px, linear-gradient(0deg, #c4c8c6 0 1px, transparent 1px) 0 0 / 12px 12px, #f3f3ef" },
+  { id: "fault", page: "#2e4636", top: "#2a4133", name: "Not My Fault", swatch: "conic-gradient(from 0deg at 50% 62%, #f2c94c 0 35%, #f4a7b9 35% 60%, #8ecae6 60% 80%, #a8e0a0 80% 95%, #f3f1e6 95% 99%, #e76f51 99%) 50% 62% / 56% 42% no-repeat, linear-gradient(180deg, transparent 0 88%, #8a5a2e 88%), radial-gradient(ellipse 120% 90% at 50% 45%, #355241 0, #22362a 100%)" },
 ];
 // The phone fills the strip behind its clock and battery with one solid colour (theme-color and the page background).
 // On Home that is the theme's colour along its top edge; on every other screen, the theme's page colour.
@@ -5519,6 +5522,29 @@ var HOME_ART = {
     BOT + '<defs><linearGradient id="hb-pinFace" x1="0" x2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="0.6" stop-color="#f4f2ec"/><stop offset="1" stop-color="#cfcac0"/></linearGradient><g id="hb-pin"><path d="M18 0 C26 0 30 7 29 15 C28 22 24 26 24 32 C24 38 34 50 34 66 C34 84 29 96 25 100 L11 100 C7 96 2 84 2 66 C2 50 12 38 12 32 C12 26 8 22 7 15 C6 7 10 0 18 0 Z" fill="url(#hb-pinFace)" stroke="#9c968a" stroke-width="1.2"/><path d="M11.4 25 H24.6 L24.3 28.2 H11.7 Z M11.9 30.6 H24.1 L24.2 33.8 H11.8 Z" fill="#c8372d"/></g></defs><path d="M195 132 L-520 360 L-380 360 Z" fill="#f1e3c6"/><path d="M195 132 L-255 360 L-150 360 Z" fill="#f1e3c6"/><path d="M195 132 L-60 360 L20 360 Z" fill="#f1e3c6"/><path d="M195 132 L110 360 L170 360 Z" fill="#f1e3c6"/><path d="M195 132 L170 360 L280 360 Z" fill="#c8372d"/><path d="M195 132 L280 360 L370 360 Z" fill="#f1e3c6"/><path d="M195 132 L470 360 L600 360 Z" fill="#f1e3c6"/><path d="M195 132 L760 360 L920 360 Z" fill="#f1e3c6"/><rect y="128" width="390" height="6" fill="#16292f" opacity="0.5"/><use href="#hb-pin" transform="translate(111 108) rotate(0) scale(0.5) translate(-18 -50)"/><use href="#hb-pin" transform="translate(153 108) rotate(0) scale(0.6) translate(-18 -50)"/><use href="#hb-pin" transform="translate(195 108) rotate(0) scale(0.6) translate(-18 -50)"/><use href="#hb-pin" transform="translate(237 108) rotate(0) scale(0.6) translate(-18 -50)"/><use href="#hb-pin" transform="translate(279 108) rotate(0) scale(0.5) translate(-18 -50)"/><g fill="#1f3a42" opacity="0.55"><circle cx="231" cy="351" r="2.2"/><circle cx="231" cy="260" r="1.2"/><circle cx="94" cy="335" r="2.2"/><circle cx="322" cy="287" r="1.2"/><circle cx="48" cy="244" r="1.6"/><circle cx="72" cy="153" r="0.8"/><circle cx="304" cy="231" r="2.2"/><circle cx="334" cy="319" r="1.2"/><circle cx="319" cy="133" r="0.8"/><circle cx="30" cy="139" r="1.2"/><circle cx="123" cy="283" r="0.8"/><circle cx="237" cy="213" r="2.2"/><circle cx="302" cy="345" r="1.2"/><circle cx="265" cy="189" r="1.6"/><circle cx="255" cy="131" r="0.8"/><circle cx="234" cy="297" r="1.6"/><circle cx="208" cy="271" r="0.8"/><circle cx="362" cy="195" r="1.6"/><circle cx="388" cy="188" r="1.6"/><circle cx="15" cy="147" r="0.8"/><circle cx="205" cy="157" r="1.6"/><circle cx="197" cy="147" r="0.8"/><circle cx="350" cy="130" r="1.2"/><circle cx="107" cy="143" r="2.2"/><circle cx="192" cy="311" r="2.2"/><circle cx="214" cy="148" r="1.2"/><circle cx="345" cy="199" r="1.6"/><circle cx="44" cy="209" r="1.6"/><circle cx="7" cy="234" r="0.8"/><circle cx="68" cy="193" r="0.8"/><circle cx="5" cy="145" r="2.2"/><circle cx="249" cy="175" r="1.2"/><circle cx="229" cy="260" r="1.2"/><circle cx="374" cy="326" r="1.2"/><circle cx="214" cy="294" r="2.2"/><circle cx="59" cy="231" r="2.2"/><circle cx="108" cy="130" r="1.6"/><circle cx="303" cy="207" r="0.8"/><circle cx="107" cy="177" r="2.2"/><circle cx="308" cy="294" r="0.8"/><circle cx="21" cy="167" r="1.2"/><circle cx="226" cy="196" r="0.8"/><circle cx="312" cy="214" r="1.6"/><circle cx="197" cy="148" r="0.8"/><circle cx="46" cy="183" r="1.2"/><circle cx="7" cy="283" r="1.6"/><circle cx="190" cy="289" r="2.2"/><circle cx="65" cy="280" r="2.2"/><circle cx="294" cy="164" r="2.2"/><circle cx="93" cy="290" r="1.2"/><circle cx="159" cy="188" r="1.2"/><circle cx="371" cy="178" r="1.2"/><circle cx="378" cy="291" r="1.2"/><circle cx="351" cy="229" r="2.2"/><circle cx="309" cy="150" r="2.2"/><circle cx="24" cy="156" r="0.8"/><circle cx="19" cy="261" r="1.6"/><circle cx="122" cy="319" r="2.2"/><circle cx="131" cy="237" r="2.2"/><circle cx="150" cy="263" r="1.2"/><circle cx="368" cy="147" r="1.2"/><circle cx="116" cy="252" r="0.8"/><circle cx="143" cy="184" r="1.2"/><circle cx="383" cy="134" r="0.8"/><circle cx="137" cy="235" r="2.2"/><circle cx="127" cy="145" r="0.8"/><circle cx="90" cy="202" r="1.6"/><circle cx="271" cy="276" r="1.2"/><circle cx="47" cy="222" r="1.2"/><circle cx="230" cy="214" r="1.2"/><circle cx="302" cy="138" r="0.8"/><circle cx="243" cy="221" r="1.6"/><circle cx="17" cy="135" r="0.8"/><circle cx="246" cy="147" r="1.6"/><circle cx="163" cy="164" r="0.8"/><circle cx="38" cy="245" r="1.6"/><circle cx="377" cy="141" r="1.2"/><circle cx="174" cy="220" r="0.8"/><circle cx="350" cy="251" r="0.8"/><circle cx="213" cy="332" r="0.8"/><circle cx="255" cy="276" r="0.8"/><circle cx="319" cy="299" r="2.2"/><circle cx="194" cy="279" r="0.8"/><circle cx="311" cy="148" r="0.8"/><circle cx="46" cy="293" r="0.8"/><circle cx="131" cy="355" r="2.2"/><circle cx="372" cy="214" r="2.2"/><circle cx="376" cy="307" r="2.2"/><circle cx="225" cy="248" r="0.8"/><circle cx="265" cy="322" r="0.8"/></g></svg>',
   bigals:
     '',
+  // Not My Fault (id "fault"): a coach's chalkboard after a rough night. A chalk play diagram of a perfect shot the lane
+  // ruined at the top; a chalk pie chart of why we lost at the bottom (a 1% sliver for "Me"), above a chalk tray
+  fault:
+    TOP + '<g transform="translate(34 30) scale(0.82)"><g fill="none" stroke="#f3f1e6" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M24 66 H290 M24 134 H290" stroke-width="1.5" opacity="0.35"/>' +
+      '<path d="M24 74 H290 M24 126 H290" stroke-width="2" stroke-dasharray="10 6" opacity="0.6"/>' +
+      '<path d="M24 66 V134" stroke-width="2" opacity="0.6"/>' +
+      '<g stroke-width="2.2" opacity="0.9"><circle cx="300" cy="100" r="5"/><circle cx="314" cy="92" r="5"/><circle cx="314" cy="108" r="5"/><circle cx="328" cy="84" r="5"/><circle cx="328" cy="100" r="5"/><circle cx="328" cy="116" r="5"/><circle cx="342" cy="76" r="5"/><circle cx="342" cy="92" r="5"/><circle cx="342" cy="108" r="5"/><circle cx="342" cy="124" r="5"/></g>' +
+      '<path d="M44 92 C110 101 170 118 212 120 C246 121 276 110 293 103" stroke="#f2c94c" stroke-width="2.2" stroke-dasharray="5 5"/><path d="M285 101 L294 103 L288 110" stroke="#f2c94c" stroke-width="2.2"/>' +
+      '<path d="M44 93 L178 130 L282 130" stroke-width="2.8"/><path d="M272 125 L283 130 L272 135" stroke-width="2.8"/>' +
+      '<circle cx="36" cy="92" r="8" stroke-width="2.4" opacity="0.95"/>' +
+    '</g>' +
+    '<g font-family="Caveat, cursive" font-weight="700" fill="#f3f1e6"><text x="150" y="62" font-size="20" fill="#f2c94c">perfect shot</text><path d="M196 66 C204 82 210 100 212 116" stroke="#f2c94c" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-dasharray="3 3"/>' +
+      '<text x="64" y="152" font-size="19" transform="rotate(-2 64 152)">the lane did this →</text></g></g></svg>' +
+    BOT + '<g font-family="Caveat, cursive" font-weight="700" fill="#f3f1e6">' +
+      '<text x="24" y="156" font-size="26">Why you lost:</text><path d="M24 162 C70 166 110 160 150 164" stroke="#f3f1e6" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.8"/>' +
+      '<g opacity="0.88"><path d="M104 236 L104.0 170.0 A66 66 0 0 1 157.4 274.8 Z" fill="#f2c94c"/><path d="M104 236 L157.4 274.8 A66 66 0 0 1 65.2 289.4 Z" fill="#f4a7b9"/><path d="M104 236 L65.2 289.4 A66 66 0 0 1 41.2 215.6 Z" fill="#8ecae6"/><path d="M104 236 L41.2 215.6 A66 66 0 0 1 83.6 173.2 Z" fill="#a8e0a0"/><path d="M104 236 L83.6 173.2 A66 66 0 0 1 99.9 170.1 Z" fill="#f3f1e6"/><path d="M104 236 L99.9 170.1 A66 66 0 0 1 104.0 170.0 Z" fill="#e76f51"/></g>' +
+      '<circle cx="104" cy="236" r="66" fill="none" stroke="#f3f1e6" stroke-width="2.2" opacity="0.9"/>' +
+      '<rect x="196" y="165" width="13" height="13" rx="2" fill="#f2c94c"/><text x="216" y="177" font-size="19">The oil</text><text x="380" y="177" font-size="19" text-anchor="end">35%</text><rect x="196" y="189" width="13" height="13" rx="2" fill="#f4a7b9"/><text x="216" y="201" font-size="19">The ball</text><text x="380" y="201" font-size="19" text-anchor="end">25%</text><rect x="196" y="213" width="13" height="13" rx="2" fill="#8ecae6"/><text x="216" y="225" font-size="19">Slippery approach</text><text x="380" y="225" font-size="19" text-anchor="end">20%</text><rect x="196" y="237" width="13" height="13" rx="2" fill="#a8e0a0"/><text x="216" y="249" font-size="19">Big Al\u2019s fault</text><text x="380" y="249" font-size="19" text-anchor="end">15%</text><rect x="196" y="261" width="13" height="13" rx="2" fill="#f3f1e6"/><text x="216" y="273" font-size="19">Glued 10 pin</text><text x="380" y="273" font-size="19" text-anchor="end">4%</text><rect x="196" y="285" width="13" height="13" rx="2" fill="#e76f51"/><text x="216" y="297" font-size="19">Me</text><text x="244" y="297" font-size="15" fill="#e76f51">(rounding error)</text><text x="380" y="297" font-size="19" text-anchor="end">1%</text>' +
+    '</g>' +
+    '<rect x="0" y="330" width="390" height="30" fill="#8a5a2e"/><rect x="0" y="330" width="390" height="5" fill="#a87442"/><rect x="0" y="352" width="390" height="8" fill="#6b4422"/>' +
+    '<rect x="96" y="321" width="42" height="10" rx="4" fill="#fbfaf4"/><rect x="146" y="323" width="26" height="8" rx="3.5" fill="#f2c94c"/>' +
+    '<rect x="262" y="314" width="68" height="18" rx="3" fill="#3a3a3a"/><rect x="262" y="314" width="68" height="7" rx="3" fill="#b0855a"/><path d="M266 328 H326" stroke="rgba(255,255,255,0.35)" stroke-width="2"/></svg>',
   // Not a Golfer (id "golfer"): a bowling ball dropped on a white tile bathroom floor, sitting in a crater of shattered tile
   golfer:
     TOP + '<g fill="#ffffff" stroke="#b9bdbb" stroke-width="1"><path d="M300 100 l12 -6 l6 10 l-10 6 z"/><path d="M60 118 l9 -2 l2 8 l-9 3 z"/><path d="M340 136 l7 2 l-2 7 l-7 -3 z"/></g></svg>' +
@@ -5580,6 +5606,7 @@ function renderHome(){
   var first = (profile.name || "").trim().split(/\s+/)[0];
   var tid = themeId(), greet = part + (first ? ", " + first : "") + ".", sub = "";
   if (tid === "sweater") greet = "Dude!";
+  if (tid === "fault") greet = "Not your fault" + (first ? ", " + first : "") + ".";
   if (tid === "golfer") sub = "\u201cYou\u2019re obviously not a golfer\u201d \u2013 The Dude";
   if (tid === "lebowski"){ greet = "Nice Rug" + (first ? ", " + first : ""); sub = "It really ties the app together"; }
   var gEl = document.getElementById("home-greet"), sEl = document.getElementById("home-subgreet");
@@ -5665,8 +5692,8 @@ function keepBowlInPlace(){
 }
 // where each theme's top art ends (in the 390-wide drawing); on a short phone the art slides up
 // just far enough to stay clear of the greeting, and stays put where there's room
-var HOME_ART_CLEAR = { sweater: 54, retro: 70, golfer: 150 };
-var HOME_ART_BOTTOM = { golfer: 110, rose: 136, lanes: 140, lebowski: 112, seventies: 130, cosmic: 150, shirt: 148, flame: 100, aloha: 150, beer: 128, sweater: 128, pins: 120, retro: 112, bigals: 20 };
+var HOME_ART_CLEAR = { sweater: 54, retro: 70, golfer: 150, fault: 140 };
+var HOME_ART_BOTTOM = { fault: 156, golfer: 110, rose: 136, lanes: 140, lebowski: 112, seventies: 130, cosmic: 150, shirt: 148, flame: 100, aloha: 150, beer: 128, sweater: 128, pins: 120, retro: 112, bigals: 20 };
 function layoutHomeArt(){
   var g = document.getElementById("home-greet"), stage = document.getElementById("home-stage");
   if (!g || !stage || document.getElementById("view-home").classList.contains("hidden")) return;
