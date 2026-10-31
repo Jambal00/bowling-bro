@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-10-26 19:58">
+<meta name="bb-version" content="2026-10-30 22:20">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -283,6 +283,9 @@ body:not(.on-home) .lg-toggle { background: var(--chrome, rgba(255,255,255,0.14)
 .lg-weeks tr.lg-wk.open td { background: #f6f5ef; }
 .lg-weeks td.lg-name, .lg-weeks > thead th:nth-child(2), .lg-rec td.lg-name { text-align: left; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
 .lg-weeks tr.lg-detail > td { text-align: left; background: #f6f5ef; padding: 4px 8px 10px; }
+/* the opponent's name takes whatever room is left and trims with an ellipsis, so wide points like 11½–24½ never push Place off the card */
+.lg-weeks > tbody > tr.lg-wk > td.lg-name { width: 100%; max-width: 0; }
+.lg-weeks > tbody > tr.lg-wk > td:nth-child(4), .lg-weeks > thead th:nth-child(4) { padding-left: 7px; }
 .lg-detail-men { margin-top: 6px; }
 .lg-num.neg { color: #b3261e; }
 .lg-rec { margin-top: 12px; }
