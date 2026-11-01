@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-10-31 13:20">
+<meta name="bb-version" content="2026-11-01 13:10">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -279,6 +279,9 @@ body:not(.on-home) .lg-toggle { background: var(--chrome, rgba(255,255,255,0.14)
 .lg-meet-close { font-size: 12px; color: #8a5a00; font-weight: 600; }
 .lg-weeks tr.lg-wk { cursor: pointer; }
 .lg-ind th { white-space: nowrap; }
+.lg-ind tr.lg-ind-groups th { border-bottom: 0; padding-bottom: 0; font-size: 10px; letter-spacing: 0.02em; }
+.lg-ind th.lg-ind-group { text-align: center; border-bottom: 1px solid #e6e3d8; padding-bottom: 2px; }
+.lg-ind td.lg-ind-hc, .lg-ind thead tr:last-child th:nth-child(7) { padding-left: 8px; }
 .lg-ind th[role="button"] { cursor: pointer; user-select: none; -webkit-user-select: none; }
 .lg-ind th.sorted { color: #1a1a1a; }
 .lg-ind td.sorted { font-weight: 700; }
@@ -3699,11 +3702,16 @@ var lgMode = "main", recTab = "individual", lgTab = "week", stTab = "team", indS
 // Tapping a column header sorts by it (tap again to flip); the # column follows the current sort.
 function renderIndividualStandings(c, myT){
   var W = sheetLatest(), weeks = sheetWeeks(), by = {};
-  weeks.forEach(function(w){
+  weeks.forEach(function(w, wi){
+    var pw = wi ? weeks[wi - 1] : null;
     w.bowlers.forEach(function(b){
-      var x = by[b.id] || (by[b.id] = { id: b.id, hiG: 0, hiS: 0, won: 0, played: 0 });
+      var x = by[b.id] || (by[b.id] = { id: b.id, hiG: 0, hiS: 0, hcG: 0, hcS: 0, won: 0, played: 0 });
       if (b.scores){
         x.hiG = Math.max(x.hiG, Math.max.apply(null, b.scores)); x.hiS = Math.max(x.hiS, sum(b.scores));
+        // handicap going in is last week's sheet; a bowler's first night uses that night's own sheet. Week 1 is left
+        // out because its handicaps came from before the season (the team totals confirm this rule for Weeks 2-8).
+        var pb = pw && sheetBowler(pw, b.id), hc = !pw ? null : (pb && pb.games ? pb.hdcp : b.hdcp);
+        if (hc !== null){ x.hcG = Math.max(x.hcG, Math.max.apply(null, b.scores) + hc); x.hcS = Math.max(x.hcS, sum(b.scores) + 3 * hc); }
         if (b.won){ x.won += b.won.filter(Boolean).length; x.played += 3; }
       }
     });
@@ -3711,9 +3719,9 @@ function renderIndividualStandings(c, myT){
   var rows = W.bowlers.filter(function(b){ return b.games > 0; }).map(function(b){
     var x = by[b.id];
     return { id: b.id, name: shortName(b.name), team: b.rosterTeam || b.team, avg: b.avg, hdcp: b.hdcp, games: b.games, pins: b.pins,
-      pts: typeof b.mp === "number" ? b.mp : 0, hiG: x.hiG || null, hiS: x.hiS || null };
+      pts: typeof b.mp === "number" ? b.mp : 0, hiG: x.hiG || null, hiS: x.hiS || null, hcG: x.hcG || null, hcS: x.hcS || null };
   });
-  var cols = [["#", null], ["Bowler", "name"], ["Avg", "avg"], ["Pts", "pts"], ["Hi G", "hiG"], ["Hi S", "hiS"], ["Gms", "games"]];
+  var cols = [["#", null], ["Bowler", "name"], ["Avg", "avg"], ["Pts", "pts"], ["G", "hiG"], ["S", "hiS"], ["G", "hcG"], ["S", "hcS"]];
   var key = indSort.key, dir = indSort.dir;
   rows.sort(function(a, z){
     var va = a[key], vz = z[key];
@@ -3721,7 +3729,9 @@ function renderIndividualStandings(c, myT){
     return dir * (((va === null ? -1 : va) - (vz === null ? -1 : vz))) || (z.avg - a.avg);
   });
   function add(parent, tag, cls, text){ var n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; parent.appendChild(n); return n; }
-  var t = add(c, "table", "lg-table lg-ind"), hr = add(add(t, "thead"), "tr");
+  var t = add(c, "table", "lg-table lg-ind"), thd = add(t, "thead"), gr = add(thd, "tr", "lg-ind-groups"), hr = add(thd, "tr");
+  add(gr, "th", "", ""); add(gr, "th", "", ""); add(gr, "th", "", ""); add(gr, "th", "", "");
+  [["High scratch", 2], ["High hdcp", 2]].forEach(function(g){ var th = add(gr, "th", "lg-ind-group", g[0]); th.colSpan = g[1]; });
   cols.forEach(function(col){
     var th = add(hr, "th", col[1] === key ? "sorted" : "", col[0] + (col[1] === key ? (dir < 0 ? " \u25BE" : " \u25B4") : ""));
     if (col[1]){
@@ -3742,9 +3752,10 @@ function renderIndividualStandings(c, myT){
     add(tr, "td", key === "pts" ? "sorted" : "", fmtPts(r.pts));
     add(tr, "td", key === "hiG" ? "sorted" : "", r.hiG || "\u2014");
     add(tr, "td", key === "hiS" ? "sorted" : "", r.hiS || "\u2014");
-    add(tr, "td", key === "games" ? "sorted" : "", r.games);
+    add(tr, "td", "lg-ind-hc" + (key === "hcG" ? " sorted" : ""), r.hcG || "\u2014");
+    add(tr, "td", key === "hcS" ? "sorted" : "", r.hcS || "\u2014");
   });
-  add(c, "p", "lg-fine", "Avg and Gms are the league's own numbers from the latest sheet. Pts: individual points won this season. Hi G and Hi S: best scratch game and series on the weekly sheets. Your team is highlighted; you're in bold.");
+  add(c, "p", "lg-fine", "Avg is the league's own number from the latest sheet. Pts: individual points won this season. G and S: best game and series on the weekly sheets, scratch and with handicap (handicap from Week 2 on; Week 1's handicaps aren't on the sheets). Your team is highlighted; you're in bold.");
 }
 function teamGameLog(team){
   // one entry per bowler per week: games, series, handicap and average going in, points won
