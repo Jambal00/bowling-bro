@@ -3747,7 +3747,9 @@ function renderIndividualStandings(c, myT){
       th.setAttribute("role", "button"); th.tabIndex = 0;
       th.addEventListener("click", function(){
         indSort = { key: col[1], dir: col[1] === key ? -dir : (col[1] === "name" ? 1 : -1) };
-        var y = window.scrollY; renderLeaguePage(); window.scrollTo(0, y);
+        // the page is rebuilt to re-sort, so put the table back where it was, down and sideways
+        var y = window.scrollY, x = sc.scrollLeft; renderLeaguePage(); window.scrollTo(0, y);
+        var fresh = document.querySelector("#league-body .lg-ind-scroll"); if (fresh) fresh.scrollLeft = x;
       });
     }
   });
