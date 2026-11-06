@@ -25,4 +25,4 @@ grant insert (session_id, screen, tab, started_at, seconds, app_version) on publ
 drop policy if exists "insert own screen views" on public.bb_screen_views;
 create policy "insert own screen views" on public.bb_screen_views
   for insert to authenticated
-  with check (user_id = auth.uid() and started_at > now() - interval '14 days' and started_at < now() + interval '5 minutes');
+  with check (user_id = (select auth.uid()) and started_at > now() - interval '14 days' and started_at < now() + interval '5 minutes');
