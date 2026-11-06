@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-11-02 16:10">
+<meta name="bb-version" content="2026-11-06 10:05">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -1252,6 +1252,7 @@ function showView(name){
     var labels = {home:"", setup:"Bowl", scores:"Game Scores", photo:"Photo Scoring", summary:"Series Summary", history:"Your Stats", league:"Your League", goals:"Your Goals", arsenal:"Your Arsenal", profile:"Profile"};
     document.getElementById("game-label").textContent = labels[name] || "";
   }
+  svNote(name);
 }
 
 // ---------- setup view wiring ----------
@@ -3129,6 +3130,7 @@ function applyReportTab(hasGames){
   var empty = document.getElementById("report-empty");
   empty.classList.toggle("hidden", hasGames || reportTab === "history");
   empty.firstChild.textContent = practiceTab ? "Nothing here yet. Save a practice session to see it on this report." : "Nothing here yet. Save a league night to see your season on this report.";
+  svTick();
 }
 Array.prototype.forEach.call(document.querySelectorAll("#report-tabs button"), function(btn){
   btn.addEventListener("click", function(){ reportTab = btn.getAttribute("data-report-tab"); renderHistory(); });
@@ -3557,6 +3559,7 @@ function syncSheetNights(){
 // --- Your League page ---
 function openLeaguePage(){ lgOpenWeek = null; lgMode = "main"; lgTab = leagueNightToday() ? "week" : "standings"; recTab = "individual"; renderLeaguePage(); showView("league"); }   // every visit starts with all weeks closed
 function renderLeaguePage(){
+  svTick();
   var el = document.getElementById("league-body"); el.innerHTML = "";
   if (!inSheetLeague()) return;
   var W = sheetLatest(), weeks = sheetWeeks(), prev = weeks.length > 1 ? weeks[weeks.length - 2] : null;
@@ -6578,6 +6581,70 @@ document.getElementById("view-history-link").addEventListener("click", function(
   showView("history");
 });
 function allGamesFreshlyReset(){ return state.games.length===0; }
+
+// ---------- screen-time log ----------
+// For signed-in bowlers, each visit to a screen (and to a tab inside Your Stats or Your League)
+// becomes one row in bb_screen_views: screen, tab, when it started and how many seconds it was
+// in front of them. A visit ends when they move on or the app goes to the background; one visit
+// counts for at most 30 minutes. Rows wait in this phone's storage and go up in batches, so a
+// spot with no signal loses nothing. The app can add rows but never read them.
+var SV = null;
+function svInit(){
+  if (SV) return SV;
+  var q = [];
+  try { q = JSON.parse(localStorage.getItem("bb_sv_q") || "[]"); if (!Array.isArray(q)) q = []; } catch (e) { q = []; }
+  SV = { screen: null, tab: null, start: 0, session: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), queue: q, sending: false };
+  return SV;
+}
+function svTabFor(screen){
+  if (screen === "history") return historyTab + "/" + reportTab;
+  if (screen === "league") return lgTab + (lgTab === "standings" ? "/" + stTab : lgTab === "records" ? "/" + recTab : "");
+  return null;
+}
+function svClose(){
+  var s = svInit();
+  if (!s.screen || !s.start) return;
+  var secs = Math.min(1800, Math.round((Date.now() - s.start) / 1000));
+  if (secs >= 1 && sbUser){
+    s.queue.push({ session_id: s.session, screen: s.screen, tab: s.tab, started_at: new Date(s.start).toISOString(), seconds: secs, app_version: (APP_VERSION || "").slice(0, 32) || null });
+    if (s.queue.length > 500) s.queue = s.queue.slice(-500);
+    svSave();
+  }
+  s.start = 0;
+}
+function svOpen(screen){
+  var s = svInit();
+  s.screen = screen; s.tab = svTabFor(screen); s.start = document.visibilityState === "hidden" ? 0 : Date.now();
+}
+function svNote(screen){
+  var s = svInit();
+  if (s.screen === screen && s.start && s.tab === svTabFor(screen)) return;
+  svClose(); svOpen(screen);
+  if (s.queue.length >= 5) svFlush();
+}
+function svTick(){ var s = svInit(); if (s.screen) svNote(s.screen); }
+function svSave(){ try { localStorage.setItem("bb_sv_q", JSON.stringify(SV.queue)); } catch (e) {} }
+function svFlush(){
+  var s = svInit();
+  if (s.sending || !s.queue.length || !sb || !sbUser) return;
+  var cutoff = Date.now() - 13 * 864e5;   // the table takes rows up to 14 days old
+  s.queue = s.queue.filter(function(r){ return Date.parse(r.started_at) > cutoff; });
+  var batch = s.queue.slice(0, 100);
+  if (!batch.length){ svSave(); return; }
+  s.sending = true;
+  sb.from("bb_screen_views").insert(batch).then(function(r){
+    s.sending = false;
+    // sent, or refused as a whole (a bad row would refuse every retry): either way drop the batch
+    if (!r.error || (r.error.code && /^(23|42)/.test(r.error.code))){ s.queue = s.queue.slice(batch.length); svSave(); }
+  }, function(){ s.sending = false; });
+}
+document.addEventListener("visibilitychange", function(){
+  var s = svInit();
+  if (document.visibilityState === "hidden"){ svClose(); svFlush(); }
+  else if (s.screen){ svOpen(s.screen); svFlush(); }
+});
+window.addEventListener("pagehide", function(){ svClose(); svFlush(); });
+setInterval(svFlush, 60000);
 
 // ---------- new release check ----------
 // The page carries its release marker. While the app is open it quietly fetches a fresh copy of the
