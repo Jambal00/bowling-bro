@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-11-06 10:05">
+<meta name="bb-version" content="2026-11-06 13:45">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -470,6 +470,18 @@ body.home-theme-lebowski.on-home .header .place.brand { background: #1d2848; bor
 .theme-grid .sw { width: 100%; aspect-ratio: 3 / 4; border-radius: 10px; box-shadow: 0 0 0 1px #d8d5c8; display: block; }
 .theme-grid button[aria-checked="true"] .sw { box-shadow: 0 0 0 3px #2f6fed; }
 .theme-grid button[aria-checked="true"] { font-weight: 700; }
+/* theme preview: Home with the theme on, taps blocked, a bar to flip through and choose */
+#tp-shield { position: fixed; inset: 0; z-index: 60; background: transparent; touch-action: pan-y; }
+#tp-bar { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 61; max-width: 420px; margin: 0 auto;
+  background: #fff; color: #1a1a1a; border-radius: 16px; box-shadow: 0 8px 28px rgba(0,0,0,.28); padding: 12px; }
+#tp-bar .tp-row { display: flex; align-items: center; gap: 8px; }
+#tp-bar .tp-arrow { flex: 0 0 44px; height: 44px; border-radius: 12px; border: 1px solid #d8d5c8; background: #fff; font-size: 22px; line-height: 1; padding: 0; color: #1a1a1a; }
+#tp-bar .tp-mid { flex: 1; text-align: center; min-width: 0; }
+#tp-bar .tp-name { font-weight: 700; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#tp-bar .tp-count { font-size: 12px; color: #6b6b6b; margin-top: 2px; }
+#tp-bar .tp-actions { display: flex; gap: 8px; margin-top: 10px; }
+#tp-bar .tp-actions button { flex: 1; min-height: 44px; }
+body.theme-preview #update-pill { display: none; }
 body { --card-shadow: 0 3px 10px rgba(0,0,0,0.10); --greet-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; --greet-weight: 800; --greet-size: 30px; }
 body.home-theme-lanes { --chrome: rgba(255,255,255,0.55); --page: #e3c08c; --page-ink: #2b1d0e; --nav: #2f6fed; --nav-ink: #ffffff; --home-bg: repeating-linear-gradient(90deg, #ecd0a4 0 17px, #d9b27c 17px 18px, #e6c493 18px 35px, #d9b27c 35px 36px); --home-ink: #2b1d0e; --card: rgba(255,255,255,0.94); --card-ink: #1a1a1a; --card-sub: #5a5a55; --card-border: 1px solid rgba(80,50,20,0.18); --accent: #2f6fed; --accent-ink: #ffffff; --icon: #2f6fed; }
 body.home-theme-lebowski { --chrome: rgba(255,255,255,0.26); --page: #82222a; --page-ink: #f6e7c4; --nav: #c9a24a; --nav-ink: #2a1410; --home-bg: repeating-linear-gradient(0deg, rgba(60,10,6,0.06) 0 2px, transparent 2px 7px), repeating-linear-gradient(90deg, rgba(255,230,200,0.035) 0 1px, transparent 1px 4px), #8e2528; --home-ink: #f6e7c4; --greet-font: Sancreek, "Abril Fatface", Georgia, serif; --greet-weight: 400; --greet-size: 38px; --card: #fbf4e4; --card-ink: #2a1410; --card-sub: #6b4a3a; --card-border: 2px solid #c9a24a; --accent: #c9a24a; --accent-ink: #2a1410; --icon: #6e1f22; }
@@ -644,6 +656,18 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
 </div>
 <div id="home-bg" class="hidden"><div class="home-stage" id="home-stage"></div></div>
 <button id="update-pill" class="hidden" type="button">New version available · Tap to refresh</button>
+<div id="tp-shield" class="hidden" aria-hidden="true"></div>
+<div id="tp-bar" class="hidden" role="dialog" aria-label="Theme preview">
+  <div class="tp-row">
+    <button type="button" class="tp-arrow" id="tp-prev" aria-label="Previous theme">&lsaquo;</button>
+    <div class="tp-mid"><div class="tp-name" id="tp-name"></div><div class="tp-count" id="tp-count"></div></div>
+    <button type="button" class="tp-arrow" id="tp-next" aria-label="Next theme">&rsaquo;</button>
+  </div>
+  <div class="tp-actions">
+    <button type="button" id="tp-back">Back</button>
+    <button type="button" class="primary" id="tp-use">Use this theme</button>
+  </div>
+</div>
 <div class="app">
 
   <div class="header">
@@ -1152,13 +1176,13 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
     </details>
     <button class="primary full" id="profile-save-btn">Save profile</button>
     <p id="profile-status" style="font-size:12px;color:#6b6b6b;text-align:center;margin:8px 0;min-height:15px;"></p>
-    <div class="card">
+    <div class="card" id="theme-card">
       <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 0 10px;">
         <h2 style="margin:0;">Home screen theme</h2>
         <span id="theme-name" style="font-size:13px;color:#6b6b6b;"></span>
       </div>
       <div class="theme-grid" id="theme-grid" role="radiogroup" aria-label="Home screen theme"></div>
-      <p style="font-size:12px;color:#6b6b6b;margin:10px 0 0;line-height:1.4;">Sets your Home screen and the colours across the app. Saved to your account, so it follows you to a new phone.</p>
+      <p style="font-size:12px;color:#6b6b6b;margin:10px 0 0;line-height:1.4;">Tap a theme to see your Home screen with it, then flip through the others. Sets your Home screen and the colours across the app, and follows you to a new phone.</p>
     </div>
     <div class="card">
       <h2>Account</h2>
@@ -4375,7 +4399,7 @@ var WIZ_STEPS = [
   { title: "Welcome to Bowling Bro'", blurb: "Four quick steps and you're ready to bowl. Everything here can be changed later." },
   { title: "Your bowling", blurb: "Where you bowl and the balls you own, so each night starts ready to go." },
   { title: "One goal to start", blurb: "Most bowlers start with an average to aim for." },
-  { title: "Pick your home screen", blurb: "This is what you'll see each time you open Bowling Bro'. You can change it any time in Profile." }
+  { title: "Pick your home screen", blurb: "This is what you'll see each time you open Bowling Bro'. Tap one to see your Home screen with it. You can change it any time in Profile." }
 ];
 // these were the app's built-in defaults before each bowler had their own; never treat them as a new bowler's gear
 var LEGACY_ARSENAL = ["Storm Bionic", "Storm Phase II Pearl", "Storm Hy-Road 40", "Storm Ion Max Pearl"];
@@ -4414,8 +4438,25 @@ function renderWizard(){
   document.getElementById("wiz-back-wrap").classList.toggle("hidden", wizStep === 0);
   document.getElementById("wiz-next").textContent = wizStep === WIZ_STEPS.length - 1 ? "Finish" : "Next";
   renderWizardBag();
-  renderThemeGrid("wiz-theme-grid", wiz.theme, function(id){ wiz.theme = id; renderWizard(); });
+  renderThemeGrid("wiz-theme-grid", wiz.theme, openWizardThemePreview);
   document.getElementById("wizard").scrollTop = 0;
+}
+// the setup's theme step: preview over Home, then back to the setup with the pick (or without)
+function openWizardThemePreview(id){
+  var wizEl = document.getElementById("wizard");
+  var back = views.filter(function(v){ return !document.getElementById("view-" + v).classList.contains("hidden"); })[0] || "home";
+  wizEl.classList.add("hidden");
+  openThemePreview(id, {
+    mine: wiz.theme,
+    name: document.getElementById("wiz-name").value,
+    use: function(t){ wiz.theme = t; },
+    done: function(){
+      showView(back);
+      wizEl.classList.remove("hidden");
+      renderThemeGrid("wiz-theme-grid", wiz.theme, openWizardThemePreview);
+      var g = document.getElementById("wiz-theme-grid"); if (g) g.scrollIntoView({ block: "center" });
+    }
+  });
 }
 function renderWizardBag(){
   var list = document.getElementById("wiz-arsenal-list"); list.innerHTML = "";
@@ -5533,7 +5574,8 @@ function setTopColor(onHome){
   document.documentElement.style.backgroundColor = c;
   document.body.style.backgroundColor = c;
 }
-function themeId(){ return THEME_IDS.indexOf(profile.theme) >= 0 ? profile.theme : "lanes"; }
+var themePreview = null;   // a theme being tried on from Profile, not yet chosen
+function themeId(){ if (themePreview) return themePreview; return THEME_IDS.indexOf(profile.theme) >= 0 ? profile.theme : "lanes"; }
 function themeName(id){ var t = THEMES.filter(function(x){ return x.id === id; })[0]; return t ? t.name : "Classic Lanes"; }
 // Each theme's art, drawn in a stage that spans the phone: one picture pinned to the top (390 x 220)
 // and one to the bottom (390 x 360), so the art stays at the ends whatever the screen height.
@@ -5727,7 +5769,7 @@ function applyHomeTheme(){
 }
 function renderHome(){
   var h = new Date().getHours(), part = h < 12 ? "Morning" : (h < 17 ? "Afternoon" : "Evening");
-  var first = (profile.name || "").trim().split(/\s+/)[0];
+  var first = ((tp && tp.name != null ? tp.name : profile.name) || "").trim().split(/\s+/)[0];
   var tid = themeId(), greet = part + (first ? ", " + first : "") + ".", sub = "";
   if (tid === "sweater") greet = "Dude!";
   if (tid === "fault") greet = "Not your fault" + (first ? ", " + first : "") + ".";
@@ -5857,7 +5899,7 @@ function renderThemeGrid(containerId, current, onPick){
   });
 }
 function renderThemePicker(){
-  renderThemeGrid("theme-grid", themeId(), pickTheme);
+  renderThemeGrid("theme-grid", themeId(), openThemePreview);
   document.getElementById("theme-name").textContent = themeName(themeId());
 }
 // picking a theme saves it straight away, to the phone and the account
@@ -5869,6 +5911,72 @@ function pickTheme(id){
     profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(null, function(){});
   }
 }
+
+// Tapping a theme (in Profile or the first-time setup) shows the real Home screen with it, with a
+// bar to flip through the rest. Nothing is chosen until "Use this theme"; Back changes nothing.
+// tp holds where the preview came from: the theme already chosen there, a name for the greeting,
+// and what Use and Back do.
+var tp = null;
+function openThemePreview(id, from){
+  tp = from || themePreviewFromProfile();
+  themePreview = id;
+  document.body.classList.add("theme-preview");
+  document.getElementById("tp-shield").classList.remove("hidden");
+  document.getElementById("tp-bar").classList.remove("hidden");
+  showView("home");
+  showThemePreview();
+}
+function themePreviewFromProfile(){
+  return {
+    mine: THEME_IDS.indexOf(profile.theme) >= 0 ? profile.theme : "lanes",
+    use: function(id){ pickTheme(id); },
+    done: function(){
+      showView("profile");
+      var card = document.getElementById("theme-card"); if (card) card.scrollIntoView({ block: "center" });
+    }
+  };
+}
+function showThemePreview(){
+  var id = themePreview, i = THEMES.map(function(t){ return t.id; }).indexOf(id);
+  applyHomeTheme(); renderHome(); svTick();
+  document.getElementById("tp-name").textContent = themeName(id);
+  document.getElementById("tp-count").textContent = (i + 1) + " of " + THEMES.length + (id === tp.mine ? " \u00b7 your theme now" : "");
+  document.getElementById("tp-use").textContent = id === tp.mine ? "Keep this theme" : "Use this theme";
+}
+function stepThemePreview(d){
+  var ids = THEMES.map(function(t){ return t.id; }), i = ids.indexOf(themePreview);
+  themePreview = ids[(i + d + ids.length) % ids.length];
+  showThemePreview();
+}
+function closeThemePreview(use){
+  var id = themePreview, from = tp;
+  themePreview = null; tp = null;
+  document.body.classList.remove("theme-preview");
+  document.getElementById("tp-shield").classList.add("hidden");
+  document.getElementById("tp-bar").classList.add("hidden");
+  applyHomeTheme(); renderThemePicker();
+  if (use && id) from.use(id);
+  from.done();
+}
+document.getElementById("tp-prev").addEventListener("click", function(){ stepThemePreview(-1); });
+document.getElementById("tp-next").addEventListener("click", function(){ stepThemePreview(1); });
+document.getElementById("tp-back").addEventListener("click", function(){ closeThemePreview(false); });
+document.getElementById("tp-use").addEventListener("click", function(){ closeThemePreview(true); });
+document.addEventListener("keydown", function(e){
+  if (!themePreview) return;
+  if (e.key === "Escape") closeThemePreview(false);
+  else if (e.key === "ArrowLeft") stepThemePreview(-1);
+  else if (e.key === "ArrowRight") stepThemePreview(1);
+});
+(function(){   // swipe left or right anywhere on the preview to flip themes
+  var sh = document.getElementById("tp-shield"), x0 = null, y0 = 0;
+  sh.addEventListener("touchstart", function(e){ x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
+  sh.addEventListener("touchend", function(e){
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) stepThemePreview(dx < 0 ? 1 : -1);
+  });
+})();
 
 // ---------- Your Goals ----------
 // Every goal with its progress, and the editor to change them. Goals measure the league season,
@@ -6597,6 +6705,7 @@ function svInit(){
   return SV;
 }
 function svTabFor(screen){
+  if (screen === "home" && themePreview) return "theme-preview";
   if (screen === "history") return historyTab + "/" + reportTab;
   if (screen === "league") return lgTab + (lgTab === "standings" ? "/" + stTab : lgTab === "records" ? "/" + recTab : "");
   return null;
