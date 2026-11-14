@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-11-06 13:45">
+<meta name="bb-version" content="2026-11-13 19:13">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -176,6 +176,30 @@ label.btn-label.secondary { background: #fff; color: #2f6fed; border: 1px solid 
 .check-line { font-size: 14px; padding: 9px 11px; border-radius: 8px; margin: 4px 0 10px; line-height: 1.4; }
 .check-line.ok { background: #e6f4ea; color: #1d5e33; }
 .check-line.warn { background: #fff1d6; color: #7a4700; }
+.tp-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #d8d5c8; border-radius: 12px; margin-bottom: 8px; background: #fff; }
+.tp-row.on { border-color: #2f6fed; background: #f3f7ff; }
+.tp-row .tp-tick { flex: 0 0 26px; width: 26px; height: 26px; border-radius: 7px; border: 2px solid #b9b5a6; background: #fff; padding: 0; font-size: 16px; line-height: 22px; color: #fff; }
+.tp-row.on .tp-tick { background: #2f6fed; border-color: #2f6fed; }
+.tp-row .tp-tick:disabled { opacity: 1; }
+.tp-row .tp-who { flex: 1; min-width: 0; }
+.tp-row .tp-nm { font-weight: 600; font-size: 15px; }
+.tp-row .tp-scr { font-size: 12px; color: #6b6b6b; }
+.tp-row .tp-score { font-weight: 700; font-size: 18px; }
+.tp-row select { font-size: 14px; padding: 4px 6px; margin-top: 4px; max-width: 100%; }
+.tp-row .tp-stat { font-size: 12px; margin-top: 2px; }
+.tp-row .tp-stat.ok { color: #1f7a3a; } .tp-row .tp-stat.warn { color: #a5560b; font-weight: 600; }
+.tp-row .tp-fix { font-size: 13px; padding: 6px 10px; }
+.tp-row.off { background: #f4f3ee; border-style: dashed; }
+.tp-row.off .tp-nm, .tp-row.off .tp-score { color: #8a877c; }
+.tp-row .tp-note { font-size: 12px; color: #6b6b6b; margin-top: 2px; }
+.tp-row .tp-link { font-size: 12px; background: none; border: 0; padding: 0; color: #2f6fed; text-decoration: underline; margin-left: 6px; }
+.tp-game { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 0 0 12px; }
+.tp-game button { width: 40px; height: 40px; border-radius: 10px; padding: 0; font-size: 20px; }
+.tp-game .tp-gn { font-weight: 700; font-size: 17px; min-width: 80px; text-align: center; }
+.tp-others summary { font-size: 13px; color: #6b6b6b; padding: 6px 2px 10px; cursor: pointer; }
+#team-pill { position: fixed; left: 12px; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 58; max-width: 420px; margin: 0 auto;
+  background: #1f4fb8; color: #fff; border: 0; border-radius: 12px; padding: 12px 14px; font-size: 14px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+.pg-from { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .02em; color: #1f4fb8; background: #e8efff; border-radius: 6px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
 .line-pick button { display: flex; width: 100%; justify-content: space-between; align-items: center; padding: 12px 14px; margin-bottom: 8px; font-size: 16px; }
 .line-pick button span:last-child { font-weight: 700; }
 #photo-status.photo-error { background: #fdecea; color: #8a1f17; border-radius: 8px; padding: 9px 11px; font-size: 13px; }
@@ -656,6 +680,7 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
 </div>
 <div id="home-bg" class="hidden"><div class="home-stage" id="home-stage"></div></div>
 <button id="update-pill" class="hidden" type="button">New version available · Tap to refresh</button>
+<button id="team-pill" class="hidden" type="button"></button>
 <div id="tp-shield" class="hidden" aria-hidden="true"></div>
 <div id="tp-bar" class="hidden" role="dialog" aria-label="Theme preview">
   <div class="tp-row">
@@ -923,8 +948,8 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
     </div>
 
     <div id="photo-crop" class="card hidden">
-      <h2>Crop to your line</h2>
-      <p style="font-size:13px;color:#444;margin:-4px 0 8px;line-height:1.4;">Drag the corners so the box takes in your name and all ten frames. Leave out other lanes and the background where you can.</p>
+      <h2 id="crop-title">Crop to your line</h2>
+      <p id="crop-hint" style="font-size:13px;color:#444;margin:-4px 0 8px;line-height:1.4;">Drag the corners so the box takes in your name and all ten frames. Leave out other lanes and the background where you can.</p>
       <div id="crop-stage"><img id="crop-img" alt="Your scoreboard photo" /><div id="crop-box"><span class="ch tl" data-h="tl"></span><span class="ch tr" data-h="tr"></span><span class="ch bl" data-h="bl"></span><span class="ch br" data-h="br"></span></div></div>
       <div class="row">
         <div><button class="full" id="crop-cancel">Cancel</button></div>
@@ -942,6 +967,28 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <p style="font-size:13px;color:#444;margin:-4px 0 10px;">We found more than one bowler. Tap yours and we'll remember it.</p>
       <div class="line-pick" id="photo-lines"></div>
       <button class="full" id="pick-cancel">Cancel</button>
+    </div>
+
+    <!-- team photo (Big Al's 4 Life only for now): one photo, games for each teammate -->
+    <div id="photo-team" class="card hidden">
+      <h2>Whose games are these?</h2>
+      <p style="font-size:13px;color:#444;margin:-4px 0 10px;line-height:1.4;">Tick teammates to save their game from this photo too. It shows up in their League night right away, tagged with your name.</p>
+      <div class="tp-game"><button type="button" id="team-game-prev" aria-label="Earlier game">&lsaquo;</button><div class="tp-gn" id="team-game">Game 1</div><button type="button" id="team-game-next" aria-label="Later game">&rsaquo;</button></div>
+      <div id="team-lines"></div>
+      <div class="row" style="margin-top:4px;">
+        <div><button class="full" id="team-cancel">Cancel</button></div>
+        <div><button class="primary full" id="team-next">Next</button></div>
+      </div>
+    </div>
+
+    <div id="photo-teamcheck" class="card hidden">
+      <h2 id="teamcheck-title">Check Game 1</h2>
+      <p style="font-size:13px;color:#444;margin:-4px 0 10px;line-height:1.4;">Each game is checked against the scoreboard's running totals. Tap Check on any that don't add up.</p>
+      <div id="teamcheck-lines"></div>
+      <div class="row" style="margin-top:4px;">
+        <div><button class="full" id="teamcheck-cancel">Discard</button></div>
+        <div><button class="primary full" id="teamcheck-save">Save all</button></div>
+      </div>
     </div>
 
     <div id="photo-confirm" class="card hidden">
@@ -2102,6 +2149,9 @@ function startCloud(){
     }
     profile = cleanProfile(snap.data());
     state.profile = profile;
+    // teammates' games this bowler removed, from any of their devices
+    var td = snap.data().teamDeclined;
+    if (Array.isArray(td)) td.forEach(function(k){ if (typeof k === "string" && (state.teamDeclined || []).indexOf(k) < 0) state.teamDeclined = (state.teamDeclined || []).concat([k]); });
     state.onboarded = true;   // an account with a profile has been set up before, on this device or another
     applyCloudGear(snap.data());
     saveState();
@@ -2124,8 +2174,8 @@ function startCloud(){
   cloud.col.orderBy("savedAt", "desc").limit(500).onSnapshot(function(snap){
     cloud.docs = snap.docs.map(function(d){ return d.data(); }).filter(Boolean);
     cloud.ready = true;
-    if (!sheetLg) loadLeagueSheet().then(function(){ syncSheetNights(); renderHistory(); if (!document.getElementById("view-home").classList.contains("hidden")) renderHome(); });
-    else syncSheetNights();
+    if (!sheetLg) loadLeagueSheet().then(function(){ syncSheetNights(); renderHistory(); if (!document.getElementById("view-home").classList.contains("hidden")) renderHome(); teamSend(); teamPull(); });
+    else { syncSheetNights(); teamPull(); }
     renderHistory();
   }, function(e){
     cloud.col = null; cloud.ready = true; cloud.why = "the database reported \"" + ((e && e.code) || "an error") + "\"";
@@ -2512,7 +2562,7 @@ function scoreModeChanged(e){
 var READ_MAX_EDGE = 1568;   // longest side sent to the reader, in pixels (its standard image size)
 function photoActive(){ return !!(state.setupDone && state.photoNight && Array.isArray(state.photoNight.games)); }
 function photoStep(name){
-  ["home", "attach", "crop", "wait", "pick", "confirm"].forEach(function(k){
+  ["home", "attach", "crop", "wait", "pick", "team", "teamcheck", "confirm"].forEach(function(k){
     document.getElementById("photo-" + k).classList.toggle("hidden", k !== name);
   });
   window.scrollTo(0, 0);
@@ -2534,6 +2584,7 @@ function renderPhoto(){
     var row = document.createElement("div"); row.className = "photo-game";
     var left = document.createElement("div");
     left.innerHTML = "<div>Game " + (idx + 1) + " &nbsp;<span class=\"pg-score\">" + g.finalScore + "</span></div>";
+    if (g.fromName){ var tag = document.createElement("span"); tag.className = "pg-from"; tag.textContent = "From " + g.fromName + "'s photo"; left.firstChild.appendChild(tag); }
     var meta = document.createElement("div"); meta.className = "pg-meta";
     meta.textContent = plural(s.strikes, "strike") + " · " + s.spares + " of " + s.spareOpportunities + " spares" + (s.opens ? " · " + plural(s.opens, "open") : " · clean");
     left.appendChild(meta);
@@ -2543,6 +2594,10 @@ function renderPhoto(){
     var rm = document.createElement("button"); rm.textContent = "Remove"; rm.style.color = "#a33";
     rm.addEventListener("click", function(){
       if (!confirm("Remove Game " + (idx + 1) + " (" + g.finalScore + ")?")) return;
+      if (g.teamKey){
+        state.teamDeclined = (state.teamDeclined || []).concat([g.teamKey]);
+        if (cloud.profileDoc && cloud.profileLoaded){ var body = profileDocBody(); profileWrite = profileWrite.then(function(){ return cloud.profileDoc.set(body); }).then(null, function(){}); }
+      }
       n.games.splice(idx, 1); renderPhoto(); savePhotoNight();
     });
     right.appendChild(ed); right.appendChild(rm);
@@ -2638,7 +2693,14 @@ function onPhotoPicked(e){
   document.getElementById("photo-status").classList.remove("photo-error");
   if (cropUrl) URL.revokeObjectURL(cropUrl);
   cropUrl = URL.createObjectURL(file);
-  cropImg.onload = function(){ crop = { x: 0, y: 0, w: 1, h: 1 }; placeCropBox(); photoStep("crop"); };
+  cropImg.onload = function(){
+    var team = !attach && teamPhotoOn();
+    document.getElementById("crop-title").textContent = team ? "Crop to the team" : "Crop to your line";
+    document.getElementById("crop-hint").textContent = team
+      ? "Drag the corners so the box takes in all four of our names and all ten frames. Leave out other lanes and the background where you can."
+      : "Drag the corners so the box takes in your name and all ten frames. Leave out other lanes and the background where you can.";
+    crop = { x: 0, y: 0, w: 1, h: 1 }; placeCropBox(); photoStep("crop");
+  };
   cropImg.onerror = function(){ document.getElementById("photo-status").textContent = "That picture couldn't be opened here. Try a different photo or a screenshot of it."; };
   cropImg.src = cropUrl;
 }
@@ -2723,6 +2785,7 @@ document.getElementById("crop-go").addEventListener("click", function(){
     if (!photoLines.length) throw { code: "no_lines" };
     var mine = photoLines.filter(function(l){ return state.photoName && cleanName(l.name) === cleanName(state.photoName); });
     if (photoLines.length === 1) openConfirm(lineToSheet(photoLines[0]), null, photoLines[0]);
+    else if (teamPhotoOn()) return fetchTeamSent().then(showTeamPicker);
     else if (mine.length === 1) openConfirm(lineToSheet(mine[0]), null, mine[0]);
     else showLinePicker();
   }).then(null, function(err){
@@ -2735,6 +2798,340 @@ document.getElementById("crop-go").addEventListener("click", function(){
   });
 });
 function cleanName(s){ return String(s || "").trim().toUpperCase().replace(/\s+/g, " "); }
+
+// ---------- team photo (draft: Big Al's 4 Life only) ----------
+// One photo of the lane screen, which shows the whole team, saves a game for each teammate who's
+// ticked. Your own game goes into your night as usual; teammates' games would go to a shared
+// league table and show up in their League night tagged "From <you>'s photo". (Mock-up: the
+// teammates' games are kept on this phone only, in state.teamOutbox.)
+var TEAM_PHOTO_TEAMS = { "tme-2026-27": [7] };
+var teamRows = [], teamFix = null, teamGame = 1;
+// A bowler who is absent or pre-bowled still gets a line on the screen: the system fills it with
+// made-up frames (2/ 2/ 2/ ... with the 10th set so the total is the blind score) and prints a small
+// white number above the name. Those frames must never reach anyone's shot stats.
+function lineIsBlind(l){
+  if (l.badge !== null && l.badge !== undefined) return true;
+  var counts = {}, best = 0;
+  (l.frames || []).slice(0, 9).forEach(function(f){
+    var k = (f.marks || []).join("");
+    if (!k || k === "X") return;
+    counts[k] = (counts[k] || 0) + 1; best = Math.max(best, counts[k]);
+  });
+  return best >= 7;   // the same non-strike frame seven or more times in nine is not a real game
+}
+// what's already been sent for this night: the team's rows from the shared table (fetched when the
+// photo is read), plus anything still waiting to go up from this phone
+var teamSentCache = [];
+function alreadyIn(bowlerId){
+  var d = state.photoNight.date;
+  var rows = teamSentCache.concat((state.teamSendQueue || []).map(function(q){ return { bowler_id: q.bowler_id, game_date: q.game_date, game_no: q.game_no, from_name: q.from_name }; }));
+  var r = rows.filter(function(o){ return o.bowler_id === bowlerId && o.game_date === d && o.game_no === teamGame; })[0];
+  return r ? { from: r.from_name || "a teammate" } : null;
+}
+function fetchTeamSent(){
+  teamSentCache = [];
+  if (!sb || !sbUser || !inSheetLeague()) return Promise.resolve();
+  return sb.from("bb_team_games").select("bowler_id, game_date, game_no, from_name")
+    .eq("league_id", sheetLg.data.id).eq("game_date", state.photoNight.date)
+    .then(function(r){ if (r && !r.error && r.data) teamSentCache = r.data; }, function(){});
+}
+function teamPhotoOn(){
+  if (!inSheetLeague() || sessionType() === "practice") return false;
+  var t = sheetMyTeam(), allowed = TEAM_PHOTO_TEAMS[sheetLg.data.id] || [];
+  return t !== null && allowed.indexOf(t) >= 0;
+}
+function teamMates(){   // the team's own bowlers on the latest sheet, me first
+  var w = sheetLatest(), t = sheetMyTeam();
+  var list = (w.bowlers || []).filter(function(b){ return (b.rosterTeam || b.team) === t && b.games !== 0 && (b.avg || b.scores); });
+  list.sort(function(a, b){ return (a.id === sheetLg.me ? -1 : 0) - (b.id === sheetLg.me ? -1 : 0); });
+  return list.map(function(b){ var nm = titleCase(b.name).replace(/\s+[A-Z]\.?\s+/, " "); return { id: b.id, name: nm, first: nm.split(" ")[0], me: b.id === sheetLg.me }; });
+}
+function matchTeammate(lineName, mates){
+  var key = cleanName(lineName), saved = (state.teamScreenNames || {})[key];
+  if (saved !== undefined) return mates.filter(function(m){ return m.id === saved; })[0] || null;
+  if (state.photoName && key === cleanName(state.photoName)) return mates.filter(function(m){ return m.me; })[0] || null;
+  var hits = mates.filter(function(m){
+    var parts = cleanName(m.name).split(" ");
+    return key === cleanName(m.name) || key === parts[0] || key === parts[parts.length - 1] || key.indexOf(parts[0]) === 0;
+  });
+  return hits.length === 1 ? hits[0] : null;
+}
+function showTeamPicker(){
+  var mates = teamMates(), used = {};
+  teamRows = photoLines.map(function(l){
+    var m = matchTeammate(l.name, mates);
+    if (m && used[m.id]) m = null;
+    if (m) used[m.id] = true;
+    var r = { line: l, mate: m, sheet: lineToSheet(l), blind: lineIsBlind(l) };
+    r.on = !!(m && !r.blind && (m.me || !alreadyIn(m.id)));
+    return r;
+  });
+  teamGame = state.photoNight.games.length + 1;
+  renderTeamPicker();
+  photoStep("team");
+}
+function renderTeamPicker(){
+  document.getElementById("team-game").textContent = "Game " + teamGame;
+  document.getElementById("team-game-prev").disabled = teamGame <= 1;
+  var box = document.getElementById("team-lines"); box.innerHTML = "";
+  var mates = teamMates();
+  var allMatched = mates.every(function(m){ return teamRows.some(function(r){ return r.mate && r.mate.id === m.id; }); });
+  var others = null;
+  teamRows.forEach(function(r){
+    var have = r.mate && !r.mate.me ? alreadyIn(r.mate.id) : null;
+    var row = document.createElement("div"); row.className = "tp-row" + (r.on ? " on" : "") + (r.blind ? " off" : "");
+    var tick = document.createElement("button"); tick.type = "button"; tick.className = "tp-tick";
+    tick.setAttribute("role", "checkbox"); tick.setAttribute("aria-checked", r.on ? "true" : "false"); tick.textContent = r.on ? "✓" : "";
+    tick.disabled = !r.mate || r.mate.me || r.blind;
+    tick.setAttribute("aria-label", r.mate ? (r.mate.me ? "Your game (always saved)" : "Save " + r.mate.name + "'s game") : "Pick who this is first");
+    tick.addEventListener("click", function(){ r.on = !r.on; renderTeamPicker(); });
+    var who = document.createElement("div"); who.className = "tp-who";
+    var nm = document.createElement("div"); nm.className = "tp-nm";
+    nm.textContent = r.mate ? (r.mate.me ? r.mate.name + " (you)" : r.mate.name) : (r.blind ? (r.line.name || "(no name)") : "Who's this?");
+    var scr = document.createElement("div"); scr.className = "tp-scr"; scr.textContent = "On screen: " + (r.line.name || "(no name)");
+    if (r.mate && !r.mate.me && !r.blind){
+      var ch = document.createElement("button"); ch.type = "button"; ch.className = "tp-link"; ch.textContent = r.changing ? "done" : "change";
+      ch.addEventListener("click", function(){ r.changing = !r.changing; renderTeamPicker(); });
+      scr.appendChild(ch);
+    }
+    who.appendChild(nm); who.appendChild(scr);
+    if (r.blind){
+      var nb = document.createElement("div"); nb.className = "tp-note";
+      nb.textContent = "Not bowling live (absent or pre-bowled). Nothing is saved for this line.";
+      var ov = document.createElement("button"); ov.type = "button"; ov.className = "tp-link"; ov.textContent = "They did bowl";
+      ov.addEventListener("click", function(){ r.blind = false; r.forced = true; renderTeamPicker(); });
+      nb.appendChild(ov); who.appendChild(nb);
+    } else if (have){
+      var ai = document.createElement("div"); ai.className = "tp-note"; ai.textContent = "Already in from " + have.from + (r.on ? " (this replaces it)" : "");
+      who.appendChild(ai);
+    }
+    if (!r.blind && ((!r.mate) || r.changing)){
+      var sel = document.createElement("select"); sel.setAttribute("aria-label", "Who is " + (r.line.name || "this line"));
+      sel.appendChild(new Option("Not on our team", ""));
+      mates.forEach(function(m){
+        var taken = teamRows.some(function(o){ return o !== r && o.mate && o.mate.id === m.id; });
+        if (!taken) sel.appendChild(new Option(m.me ? m.name + " (me)" : m.name, String(m.id)));
+      });
+      sel.value = r.mate ? String(r.mate.id) : "";
+      sel.addEventListener("change", function(){
+        var id = sel.value === "" ? null : Number(sel.value);
+        r.mate = id === null ? null : mates.filter(function(m){ return m.id === id; })[0];
+        r.on = !!r.mate; r.changing = false;
+        state.teamScreenNames = state.teamScreenNames || {};
+        state.teamScreenNames[cleanName(r.line.name)] = id === null ? -1 : id;
+        if (r.mate && r.mate.me) state.photoName = r.line.name || "";
+        saveState(); renderTeamPicker();
+      });
+      who.appendChild(sel);
+    }
+    var sc = document.createElement("div"); sc.className = "tp-score";
+    sc.textContent = (r.line.final !== null && r.line.final !== undefined) ? r.line.final : "";
+    row.appendChild(tick); row.appendChild(who); row.appendChild(sc);
+    // once all four of us are found, anyone else on the screen folds away
+    if (!r.mate && !r.blind && allMatched){
+      if (!others){ others = document.createElement("details"); others.className = "tp-others"; others.appendChild(document.createElement("summary")); }
+      others.appendChild(row);
+    } else box.appendChild(row);
+  });
+  if (others){ others.firstChild.textContent = "Other bowlers on this screen (" + (others.childNodes.length - 1) + ")"; box.appendChild(others); }
+  var mine = teamRows.filter(function(r){ return r.mate && r.mate.me && !r.blind; }).length;
+  var next = document.getElementById("team-next");
+  next.disabled = !mine;
+  next.textContent = teamRows.filter(function(r){ return r.on; }).length > 1 ? "Next" : "Next: just mine";
+}
+document.getElementById("team-game-prev").addEventListener("click", function(){ if (teamGame > 1){ teamGame--; teamRows.forEach(function(r){ if (r.mate && !r.mate.me && !r.blind) r.on = !alreadyIn(r.mate.id); }); renderTeamPicker(); } });
+document.getElementById("team-game-next").addEventListener("click", function(){ teamGame++; teamRows.forEach(function(r){ if (r.mate && !r.mate.me && !r.blind) r.on = !alreadyIn(r.mate.id); }); renderTeamPicker(); });
+// --- sending: games for teammates go up in one batch; anything that can't go now waits on this phone
+var teamSending = false;
+function teamSend(){
+  var q = state.teamSendQueue || [];
+  if (teamSending || !q.length || !sb || !sbUser) return;
+  teamSending = true;
+  var batch = q.slice(0, 20), now = new Date().toISOString();
+  var rows = batch.map(function(x){ return { league_id: x.league_id, game_date: x.game_date, game_no: x.game_no, bowler_id: x.bowler_id,
+    game: x.game, from_name: x.from_name, from_user: sbUser.id, updated_at: now }; });
+  sb.from("bb_team_games").upsert(rows, { onConflict: "league_id,game_date,game_no,bowler_id" }).then(function(r){
+    teamSending = false;
+    // sent, or refused for good (not on the team any more, too old): drop the batch either way
+    if (!r.error || (r.error.code && /^(23|42)/.test(r.error.code))){ state.teamSendQueue = (state.teamSendQueue || []).slice(batch.length); saveState(); }
+  }, function(){ teamSending = false; });
+}
+
+// --- receiving: games teammates sent me go straight into my night for that date ---
+// Where a game goes, in order:
+//  1. a photo night in progress for that date: it fills that game number
+//  2. a scores-only night in progress for that date: its saved night gets the frames (as 4, below)
+//  3. a frame-by-frame night in progress for that date: held, not mixed in
+//  4. a league night already saved for that date (incl. one from Gary's sheet): the game number gets
+//     the frames if it has none, or is added if the night doesn't have that game yet
+//  5. nothing: a photo night is started for that date with the game in it
+// A game the bowler entered themselves is never replaced; one a teammate sent can be.
+function teamReceiveOn(){
+  if (!inSheetLeague()) return false;
+  var t = sheetMyTeam(), allowed = TEAM_PHOTO_TEAMS[sheetLg.data.id] || [];
+  return t !== null && allowed.indexOf(t) >= 0;
+}
+var teamPulling = false;
+function teamPull(){
+  if (teamPulling || !sb || !sbUser || !teamReceiveOn()) return;
+  teamPulling = true;
+  var since = state.teamSeenAt || new Date(Date.now() - 14 * 864e5).toISOString();   // a new device looks back two weeks
+  sb.from("bb_team_games").select("league_id, game_date, game_no, bowler_id, game, from_name, updated_at")
+    .eq("league_id", sheetLg.data.id).eq("bowler_id", sheetLg.me).gt("updated_at", since).order("updated_at")
+    .then(function(r){
+      teamPulling = false;
+      if (!r || r.error || !r.data || !r.data.length) return;
+      var got = [];
+      r.data.forEach(function(row){ if (applyTeamGame(row)) got.push(row); state.teamSeenAt = row.updated_at; });
+      saveState();
+      if (got.length) teamNotify(got);
+    }, function(){ teamPulling = false; });
+}
+function teamKey(row){ return row.league_id + "|" + row.game_date + "|" + row.game_no; }
+function applyTeamGame(row){
+  var key = teamKey(row);
+  if ((state.teamDeclined || []).indexOf(key) >= 0) return false;
+  var g = JSON.parse(JSON.stringify(row.game || {}));
+  if (!g || !Array.isArray(g.frames)) return false;
+  g.fromName = row.from_name || "a teammate"; g.teamKey = key; g.source = "photo";
+  var idx = row.game_no - 1, date = row.game_date;
+  // 1. photo night in progress
+  if (photoActive() && sessionType() === "league" && state.photoNight.date === date){
+    var n = state.photoNight, have = n.games[idx];
+    if (have && !have.fromName) return false;
+    if (idx < n.games.length) n.games[idx] = g; else n.games.push(g);
+    savePhotoNight();
+    if (!document.getElementById("view-photo").classList.contains("hidden")) renderPhoto();
+    return true;
+  }
+  // 3. frame by frame in progress
+  if (state.setupDone && !photoActive() && !nightActive() && state.games && state.games.length && sessionType() === "league"){
+    state.teamHeld = (state.teamHeld || []).concat([row]);
+    return false;
+  }
+  // 2 and 4: a saved league night for that date
+  var lgId = sheetAppLeague();
+  var saved = lgId ? leagueNights(lgId).filter(function(it){ return nightIso(it.h) === date; })[0] : null;
+  if (saved){
+    var hh = saved.h, sc = seriesScores(hh).filter(isNum), games = [];
+    for (var i = 0; i < Math.max(sc.length, idx + 1); i++) games.push(hh.games && hh.games[i] && hh.games[i].frames ? hh.games[i] : null);
+    var mineThere = games[idx] && !games[idx].fromName;
+    if (mineThere) return false;
+    if (idx < sc.length){
+      // the score already there wins unless a teammate sent it; frames only go on a matching score
+      if (!(games[idx] && games[idx].fromName) && sc[idx] !== g.finalScore) return false;
+      sc[idx] = g.finalScore;
+    } else if (idx === sc.length) sc.push(g.finalScore);
+    else return false;
+    games[idx] = g;
+    var t = sum(sc);
+    hh.scores = sc; hh.total = t; hh.average = (t / sc.length).toFixed(1); hh.games = games.slice(0, sc.length); hh.scoreOnly = false;
+    saveNightDoc(hh); renderHistory();
+    return true;
+  }
+  // 5. nothing for that date yet: start the night
+  if (!photoActive() && !nightActive() && !(state.setupDone && state.games && state.games.length)){
+    state.setupDone = true; state.games = []; state.night = null;
+    state.sessionType = "league"; applySessionType();
+    if (!state.center && sheetLg.data.center) state.center = sheetLg.data.center;
+    state.photoNight = { id: "s" + Date.now().toString(36), date: date, games: [g] };
+    savePhotoNight();
+    // an earlier night (the app wasn't opened until later) is saved straight to history, not left open
+    if (date !== todayIso()){ state.photoNight = null; state.setupDone = false; saveState(); renderHistory(); }
+    return true;
+  }
+  // something else (a practice night, a night for another date) is open: keep it for later
+  state.teamHeld = (state.teamHeld || []).concat([row]);
+  return false;
+}
+function teamNotify(rows){
+  var names = {}; rows.forEach(function(r){ names[r.from_name || "a teammate"] = true; });
+  var msg = (rows.length === 1 ? "Game " + rows[0].game_no + " came in" : rows.length + " games came in") + " from " + Object.keys(names).join(" and ") + "'s photo.";
+  if (!document.getElementById("view-photo").classList.contains("hidden")){
+    renderPhoto(); photoSay(msg);
+  } else {
+    var pill = document.getElementById("team-pill"); pill.textContent = msg + " Tap to see.";
+    pill.classList.remove("hidden");
+    clearTimeout(teamNotify.t); teamNotify.t = setTimeout(function(){ pill.classList.add("hidden"); }, 8000);
+  }
+}
+document.addEventListener("visibilitychange", function(){ if (document.visibilityState === "visible"){ teamSend(); teamPull(); } });
+setInterval(function(){ if (document.visibilityState !== "hidden"){ teamSend(); teamPull(); } }, 60000);
+
+function sheetCheck(s){   // the add-up check on any sheet, without drawing it
+  var keep = sheet; sheet = s;
+  var res = sheetResult(); sheet = keep;
+  var ok = res.firstBad === null && res.firstMissing === null;
+  if (!ok) return { ok: false, text: "Some boxes need fixing" };
+  var totals = computeScoresNumeric(res.frames.map(function(r){ return r.nums; }));
+  var final = totals[9], off = s.shown.some(function(v, i){ return v !== null && totals[i] !== null && v !== totals[i]; });
+  if (off || (s.shown[9] !== null && s.shown[9] !== final)) return { ok: false, final: final, text: "Doesn't add up to the screen" };
+  return { ok: true, final: final, text: "✓ Adds up to " + final };
+}
+document.getElementById("team-cancel").addEventListener("click", photoBack);
+document.getElementById("team-next").addEventListener("click", function(){
+  var picked = teamRows.filter(function(r){ return r.on; });
+  if (picked.length === 1){ openConfirm(picked[0].sheet, null, picked[0].line); return; }
+  renderTeamCheck(); photoStep("teamcheck");
+});
+function renderTeamCheck(){
+  document.getElementById("teamcheck-title").textContent = "Check Game " + teamGame + " for the team";
+  var box = document.getElementById("teamcheck-lines"); box.innerHTML = "";
+  var allOk = true;
+  teamRows.filter(function(r){ return r.on; }).forEach(function(r){
+    var c = sheetCheck(r.sheet); if (!c.ok && !r.fixed) allOk = false;
+    var row = document.createElement("div"); row.className = "tp-row";
+    var who = document.createElement("div"); who.className = "tp-who";
+    var nm = document.createElement("div"); nm.className = "tp-nm"; nm.textContent = r.mate.me ? r.mate.name + " (you)" : r.mate.name;
+    var st = document.createElement("div"); st.className = "tp-stat " + (c.ok || r.fixed ? "ok" : "warn");
+    st.textContent = r.fixed ? "✓ Checked by you" : c.text;
+    who.appendChild(nm); who.appendChild(st);
+    var sc = document.createElement("div"); sc.className = "tp-score"; sc.textContent = c.final !== undefined && c.final !== null ? c.final : "—";
+    var fx = document.createElement("button"); fx.type = "button"; fx.className = "tp-fix"; fx.textContent = (c.ok || r.fixed) ? "View" : "Check";
+    fx.addEventListener("click", function(){ teamFix = { row: r, me: r.mate.me, first: r.mate.first }; openConfirm(r.sheet, null, r.line); });
+    row.appendChild(who); row.appendChild(sc); row.appendChild(fx);
+    box.appendChild(row);
+  });
+  var save = document.getElementById("teamcheck-save");
+  save.disabled = false;
+  save.textContent = allOk ? "Save all" : "Save anyway";
+}
+document.getElementById("teamcheck-cancel").addEventListener("click", function(){ teamRows = []; photoBack(); });
+document.getElementById("teamcheck-save").addEventListener("click", function(){
+  var picked = teamRows.filter(function(r){ return r.on; }), n = state.photoNight, gameNo = teamGame, sent = [], kept = false;
+  var meName = (teamMates().filter(function(m){ return m.me; })[0] || {}).first || "a teammate";
+  picked.forEach(function(r){
+    var keep = sheet; sheet = r.sheet;
+    var res = sheetResult(); sheet = keep;
+    if (res.firstBad !== null || res.firstMissing !== null) return;
+    var g = newGame();
+    res.frames.forEach(function(fr, i){
+      g.frames[i].balls = fr.nums.map(function(v){ return { knocked: v, ballUsed: "" }; });
+      if (r.sheet.splits[i] && fr.nums[0] !== 10) g.frames[i].splitBalls = [0];
+    });
+    g.complete = true; g.finalScore = lastKnownScore(computeScoresFromFrames(g.frames)); g.source = "photo";
+    if (r.mate.me){
+      // your own night: fills that game number; a game you already have there is kept
+      if (n.games[gameNo - 1]) kept = true; else n.games[gameNo - 1] = g;
+      n.games = n.games.filter(Boolean);
+    } else {
+      g.fromName = meName;
+      state.teamSendQueue = (state.teamSendQueue || []).filter(function(q){ return !(q.bowler_id === r.mate.id && q.game_date === n.date && q.game_no === gameNo); });
+      state.teamSendQueue.push({ league_id: sheetLg.data.id, game_date: n.date, game_no: gameNo, bowler_id: r.mate.id, game: g, from_name: meName });
+      sent.push(r.mate.first);
+    }
+  });
+  teamRows = []; saveState();
+  renderPhoto(); photoStep("home"); savePhotoNight();
+  teamSend();
+  if (sent.length){
+    photoSay((kept ? "You already had a Game " + gameNo + ", so yours wasn't changed. " : "Saved your Game " + gameNo + ". ") + "Sent Game " + gameNo + " to " + (sent.length > 1 ? sent.slice(0, -1).join(", ") + " and " + sent[sent.length - 1] : sent[0]) + ".");
+  }
+});
+// a message under the night's games, shown once the save in progress has finished (so "Saving…" doesn't replace it)
+function photoSay(msg){
+  photoWrite.then(function(){ var el = document.getElementById("photo-status"); el.classList.remove("photo-error"); el.textContent = msg; }, function(){});
+}
 function showLinePicker(){
   var box = document.getElementById("photo-lines"); box.innerHTML = "";
   photoLines.forEach(function(l){
@@ -2825,7 +3222,9 @@ function openConfirm(s, editIdx, line){
   sheet.officialLocked = !!(attach && (attachNight().source === "sheet" || attachNight()._sheet));
   document.getElementById("confirm-title").textContent = "Check Game " + gameNo;
   var sub = document.getElementById("confirm-sub"); sub.innerHTML = "";
-  if (line){
+  if (line && teamFix){
+    sub.appendChild(document.createTextNode((teamFix.me ? "Your" : teamFix.first + "'s") + " game, read from line " + (line.name || "?") + ". Check each box against the scoreboard."));
+  } else if (line){
     sub.appendChild(document.createTextNode("Read from your photo" + (line.name ? ", line " + line.name : "") + ". Check each box against the scoreboard."));
     if (photoLines.length > 1){
       var a = document.createElement("a"); a.href = "#"; a.textContent = " Not your line?";
@@ -2837,6 +3236,10 @@ function openConfirm(s, editIdx, line){
     sub.textContent = editIdx === null ? "Type each box as it reads on the scoreboard." : "Fix any box, then save.";
   }
   document.getElementById("confirm-save").textContent = editIdx === null ? "Save game" : "Save changes";
+  if (teamFix){
+    document.getElementById("confirm-title").textContent = "Check " + (teamFix.me ? "your" : teamFix.first + "'s") + " Game " + gameNo;
+    document.getElementById("confirm-save").textContent = "Done";
+  }
   buildSheetGrid();
   updateSheet();
   photoStep("confirm");
@@ -2949,11 +3352,15 @@ function updateSheet(){
   }
   save.disabled = !sheet.ok || (offSheet && sheet.officialLocked);
   var mismatch = sheet.ok && !(offSheet && sheet.officialLocked) && (offSheet || firstOff !== null || (screenFinal !== null && final !== screenFinal));
-  save.textContent = mismatch ? "Save anyway" : (sheetEditIdx === null ? "Save game" : "Save changes");
+  save.textContent = teamFix ? (mismatch ? "Done anyway" : "Done") : mismatch ? "Save anyway" : (sheetEditIdx === null ? "Save game" : "Save changes");
 }
-document.getElementById("confirm-cancel").addEventListener("click", function(){ sheet = null; photoBack(); });
+document.getElementById("confirm-cancel").addEventListener("click", function(){
+  if (teamFix){ teamFix = null; sheet = null; renderTeamCheck(); photoStep("teamcheck"); return; }
+  sheet = null; photoBack();
+});
 document.getElementById("confirm-save").addEventListener("click", function(){
   if (!sheet || !sheet.ok) return;
+  if (teamFix){ teamFix.row.sheet = sheet; teamFix.row.fixed = true; teamFix = null; sheet = null; renderTeamCheck(); photoStep("teamcheck"); return; }
   var res = sheetResult(), g = newGame();
   res.frames.forEach(function(r, i){
     var f = g.frames[i];
@@ -4304,6 +4711,7 @@ function gearNow(){
 function profileDocBody(){
   var body = JSON.parse(JSON.stringify(profile));
   body.gear = gearNow();
+  if (state.teamDeclined && state.teamDeclined.length) body.teamDeclined = state.teamDeclined.slice(-200);
   body.onboarded = true;
   return body;
 }
@@ -6790,6 +7198,10 @@ initSetupFields();
 applyPracticeMode();
 initCloud();
 if (window.__bbLeagueFake){ loadLeagueSheet(); syncSheetNights(); }
+document.getElementById("team-pill").addEventListener("click", function(){
+  this.classList.add("hidden");
+  if (photoActive()) goToView("photo"); else { historyTab = "league"; reportTab = "history"; renderHistory(); showView("history"); }
+});
 if (nightActive()){
   showNight();
 } else if (photoActive()){

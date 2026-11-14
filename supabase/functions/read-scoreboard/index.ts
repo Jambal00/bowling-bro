@@ -28,6 +28,8 @@ Read every bowler line you can see. For each line report:
 - first_ball_red: true when that frame's first-ball count is printed in red or circled. The scoreboard uses this to mark a split.
 - total: the running score printed under that frame, or null if it is blank or unreadable.
 - final: the game's final score as printed, or null.
+- badge: a small number printed in white just above the bowler's name, or null if there is none. (The scoreboard shows one on a line
+  for a bowler who is absent or pre-bowled, whose frames are filled in by the system rather than bowled.)
 Report only what is printed. Do not work out or correct any numbers, even if they do not seem to add up.
 If this is not a bowling scoreboard or nothing can be read, set readable to false and say why in problem.
 Give your answer by calling the report_scoreboard tool once. Do not reply with text.`;
@@ -59,6 +61,7 @@ const TOOL = {
               },
             },
             final: { type: ["integer", "null"] },
+            badge: { type: ["integer", "null"] },
           },
           required: ["name", "frames"],
         },
@@ -118,7 +121,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model: MODEL,
-        max_tokens: 2500,
+        max_tokens: 4096,   // a team photo has four or five lines of frames
         tools: [TOOL],
         // newer models don't accept a forced tool call, so the tool is offered and the prompt asks for it
         tool_choice: { type: "auto" },
