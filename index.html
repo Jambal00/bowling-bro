@@ -5444,6 +5444,10 @@ var SHARE_PARTS = [["totals", "Season totals"], ["chart", "Chart"], ["shots", "S
 var SHEET_ROWS_MAX = 15;
 function buildStatsSheet(opts){
   var W = 800, P = 40, IW = W - 2 * P, y = 0, out = [];
+  // places a printed page may end (sheetToPdf picks the last one that fits); a break inside a table
+  // carries the table's heading row, so the next page can repeat it
+  var breaks = [];
+  function brk(head){ breaks.push({ y: y, head: head || null }); }
   var INK = "#1a1a1a", MUTE = "#6b6b6b", RULE = "#e2e0d5", BLUE = "#2f6fed", GREY = "#8f8c80", GREEN = "#1d7a46", AMBER = "#b26a00";
   function esc(t){ return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
   function text(x, yy, t, size, weight, fill, anchor, halo){
@@ -5453,7 +5457,7 @@ function buildStatsSheet(opts){
   }
   function rect(x, yy, w, h, fill, rx){ out.push('<rect x="' + x + '" y="' + yy + '" width="' + Math.max(0, w) + '" height="' + h + '" rx="' + (rx || 0) + '" fill="' + fill + '"/>'); }
   function line(x1, y1, x2, y2, stroke, w, dash){ out.push('<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + stroke + '" stroke-width="' + (w || 1) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : '') + '/>'); }
-  function heading(t){ y += 30; text(P, y, t.toUpperCase(), 13, 700, MUTE); y += 8; line(P, y, W - P, y, RULE); y += 6; }
+  function heading(t){ brk(); y += 30; text(P, y, t.toUpperCase(), 13, 700, MUTE); y += 8; line(P, y, W - P, y, RULE); y += 6; }
   function tiles(list, cols){
     var cw = IW / cols;
     list.forEach(function(tl, i){
@@ -5576,8 +5580,9 @@ function buildStatsSheet(opts){
       var gl = (opts.goals ? scoringGoals(selGoals) : []).concat(opts.shotGoals ? shotGoals(selGoals) : []);
       if (gl.length){
         heading("Goals");
-        gl.forEach(function(goal){
+        gl.forEach(function(goal, gi){
           var g = evalGoal(goal, st); if (!g) return;
+          if (gi) brk();
           var col = g.pending ? MUTE : (g.met ? GREEN : AMBER);
           y += 24; text(P, y, g.name, 15, 700);
           text(W - P, y, g.pending ? "No data yet" : (g.met ? "✓ On track" : "Not yet"), 13, 700, col, "end");
@@ -5591,10 +5596,11 @@ function buildStatsSheet(opts){
       var pshown = view.length > SHEET_ROWS_MAX ? view.slice(-SHEET_ROWS_MAX) : view;
       heading("Session by session" + (pshown.length < rows.length ? " · last " + pshown.length + " of " + rows.length : ""));
       var pcols = ["Session", "Games", "Average", "High", "Low", "Running avg"], pcw = IW / pcols.length;
-      y += 4; rect(P, y, IW, 26, "#fde9b4", 4);
+      y += 4; var phead = { y0: y, y1: y + 26 }; rect(P, y, IW, 26, "#fde9b4", 4);
       pcols.forEach(function(c, ci){ text(P + ci * pcw + (ci ? pcw / 2 : 10), y + 18, c, 12, 700, INK, ci ? "middle" : "start"); });
       y += 26;
-      pshown.forEach(function(d){
+      pshown.forEach(function(d, ri){
+        if (ri) brk(phead);
         [d.label, d.sc.length, d.avg.toFixed(1), Math.max.apply(null, d.sc), Math.min.apply(null, d.sc), d.run.toFixed(1)].forEach(function(c, ci){
           text(P + ci * pcw + (ci ? pcw / 2 : 10), y + 18, c, 13, ci === 2 ? 700 : 400, INK, ci ? "middle" : "start");
         });
@@ -5610,7 +5616,7 @@ function buildStatsSheet(opts){
       var cols = [practice ? "Date" : "Week of"]; for (var gi = 0; gi < maxG; gi++) cols.push((wide ? "G" : "Game ") + (gi + 1));
       cols.push((wide || practice) ? "Total" : "Series", wide ? "Avg" : "Average", wide ? "Run avg" : "Running avg");
       var cw = IW / cols.length, rh = 26;
-      y += 4; rect(P, y, IW, rh, "#fde9b4", 4);
+      y += 4; var thead = { y0: y, y1: y + rh }; rect(P, y, IW, rh, "#fde9b4", 4);
       cols.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, hs, 700, INK, ci ? "middle" : "start"); });
       y += rh;
       // same colours as the History table: green at or above the average goal, red below the lowest
@@ -5618,7 +5624,8 @@ function buildStatsSheet(opts){
       var tg = goalsFor(statsSingle()), tAvg = goalAverage(tg), tFloor = goalFloor(["gamePct", "gameCount"], tg), tSer = goalFloor(["seriesPct", "seriesCount"], tg);
       var RED = "#c0392b";
       function tCol(v, good, bad){ return (good !== null && v >= good) ? GREEN : ((bad !== null && v < bad) ? RED : null); }
-      shown.forEach(function(d){
+      shown.forEach(function(d, ri){
+        if (ri) brk(thead);
         var n = d.sc.filter(isNum).length;
         var cells = [d.label], cols2 = [null]; for (var k = 0; k < maxG; k++){ cells.push(isNum(d.sc[k]) ? d.sc[k] : ""); cols2.push(isNum(d.sc[k]) ? tCol(d.sc[k], tAvg, tFloor) : null); }
         cells.push(d.total, d.avg.toFixed(1), d.run.toFixed(1));
@@ -5632,14 +5639,14 @@ function buildStatsSheet(opts){
     }
   }
   (opts.which === "both" ? ["league", "practice"] : [opts.which]).forEach(function(type, i){
-    if (i){ y += 26; line(P, y, W - P, y, RULE, 2); }
+    if (i){ brk(); y += 26; line(P, y, W - P, y, RULE, 2); }
     section(type);
   });
-  y += 40; text(P, y, "Made with Bowling Bro'", 11, 400, MUTE); y += 24;
+  brk(); y += 40; text(P, y, "Made with Bowling Bro'", 11, 400, MUTE); y += 24;
   var H = Math.ceil(y);
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif">'
     + '<rect width="' + W + '" height="' + H + '" fill="#ffffff"/>' + out.join("") + '</svg>';
-  return { svg: svg, width: W, height: H };
+  return { svg: svg, width: W, height: H, breaks: breaks };
 }
 function sheetDataUrl(sheet){ return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(sheet.svg); }
 function sheetToCanvas(sheet){
@@ -5663,30 +5670,69 @@ function canvasBlob(c, type, quality){
   });
 }
 function sheetToPng(sheet){ return sheetToCanvas(sheet).then(function(c){ return canvasBlob(c, "image/png"); }); }
-// The app makes the PDF itself: one page holding the summary picture (a JPEG), sized to the picture.
+// The app makes the PDF itself, as US Letter pages for printing. The summary picture is cut at the
+// places its builder marked as safe (before a section, between table rows or games), never through
+// a line of text; a table that runs onto the next page repeats its heading row there.
 // The phone's print dialog isn't used, because it doesn't open from the Home Screen app on iPhone.
+function sheetPages(sheet){
+  var pageH = sheet.width * 792 / 612, TOP = 40, BOTTOM = 36, H = sheet.height;
+  var breaks = (sheet.breaks || []).slice().sort(function(a, b){ return a.y - b.y; });
+  var pages = [], from = 0, head = null;
+  while (from < H - 1){
+    var first = !pages.length, headH = head ? head.y1 - head.y0 : 0;
+    var room = pageH - (first ? 0 : TOP) - headH - BOTTOM;
+    var end;
+    if (H - from <= room + BOTTOM) end = H;   // the rest fits (the footer may use the bottom margin)
+    else {
+      var fit = breaks.filter(function(b){ return b.y > from + 80 && b.y <= from + room; }).pop();
+      end = fit ? fit.y : from + room;          // no safe place on this page: cut at the bottom
+    }
+    pages.push({ from: from, to: end, head: first ? null : head, top: first ? 0 : TOP });
+    var used = breaks.filter(function(b){ return b.y === end; })[0];
+    head = used ? used.head : null;
+    from = end;
+  }
+  return { pageH: pageH, pages: pages };
+}
 function sheetToPdf(sheet){
-  return sheetToCanvas(sheet).then(function(c){ return canvasBlob(c, "image/jpeg", 0.92); }).then(function(jpg){
-    return jpg.arrayBuffer().then(function(buf){
-      var img = new Uint8Array(buf), pxW = sheet.width * 2, pxH = sheet.height * 2;
-      var W = 612, H = Math.round(612 * sheet.height / sheet.width);   // 8.5 inches wide
+  return sheetToCanvas(sheet).then(function(src){
+    var k = src.width / sheet.width, lay = sheetPages(sheet);
+    var pxW = src.width, pxH = Math.round(lay.pageH * k);
+    return Promise.all(lay.pages.map(function(pg){
+      var c = document.createElement("canvas"); c.width = pxW; c.height = pxH;
+      var ctx = c.getContext("2d"), y = pg.top * k;
+      ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, pxW, pxH);
+      if (pg.head){
+        var hh = (pg.head.y1 - pg.head.y0) * k;
+        ctx.drawImage(src, 0, pg.head.y0 * k, pxW, hh, 0, y, pxW, hh); y += hh;
+      }
+      var sh = (pg.to - pg.from) * k;
+      ctx.drawImage(src, 0, pg.from * k, pxW, sh, 0, y, pxW, sh);
+      return canvasBlob(c, "image/jpeg", 0.92).then(function(b){ return b.arrayBuffer(); });
+    })).then(function(bufs){
+      var W = 612, H = 792, n = bufs.length;
       var enc = new TextEncoder(), parts = [], offsets = [], size = 0;
       function add(x){ var b = typeof x === "string" ? enc.encode(x) : x; parts.push(b); size += b.length; }
-      function obj(n, body){ offsets[n] = size; add(n + " 0 obj\n"); body(); add("\nendobj\n"); }
+      function obj(id, body){ offsets[id] = size; add(id + " 0 obj\n"); body(); add("\nendobj\n"); }
+      // objects: 1 catalog, 2 page list, then for page i: 3+3i page, 4+3i picture, 5+3i drawing
+      var kids = []; for (var i = 0; i < n; i++) kids.push((3 + 3 * i) + " 0 R");
       var content = "q " + W + " 0 0 " + H + " 0 0 cm /Im0 Do Q";
       add("%PDF-1.4\n");
       obj(1, function(){ add("<< /Type /Catalog /Pages 2 0 R >>"); });
-      obj(2, function(){ add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"); });
-      obj(3, function(){ add("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + W + " " + H + "] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>"); });
-      obj(4, function(){
-        add("<< /Type /XObject /Subtype /Image /Width " + pxW + " /Height " + pxH + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + img.length + " >>\nstream\n");
-        add(img); add("\nendstream");
+      obj(2, function(){ add("<< /Type /Pages /Kids [" + kids.join(" ") + "] /Count " + n + " >>"); });
+      bufs.forEach(function(buf, i){
+        var img = new Uint8Array(buf), p = 3 + 3 * i;
+        obj(p, function(){ add("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + W + " " + H + "] /Resources << /XObject << /Im0 " + (p + 1) + " 0 R >> >> /Contents " + (p + 2) + " 0 R >>"); });
+        obj(p + 1, function(){
+          add("<< /Type /XObject /Subtype /Image /Width " + pxW + " /Height " + pxH + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + img.length + " >>\nstream\n");
+          add(img); add("\nendstream");
+        });
+        obj(p + 2, function(){ add("<< /Length " + content.length + " >>\nstream\n" + content + "\nendstream"); });
       });
-      obj(5, function(){ add("<< /Length " + content.length + " >>\nstream\n" + content + "\nendstream"); });
-      var xref = size, pad = function(n){ return ("0000000000" + n).slice(-10); };
-      add("xref\n0 6\n0000000000 65535 f \n");
-      for (var i = 1; i <= 5; i++) add(pad(offsets[i]) + " 00000 n \n");
-      add("trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
+      var last = 2 + 3 * n, xref = size, pad = function(v){ return ("0000000000" + v).slice(-10); };
+      add("xref\n0 " + (last + 1) + "\n0000000000 65535 f \n");
+      for (var j = 1; j <= last; j++) add(pad(offsets[j]) + " 00000 n \n");
+      add("trailer\n<< /Size " + (last + 1) + " /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
       return new Blob(parts, { type: "application/pdf" });
     });
   });
@@ -5847,6 +5893,8 @@ function seasonAvgThrough(h){
 }
 function buildSessionSheet(h, opts){
   var W = 800, P = 40, IW = W - 2 * P, y = 0, out = [];
+  var breaks = [];   // places a printed page may end (see buildStatsSheet)
+  function brk(){ breaks.push({ y: y, head: null }); }
   var INK = "#1a1a1a", MUTE = "#6b6b6b", RULE = "#e2e0d5", BLUE = "#2f6fed", RED = "#d6332a", GOLD = "#f2a900";
   function esc(t){ return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
   function text(x, yy, t, size, weight, fill, anchor){
@@ -5854,7 +5902,7 @@ function buildSessionSheet(h, opts){
   }
   function rect(x, yy, w, hh, fill, rx, stroke){ out.push('<rect x="' + x + '" y="' + yy + '" width="' + Math.max(0, w) + '" height="' + hh + '" rx="' + (rx || 0) + '" fill="' + fill + '"' + (stroke ? ' stroke="' + stroke + '"' : '') + '/>'); }
   function line(x1, y1, x2, y2, stroke, w){ out.push('<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="' + stroke + '" stroke-width="' + (w || 1) + '"/>'); }
-  function heading(t){ y += 32; text(P, y, t.toUpperCase(), 13, 700, MUTE); y += 8; line(P, y, W - P, y, RULE); y += 6; }
+  function heading(t){ brk(); y += 32; text(P, y, t.toUpperCase(), 13, 700, MUTE); y += 8; line(P, y, W - P, y, RULE); y += 6; }
   function wrap(t, max){
     var words = String(t).split(/\s+/), lines = [], cur = "";
     words.forEach(function(w){ if ((cur + " " + w).trim().length > max && cur){ lines.push(cur); cur = w; } else cur = (cur + " " + w).trim(); });
@@ -5898,6 +5946,7 @@ function buildSessionSheet(h, opts){
     var fw = IW / 10;
     games.forEach(function(g, gi){
       var scores = computeScoresFromFrames(g.frames);
+      if (gi) brk();
       y += 22; text(P, y, "Game " + (gi + 1), 14, 700); text(W - P, y, g.finalScore !== undefined ? g.finalScore : lastKnownScore(scores), 14, 700, INK, "end");
       // frame numbers sit in a row above the boxes, the way a scoresheet prints them
       y += 18;
@@ -5949,7 +5998,8 @@ function buildSessionSheet(h, opts){
     var nt = sessionNotesTally(games).slice(0, 4);
     if (nt.length) rows.push(["Shot notes", nt.join("   ·   ")]);
     if (!rows.length){ y += 22; text(P, y, "No line or ball recorded for this session.", 14, 400, MUTE); }
-    rows.forEach(function(r){
+    rows.forEach(function(r, ri){
+      if (ri) brk();
       var ls = wrap(r[1], 68);
       y += 24; text(P, y, r[0], 13, 700, MUTE);
       ls.forEach(function(l, li){ if (li) y += 20; text(P + 140, y, l, 15, 400); });
@@ -5962,11 +6012,11 @@ function buildSessionSheet(h, opts){
     wrap(h.note, 80).forEach(function(l){ y += 22; text(P, y, l, 15, 400); });
   }
 
-  y += 40; text(P, y, "Made with Bowling Bro'", 11, 400, MUTE); y += 24;
+  brk(); y += 40; text(P, y, "Made with Bowling Bro'", 11, 400, MUTE); y += 24;
   var H = Math.ceil(y);
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif">'
     + '<rect width="' + W + '" height="' + H + '" fill="#ffffff"/>' + out.join("") + '</svg>';
-  return { svg: svg, width: W, height: H };
+  return { svg: svg, width: W, height: H, breaks: breaks };
 }
 // a night still being entered picks up the note added to its saved copy in History
 function withSavedExtras(doc){
