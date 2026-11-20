@@ -2975,9 +2975,13 @@ var teamPulling = false;
 function teamPull(){
   if (teamPulling || !sb || !sbUser || !teamReceiveOn()) return;
   teamPulling = true;
-  var since = state.teamSeenAt || new Date(Date.now() - 14 * 864e5).toISOString();   // a new device looks back two weeks
-  sb.from("bb_team_games").select("league_id, game_date, game_no, bowler_id, game, from_name, updated_at")
-    .eq("league_id", sheetLg.data.id).eq("bowler_id", sheetLg.me).gt("updated_at", since).order("updated_at")
+  // The first check on a device (a new phone, or a bowler who just joined) takes the whole season:
+  // games a teammate sent before this bowler was on the app wait in the table for them. A league id
+  // is one league for one season, so this never reaches into an earlier season.
+  var q = sb.from("bb_team_games").select("league_id, game_date, game_no, bowler_id, game, from_name, updated_at")
+    .eq("league_id", sheetLg.data.id).eq("bowler_id", sheetLg.me);
+  if (state.teamSeenAt) q = q.gt("updated_at", state.teamSeenAt);
+  q.order("updated_at").limit(500)
     .then(function(r){
       teamPulling = false;
       if (!r || r.error || !r.data || !r.data.length) return;
@@ -2995,10 +2999,12 @@ function applyTeamGame(row){
   if (!g || !Array.isArray(g.frames)) return false;
   g.fromName = row.from_name || "a teammate"; g.teamKey = key; g.source = "photo";
   var idx = row.game_no - 1, date = row.game_date;
+  var sameGame = function(x){ return !!(x && x.teamKey === key && JSON.stringify(x.frames) === JSON.stringify(g.frames)); };
   // 1. photo night in progress
   if (photoActive() && sessionType() === "league" && state.photoNight.date === date){
     var n = state.photoNight, have = n.games[idx];
     if (have && !have.fromName) return false;
+    if (sameGame(have)) return false;   // already here
     if (idx < n.games.length) n.games[idx] = g; else n.games.push(g);
     savePhotoNight();
     if (!document.getElementById("view-photo").classList.contains("hidden")) renderPhoto();
@@ -3017,6 +3023,7 @@ function applyTeamGame(row){
     for (var i = 0; i < Math.max(sc.length, idx + 1); i++) games.push(hh.games && hh.games[i] && hh.games[i].frames ? hh.games[i] : null);
     var mineThere = games[idx] && !games[idx].fromName;
     if (mineThere) return false;
+    if (sameGame(games[idx])) return false;   // already here
     if (idx < sc.length){
       // the score already there wins unless a teammate sent it; frames only go on a matching score
       if (!(games[idx] && games[idx].fromName) && sc[idx] !== g.finalScore) return false;
