@@ -5613,11 +5613,22 @@ function buildStatsSheet(opts){
       y += 4; rect(P, y, IW, rh, "#fde9b4", 4);
       cols.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, hs, 700, INK, ci ? "middle" : "start"); });
       y += rh;
+      // same colours as the History table: green at or above the average goal, red below the lowest
+      // game score in the goals (series scaled to the games bowled); plain when there's no such goal
+      var tg = goalsFor(statsSingle()), tAvg = goalAverage(tg), tFloor = goalFloor(["gamePct", "gameCount"], tg), tSer = goalFloor(["seriesPct", "seriesCount"], tg);
+      var RED = "#c0392b";
+      function tCol(v, good, bad){ return (good !== null && v >= good) ? GREEN : ((bad !== null && v < bad) ? RED : null); }
       shown.forEach(function(d){
-        var cells = [d.label]; for (var k = 0; k < maxG; k++) cells.push(isNum(d.sc[k]) ? d.sc[k] : ""); cells.push(d.total, d.avg.toFixed(1), d.run.toFixed(1));
-        cells.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, cs, ci === maxG + 1 ? 700 : 400, INK, ci ? "middle" : "start"); });
+        var n = d.sc.filter(isNum).length;
+        var cells = [d.label], cols2 = [null]; for (var k = 0; k < maxG; k++){ cells.push(isNum(d.sc[k]) ? d.sc[k] : ""); cols2.push(isNum(d.sc[k]) ? tCol(d.sc[k], tAvg, tFloor) : null); }
+        cells.push(d.total, d.avg.toFixed(1), d.run.toFixed(1));
+        cols2.push(tCol(d.total, tSer === null ? null : tSer * n / 3, tFloor === null ? null : tFloor * n), tCol(d.avg, tAvg, tFloor), null);
+        cells.forEach(function(c, ci){ text(P + ci * cw + (ci ? cw / 2 : 10), y + 18, c, cs, (ci === maxG + 1 || cols2[ci]) ? 700 : 400, cols2[ci] || INK, ci ? "middle" : "start"); });
         y += rh; line(P, y, W - P, y, "#f1efe6");
       });
+      if (tAvg !== null || tFloor !== null){
+        y += 18; text(P, y, [tAvg !== null ? "Green: at or above your " + fmtNum(tAvg) + " average goal" : "", tFloor !== null ? "Red: below your lowest game goal (" + fmtNum(tFloor) + ")" : ""].filter(Boolean).join("  ·  "), 11, 400, MUTE);
+      }
     }
   }
   (opts.which === "both" ? ["league", "practice"] : [opts.which]).forEach(function(type, i){
