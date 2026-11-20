@@ -969,7 +969,7 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <button class="full" id="pick-cancel">Cancel</button>
     </div>
 
-    <!-- team photo (Big Al's 4 Life only for now): one photo, games for each teammate -->
+    <!-- team photo (every team in a league with a sheet): one photo, games for each teammate -->
     <div id="photo-team" class="card hidden">
       <h2>Whose games are these?</h2>
       <p style="font-size:13px;color:#444;margin:-4px 0 10px;line-height:1.4;">Tick teammates to save their game from this photo too. It shows up in their League night right away, tagged with your name.</p>
@@ -2799,12 +2799,11 @@ document.getElementById("crop-go").addEventListener("click", function(){
 });
 function cleanName(s){ return String(s || "").trim().toUpperCase().replace(/\s+/g, " "); }
 
-// ---------- team photo (draft: Big Al's 4 Life only) ----------
+// ---------- team photo (every team in a league that has a sheet) ----------
 // One photo of the lane screen, which shows the whole team, saves a game for each teammate who's
-// ticked. Your own game goes into your night as usual; teammates' games would go to a shared
-// league table and show up in their League night tagged "From <you>'s photo". (Mock-up: the
-// teammates' games are kept on this phone only, in state.teamOutbox.)
-var TEAM_PHOTO_TEAMS = { "tme-2026-27": [7] };
+// ticked. Your own game goes into your night as usual; teammates' games go to the shared
+// bb_team_games table and show up in their League night tagged "From <you>'s photo".
+// It needs the sheet's roster to know who's on your team, so leagues without a sheet don't get it.
 var teamRows = [], teamFix = null, teamGame = 1;
 // A bowler who is absent or pre-bowled still gets a line on the screen: the system fills it with
 // made-up frames (2/ 2/ 2/ ... with the 10th set so the total is the blind score) and prints a small
@@ -2837,8 +2836,7 @@ function fetchTeamSent(){
 }
 function teamPhotoOn(){
   if (!inSheetLeague() || sessionType() === "practice") return false;
-  var t = sheetMyTeam(), allowed = TEAM_PHOTO_TEAMS[sheetLg.data.id] || [];
-  return t !== null && allowed.indexOf(t) >= 0;
+  return sheetMyTeam() !== null && teamMates().length > 1;
 }
 function teamMates(){   // the team's own bowlers on the latest sheet, me first
   var w = sheetLatest(), t = sheetMyTeam();
@@ -2967,9 +2965,7 @@ function teamSend(){
 //  5. nothing: a photo night is started for that date with the game in it
 // A game the bowler entered themselves is never replaced; one a teammate sent can be.
 function teamReceiveOn(){
-  if (!inSheetLeague()) return false;
-  var t = sheetMyTeam(), allowed = TEAM_PHOTO_TEAMS[sheetLg.data.id] || [];
-  return t !== null && allowed.indexOf(t) >= 0;
+  return inSheetLeague() && sheetMyTeam() !== null;
 }
 var teamPulling = false;
 function teamPull(){
