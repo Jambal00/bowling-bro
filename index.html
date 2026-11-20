@@ -5628,7 +5628,7 @@ function buildStatsSheet(opts){
   return { svg: svg, width: W, height: H };
 }
 function sheetDataUrl(sheet){ return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(sheet.svg); }
-function sheetToPng(sheet){
+function sheetToCanvas(sheet){
   return new Promise(function(resolve, reject){
     var img = new Image();
     img.onload = function(){
@@ -5637,10 +5637,44 @@ function sheetToPng(sheet){
       var ctx = c.getContext("2d");
       ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
       ctx.drawImage(img, 0, 0, c.width, c.height);
-      c.toBlob(function(b){ if (b) resolve(b); else reject(new Error("no image")); }, "image/png");
+      resolve(c);
     };
     img.onerror = function(){ reject(new Error("could not draw")); };
     img.src = sheetDataUrl(sheet);
+  });
+}
+function canvasBlob(c, type, quality){
+  return new Promise(function(resolve, reject){
+    c.toBlob(function(b){ if (b) resolve(b); else reject(new Error("no image")); }, type, quality);
+  });
+}
+function sheetToPng(sheet){ return sheetToCanvas(sheet).then(function(c){ return canvasBlob(c, "image/png"); }); }
+// The app makes the PDF itself: one page holding the summary picture (a JPEG), sized to the picture.
+// The phone's print dialog isn't used, because it doesn't open from the Home Screen app on iPhone.
+function sheetToPdf(sheet){
+  return sheetToCanvas(sheet).then(function(c){ return canvasBlob(c, "image/jpeg", 0.92); }).then(function(jpg){
+    return jpg.arrayBuffer().then(function(buf){
+      var img = new Uint8Array(buf), pxW = sheet.width * 2, pxH = sheet.height * 2;
+      var W = 612, H = Math.round(612 * sheet.height / sheet.width);   // 8.5 inches wide
+      var enc = new TextEncoder(), parts = [], offsets = [], size = 0;
+      function add(x){ var b = typeof x === "string" ? enc.encode(x) : x; parts.push(b); size += b.length; }
+      function obj(n, body){ offsets[n] = size; add(n + " 0 obj\n"); body(); add("\nendobj\n"); }
+      var content = "q " + W + " 0 0 " + H + " 0 0 cm /Im0 Do Q";
+      add("%PDF-1.4\n");
+      obj(1, function(){ add("<< /Type /Catalog /Pages 2 0 R >>"); });
+      obj(2, function(){ add("<< /Type /Pages /Kids [3 0 R] /Count 1 >>"); });
+      obj(3, function(){ add("<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + W + " " + H + "] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>"); });
+      obj(4, function(){
+        add("<< /Type /XObject /Subtype /Image /Width " + pxW + " /Height " + pxH + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length " + img.length + " >>\nstream\n");
+        add(img); add("\nendstream");
+      });
+      obj(5, function(){ add("<< /Length " + content.length + " >>\nstream\n" + content + "\nendstream"); });
+      var xref = size, pad = function(n){ return ("0000000000" + n).slice(-10); };
+      add("xref\n0 6\n0000000000 65535 f \n");
+      for (var i = 1; i <= 5; i++) add(pad(offsets[i]) + " 00000 n \n");
+      add("trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
+      return new Blob(parts, { type: "application/pdf" });
+    });
   });
 }
 var currentSheet = null;
@@ -5683,6 +5717,24 @@ document.getElementById("share-stats-btn").addEventListener("click", function(){
 document.getElementById("share-close-btn").addEventListener("click", function(){ document.getElementById("share-sheet").classList.add("hidden"); });
 // Hands a finished picture to the phone's share menu, or saves it where there is no share menu.
 // Shared by the stats summary and the single-session share.
+// Save as PDF: the same picture as a one-page PDF, handed to the share menu (Save to Files, Mail,
+// Messages) or downloaded where there's no share menu. Falls back to the print dialog if this
+// device can't make the file.
+function shareSheetPdf(sheet, fileName, title, statusEl){
+  statusEl.textContent = "Preparing the PDF…";
+  sheetToPdf(sheet).then(function(blob){
+    var file = null;
+    try { file = new File([blob], fileName, { type: "application/pdf" }); } catch(e){}
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })){
+      return navigator.share({ files: [file], title: title }).then(function(){ statusEl.textContent = "PDF shared."; },
+        function(e){ statusEl.textContent = (e && e.name === "AbortError") ? "" : "Couldn't open the share menu."; });
+    }
+    var url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+    statusEl.textContent = "PDF saved to your downloads.";
+  }, function(){ statusEl.textContent = ""; printSheet(sheet, title); });
+}
 function shareSheetImage(sheet, fileName, title, statusEl){
   statusEl.textContent = "Preparing the image…";
   sheetToPng(sheet).then(function(blob){
@@ -5715,7 +5767,7 @@ document.getElementById("share-send-btn").addEventListener("click", function(){
 });
 document.getElementById("share-pdf-btn").addEventListener("click", function(){
   if (!currentSheet) return;
-  printSheet(currentSheet, "Stats summary");
+  shareSheetPdf(currentSheet, "bowling-bro-stats.pdf", "Bowling stats", document.getElementById("share-status"));
 });
 
 // ---------- share one session ----------
@@ -5944,7 +5996,9 @@ document.getElementById("ss-send-btn").addEventListener("click", function(){
   shareSheetImage(sessionShare.sheet, "bowling-bro-" + (d || "session") + ".png", "Bowling session", document.getElementById("ss-status"));
 });
 document.getElementById("ss-pdf-btn").addEventListener("click", function(){
-  if (sessionShare.sheet) printSheet(sessionShare.sheet, "Session summary");
+  if (!sessionShare.sheet) return;
+  var d = String(sessionShare.h.date || "").replace(/\//g, "-");
+  shareSheetPdf(sessionShare.sheet, "bowling-bro-" + (d || "session") + ".pdf", "Bowling session", document.getElementById("ss-status"));
 });
 document.getElementById("night-share-btn").addEventListener("click", function(){ if (nightActive()) openSessionShare(withSavedExtras(nightDoc())); });
 document.getElementById("photo-share-btn").addEventListener("click", function(){ if (photoActive()) openSessionShare(withSavedExtras(photoNightDoc())); });
