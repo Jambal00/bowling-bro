@@ -5594,6 +5594,7 @@ function buildStatsSheet(opts){
 
     if (opts.table && practice){
       var pshown = view.length > SHEET_ROWS_MAX ? view.slice(-SHEET_ROWS_MAX) : view;
+      var pKeep = breaks.length;   // the heading's break: the table starts a fresh page unless it fits whole
       heading("Session by session" + (pshown.length < rows.length ? " · last " + pshown.length + " of " + rows.length : ""));
       var pcols = ["Session", "Games", "Average", "High", "Low", "Running avg"], pcw = IW / pcols.length;
       y += 4; var phead = { y0: y, y1: y + 26 }; rect(P, y, IW, 26, "#fde9b4", 4);
@@ -5606,9 +5607,11 @@ function buildStatsSheet(opts){
         });
         y += 26; line(P, y, W - P, y, "#f1efe6");
       });
+      breaks[pKeep].keepTo = y;
     }
     if (opts.table && !practice){
       var shown = view.length > SHEET_ROWS_MAX ? view.slice(-SHEET_ROWS_MAX) : view;
+      var tKeep = breaks.length;   // the heading's break: the table starts a fresh page unless it fits whole
       heading((practice ? "Session by session" : "Week by week") + (shown.length < rows.length ? " · last " + shown.length + " of " + rows.length : ""));
       var maxG = 0; shown.forEach(function(d){ maxG = Math.max(maxG, d.sc.length); }); maxG = Math.min(maxG, 12);
       // long practice sessions: shorten the headings and type so every game still gets its own column
@@ -5636,6 +5639,7 @@ function buildStatsSheet(opts){
       if (tAvg !== null || tFloor !== null){
         y += 18; text(P, y, [tAvg !== null ? "Green: at or above your " + fmtNum(tAvg) + " average goal" : "", tFloor !== null ? "Red: below your lowest game goal (" + fmtNum(tFloor) + ")" : ""].filter(Boolean).join("  ·  "), 11, 400, MUTE);
       }
+      breaks[tKeep].keepTo = y;
     }
   }
   (opts.which === "both" ? ["league", "practice"] : [opts.which]).forEach(function(type, i){
@@ -5684,7 +5688,9 @@ function sheetPages(sheet){
     var end;
     if (H - from <= room + BOTTOM) end = H;   // the rest fits (the footer may use the bottom margin)
     else {
-      var fit = breaks.filter(function(b){ return b.y > from + 80 && b.y <= from + room; }).pop();
+      // a table marked keepTo starts on a fresh page when it can't finish on this one
+      var keep = breaks.filter(function(b){ return b.keepTo && b.y > from + 80 && b.y <= from + room && b.keepTo > from + room; })[0];
+      var fit = keep || breaks.filter(function(b){ return b.y > from + 80 && b.y <= from + room; }).pop();
       end = fit ? fit.y : from + room;          // no safe place on this page: cut at the bottom
     }
     pages.push({ from: from, to: end, head: first ? null : head, top: first ? 0 : TOP });
