@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f2f1ea">
 <!-- release marker: changed on every release, so open copies of the app can tell a newer one is out -->
-<meta name="bb-version" content="2026-11-20 19:20">
+<meta name="bb-version" content="2026-11-20 20:06">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -489,6 +489,10 @@ body.home-theme-lebowski.on-home .header .place.brand { background: #1d2848; bor
 #view-home .home-sq span { font-size: 14px; font-weight: 700; line-height: 1.2; }
 #home-resume { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 12px 14px; border-radius: 14px; background: #fdf1d2; border: 2px solid #f2a900; color: #1a1a1a; text-align: left; font: inherit; width: 100%; cursor: pointer; box-sizing: border-box; }
 #home-resume.hidden { display: none; }
+#home-newweek { display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 12px 14px; border-radius: 14px; background: #e8f0ff; border: 2px solid #2f6fed; color: #1a1a1a; text-align: left; font: inherit; width: 100%; cursor: pointer; box-sizing: border-box; }
+#home-newweek.hidden { display: none; }
+#home-league-btn { position: relative; }
+#home-league-btn .new-dot { position: absolute; top: 10px; right: 10px; width: 10px; height: 10px; border-radius: 50%; background: #d6332a; box-shadow: 0 0 0 2px #fff; }
 .theme-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px 10px; }
 .theme-grid button { display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: 0; padding: 0; border-radius: 0; cursor: pointer; font-size: 11px; color: #1a1a1a; line-height: 1.2; text-align: center; min-height: 44px; }
 .theme-grid .sw { width: 100%; aspect-ratio: 3 / 4; border-radius: 10px; box-shadow: 0 0 0 1px #d8d5c8; display: block; }
@@ -1106,6 +1110,12 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;"><b id="home-resume-title" style="font-size:15px;"></b><span id="home-resume-detail" style="font-size:13px;color:#5a4a20;"></span></span>
       <b style="font-size:14px;color:#2f6fed;white-space:nowrap;">Back to scoring ›</b>
     </button>
+    <!-- a new league week has been published since this bowler last looked at Your League -->
+    <button id="home-newweek" class="hidden">
+      <span style="width:10px;height:10px;border-radius:50%;background:#2f6fed;flex:0 0 auto;"></span>
+      <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0;"><b id="home-newweek-title" style="font-size:15px;"></b><span id="home-newweek-detail" style="font-size:13px;color:#33415c;"></span></span>
+      <b style="font-size:14px;color:#2f6fed;white-space:nowrap;">See it ›</b>
+    </button>
     <button class="home-btn home-bowl" id="home-bowl-btn">
       <svg width="46" height="46" viewBox="0 0 24 24" aria-hidden="true" style="flex:0 0 auto;"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.7"></circle><circle cx="9.4" cy="8.8" r="1.35" fill="currentColor"></circle><circle cx="13.6" cy="8" r="1.35" fill="currentColor"></circle><circle cx="12" cy="12" r="1.35" fill="currentColor"></circle></svg>
       <span class="home-text"><span class="home-title">Bowl</span><span class="home-sub">League or practice. Score by game, photo or frame.</span></span>
@@ -1128,6 +1138,7 @@ body.home-theme-sweater.on-home .header .place.brand { background: rgba(211,185,
       <button class="home-btn home-card home-sq hidden" id="home-league-btn">
         <svg class="home-icon" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"></path><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.4M17 6h2.5a2.5 2.5 0 0 1-2.6 3.4M12 13v4M8.5 20h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
         <span>Your League</span>
+        <span class="new-dot hidden" id="home-league-dot" aria-label="New results"></span>
       </button>
       <button class="home-btn home-card home-sq" id="home-profile-btn">
         <svg class="home-icon" width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8" fill="none" stroke="currentColor" stroke-width="2"></circle><path d="M4.5 20c1.2-3.6 4-5.4 7.5-5.4s6.3 1.8 7.5 5.4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
@@ -3991,7 +4002,49 @@ function syncSheetNights(){
 }
 
 // --- Your League page ---
-function openLeaguePage(){ lgOpenWeek = null; lgMode = "main"; lgTab = leagueNightToday() ? "week" : "standings"; recTab = "individual"; renderLeaguePage(); showView("league"); }   // every visit starts with all weeks closed
+// ---------- "new week" banner ----------
+// When a week newer than the last one this bowler looked at has been published, Home says so with
+// their own line from it. Opening Your League (or the banner) marks it seen.
+function lgSeenWeek(){
+  var id = sheetLg.data.id, seen = (state.lgSeen || {})[id];
+  if (seen === undefined){   // first time on this phone: nothing counts as new until the next week publishes
+    state.lgSeen = state.lgSeen || {}; state.lgSeen[id] = sheetLatest().week; saveState();
+    seen = state.lgSeen[id];
+  }
+  return seen;
+}
+function markLeagueSeen(){
+  if (!inSheetLeague()) return;
+  state.lgSeen = state.lgSeen || {}; state.lgSeen[sheetLg.data.id] = sheetLatest().week; saveState();
+}
+function newWeekLine(w){
+  var me = (w.bowlers || []).filter(function(b){ return b.id === sheetLg.me; })[0], bits = [];
+  if (me && me.scores && me.scores.length) bits.push("You bowled " + me.scores.join("-") + " (" + me.scores.reduce(function(a, b){ return a + b; }, 0) + ")");
+  else if (me) bits.push("You were out that night");
+  var t = sheetMyTeam(), tname = (w.teams || {})[t] || "";
+  var res = (w.results || []).filter(function(r){ return [r.a, r.b].some(function(s){ return s && s.name && tname.indexOf(s.name) === 0; }); })[0];
+  if (res){
+    var mine = tname.indexOf(res.a.name) === 0 ? res.a : res.b;
+    var pts = Number(mine.won);
+    bits.push(titleCase(tname) + " took " + (pts % 1 ? pts.toFixed(1).replace(".5", "½") : pts) + " points");
+  }
+  var st = (w.standings || []).filter(function(s){ return s.team === t; })[0];
+  if (st) bits.push(ordinal(st.place) + " place");
+  return bits.join(" · ");
+}
+function renderNewWeek(lgOn){
+  var card = document.getElementById("home-newweek"), dot = document.getElementById("home-league-dot");
+  var w = lgOn ? sheetLatest() : null, isNew = !!(w && w.week > lgSeenWeek());
+  card.classList.toggle("hidden", !isNew); dot.classList.toggle("hidden", !isNew);
+  if (!isNew) return;
+  document.getElementById("home-newweek-title").textContent = "Week " + w.week + " results are in";
+  document.getElementById("home-newweek-detail").textContent = newWeekLine(w);
+}
+document.getElementById("home-newweek").addEventListener("click", function(){
+  var wk = sheetLatest().week;
+  openLeaguePage(); lgTab = "season"; lgOpenWeek = wk; renderLeaguePage();
+});
+function openLeaguePage(){ markLeagueSeen(); lgOpenWeek = null; lgMode = "main"; lgTab = leagueNightToday() ? "week" : "standings"; recTab = "individual"; renderLeaguePage(); showView("league"); }   // every visit starts with all weeks closed
 function renderLeaguePage(){
   svTick();
   var el = document.getElementById("league-body"); el.innerHTML = "";
@@ -6366,6 +6419,7 @@ function renderHome(){
   }
   var lgOn = inSheetLeague();
   document.getElementById("home-league-btn").classList.toggle("hidden", !lgOn);
+  renderNewWeek(lgOn);
   document.querySelector("#view-home .home-squares").classList.toggle("four", lgOn);
   applyHomeTheme();
   keepBowlInPlace();
